@@ -9,7 +9,7 @@ const Header = () => {
       </a>
 
       {/* Connect Button */}
-      <button className="border-spacing-2 bg-slate-200 px-4 py-1 rounded-md text-black text-md font-semibold">
+      <button className="border-spacing-2 bg-slate-200 px-4 py-1 rounded-md text-black text-sm font-semibold">
         Connect
       </button>
     </nav>
