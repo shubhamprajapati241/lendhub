@@ -7,7 +7,7 @@ import { BsBarChart } from "react-icons/bs";
 
 const MainCard = () => {
   return (
-    <div className="px-20 py-12">
+    <div className="px-8 md:px-20 py-12">
       <div className="flex items-center pb-4">
         <Image
           src={ether}
