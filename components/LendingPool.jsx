@@ -18,6 +18,8 @@ const LendingPool = () => {
         <SupplyAssets />
         <BorrowAssets />
       </div>
+
+      <div className="h-32"></div>
     </div>
   );
 };

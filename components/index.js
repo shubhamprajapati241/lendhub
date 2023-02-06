@@ -8,3 +8,4 @@ export { default as BorrowAssets } from "./BorrowAssets";
 export { default as DisconnectedTab } from "./DisconnectedTab";
 
 export { default as ConnectButton } from "./ConnectButton";
+export { default as RowSupply } from "./RowSupply";
