@@ -19,7 +19,6 @@ const DisconnectedTab = () => {
           Please connect your wallet to see your supplies, borrowings, and open
           positions.
         </p>
-
         <ConnectButton />
       </div>
     </div>

@@ -1,14 +1,34 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
+import { useContext, useEffect } from "react";
+import lendContext from "../context/lendContext";
+import { Header, MainCard, LendingPool, DisconnectedTab } from "../components";
 
 const Home: NextPage = () => {
+  const { connectWallet, currentAccount } = useContext(lendContext);
+
+  useEffect(() => {
+    connectWallet();
+  }, []);
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-2">
+    <div>
       <Head>
         <title>LendHub - DeFi Lending and Borrowing Protocol</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      <main className="w-full p-0 m-0">
+        <div>
+          <div>{}</div>
+          <div className="App bg-gradient-to-b from-[#212430] to-[#17171a] h-[17rem] text-white">
+            <Header />
+            <MainCard />
+          </div>
+
+          {!currentAccount ? <DisconnectedTab /> : <LendingPool />}
+        </div>
+      </main>
     </div>
   );
 };
