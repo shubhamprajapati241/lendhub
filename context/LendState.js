@@ -6,6 +6,7 @@ const ERC20ABI = require("./erc20_abi.json");
 const WRAPPED_ETHER_ADDRESS = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
 const DAI_ADDRESS = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60";
 const USDC_ADDRESS = "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C";
+const USDT_ADDRESS = "0xe802376580c10fe23f027e1e19ed9d54d4c9311e";
 
 const LendState = (props) => {
   const [currentAccount, setCurrentAccount] = useState("");
@@ -16,7 +17,6 @@ const LendState = (props) => {
   const [supplyDAI, setSupplyDAI] = useState(0);
   const [supplyUSDC, setSupplyUSDC] = useState(0);
   const [supplyUSDT, setSupplyUSDT] = useState(0);
-  const [supplyWrapperEther, setSupplyWrapperEther] = useState(0);
 
   const [supplyTokensArray, setSupplyTokensArray] = useState([]);
 
@@ -72,29 +72,29 @@ const LendState = (props) => {
     console.log("supply DAI " + dai);
     setSupplyDAI(dai);
 
-    //* 2. Getting USDC balance
+    //* 3. Getting USDC balance
     let usdc;
     const usdcTokenContract = await new ethers.Contract(
       USDC_ADDRESS,
       ERC20ABI,
       provider
     );
-    usdc = await usdcTokenContract.balanceOf(account);
-    usdc = ethers.utils.formatEther(usdc, 18);
+    let usdc2 = await usdcTokenContract.balanceOf(account);
+    usdc = ethers.utils.formatUnits(usdc2, 6);
     setSupplyUSDC(usdc);
     console.log("supply USDC tokens : " + usdc);
 
-    //* 4. Getting Weth balance
-    let weth;
-    const wethTokenContract = await new ethers.Contract(
-      WRAPPED_ETHER_ADDRESS,
+    //* 4. Getting USDT balance
+    let usdt;
+    const usdtTokenContract = await new ethers.Contract(
+      USDT_ADDRESS,
       ERC20ABI,
       provider
     );
-    weth = await wethTokenContract.balanceOf(account);
-    weth = ethers.utils.formatEther(weth, 18);
-    setSupplyWrapperEther(weth);
-    console.log("supply weth tokens : " + weth);
+    usdt = await usdtTokenContract.balanceOf(account);
+    usdt = ethers.utils.formatUnits(usdt, 6);
+    setSupplyUSDT(usdt);
+    console.log("supply USDT tokens : " + usdt);
   };
 
   return (
@@ -106,7 +106,6 @@ const LendState = (props) => {
         supplyDAI,
         supplyUSDC,
         supplyUSDT,
-        supplyWrapperEther,
       }}
     >
       {props.children}
