@@ -2,9 +2,9 @@ import Image from "next/image";
 import React, { useContext } from "react";
 
 import lendContext from "../context/lendContext";
-import { RowSupply } from "../components";
+import { RowSupplyAssets } from "../components";
 
-import { ether, dai, usdc, usdt, weth } from "../assets";
+import { eth, dai, usdc, usdt, weth } from "../assets";
 
 const SupplyAssets = () => {
   const { supplyEther, supplyDAI, supplyUSDC, supplyUSDT, supplyWETH } =
@@ -12,38 +12,38 @@ const SupplyAssets = () => {
 
   const tokenArray = [
     {
-      image: ether,
+      image: eth,
       name: "ETH",
       balance: supplyEther,
-      apy: "3.18 %",
+      apy: "3.18",
       isCollateral: true,
     },
     {
       image: dai,
       name: "DAI",
       balance: supplyDAI,
-      apy: "3.18 %",
+      apy: "3.18",
       isCollateral: true,
     },
     {
       image: usdc,
       name: "USDC",
       balance: supplyUSDC,
-      apy: "3.18 %",
+      apy: "3.18",
       isCollateral: true,
     },
     {
       image: usdt,
       name: "USDT",
       balance: supplyUSDT,
-      apy: "3.18 %",
+      apy: "3.18",
       isCollateral: true,
     },
     {
       image: weth,
       name: "WETH",
       balance: supplyWETH,
-      apy: "3.18 %",
+      apy: 3.18,
       isCollateral: false,
     },
   ];
@@ -74,7 +74,7 @@ const SupplyAssets = () => {
 
           <tbody>
             {tokenArray.map((token, index) => (
-              <RowSupply
+              <RowSupplyAssets
                 key={index}
                 name={token.name}
                 image={token.image}
