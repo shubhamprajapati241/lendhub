@@ -4,10 +4,10 @@ import React, { useContext } from "react";
 import lendContext from "../context/lendContext";
 import { RowSupply } from "../components";
 
-import { ether, dai, usdc, usdt } from "../assets";
+import { ether, dai, usdc, usdt, weth } from "../assets";
 
 const SupplyAssets = () => {
-  const { supplyEther, supplyDAI, supplyUSDC, supplyUSDT, supplyWrapperEther } =
+  const { supplyEther, supplyDAI, supplyUSDC, supplyUSDT, supplyWETH } =
     useContext(lendContext);
 
   const tokenArray = [
@@ -35,9 +35,16 @@ const SupplyAssets = () => {
     {
       image: usdt,
       name: "USDT",
-      balance: "0",
+      balance: supplyUSDT,
       apy: "3.18 %",
       isCollateral: true,
+    },
+    {
+      image: weth,
+      name: "WETH",
+      balance: supplyWETH,
+      apy: "3.18 %",
+      isCollateral: false,
     },
   ];
 

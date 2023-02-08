@@ -29,15 +29,31 @@ const RowSupply = ({ name, image, balance, apy, isCollateral }) => {
           </div>
         </td>
         <td className="border-t-0 md:px-4 px-1 border align-middle border-l-0 border-r-0 md:whitespace-nowrap md:p-4">
-          <div className="text-green-700 text-lg font-large text-center">
-            {" "}
-            &#10004;{" "}
-          </div>
+          {isCollateral ? (
+            <div className="text-green-700 text-lg font-large text-center">
+              {" "}
+              &#10004;{" "}
+            </div>
+          ) : (
+            <div className="text-red-700 text-lg font-large text-center">
+              {" "}
+              &#10006;{" "}
+            </div>
+          )}
         </td>
         <td className="border-t-0 md:px-4 px-1 border align-middle border-l-0 border-r-0 md:whitespace-nowrap md:p-4">
-          <button className="border-spacing-2 bg-slate-200 hover:bg-slate-300 px-4 py-[6px] rounded-[4px] text-black text-sm font-semibold outline-none">
-            Supply
-          </button>
+          {isCollateral ? (
+            <button className="border-spacing-2 bg-slate-200 hover:bg-slate-300 px-4 py-[6px] rounded-[4px] text-black text-sm font-semibold outline-none">
+              Supply
+            </button>
+          ) : (
+            <button
+              className="border-spacing-2 bg-slate-200  px-4 py-[6px] rounded-[4px] text-gray-500 text-sm font-semibold outline-none"
+              disabled
+            >
+              Supply
+            </button>
+          )}
         </td>
       </tr>
     </>
