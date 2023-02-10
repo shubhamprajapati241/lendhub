@@ -2,7 +2,13 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useContext, useEffect } from "react";
 import lendContext from "../context/lendContext";
-import { Header, MainCard, LendingPool, DisconnectedTab } from "../components";
+import {
+  Header,
+  MainCard,
+  LendingPool,
+  DisconnectedTab,
+  ModalSupply,
+} from "../components";
 
 const Home: NextPage = () => {
   const { connectWallet, currentAccount } = useContext(lendContext);
@@ -15,7 +21,7 @@ const Home: NextPage = () => {
     <div>
       <Head>
         <title>LendHub - DeFi Lending and Borrowing Protocol</title>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/lendhub-favi.png" />
       </Head>
 
       <main className="w-full p-0 m-0">

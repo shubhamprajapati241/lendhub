@@ -3,9 +3,7 @@ import LendContext from "./lendContext";
 import { ethers } from "ethers";
 
 const ERC20ABI = require("./erc20_abi.json");
-const WRAPPED_ETHER_ADDRESS = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
-const DAI_ADDRESS = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60";
-const USDC_ADDRESS = "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C";
+const addresses = require("../token-list-goerli.json");
 
 const LendState = (props) => {
   const [currentAccount, setCurrentAccount] = useState("");
@@ -16,12 +14,9 @@ const LendState = (props) => {
   const [supplyDAI, setSupplyDAI] = useState(0);
   const [supplyUSDC, setSupplyUSDC] = useState(0);
   const [supplyUSDT, setSupplyUSDT] = useState(0);
-  const [supplyWrapperEther, setSupplyWrapperEther] = useState(0);
-
-  const [supplyTokensArray, setSupplyTokensArray] = useState([]);
+  const [supplyWETH, setSupplyWETH] = useState(0);
 
   const failMessage = "Please install Metamask & connect your Metamask";
-  const successMessage = "Account Connected Successfully";
 
   const connectWallet = async () => {
     const { ethereum } = window;
@@ -36,12 +31,18 @@ const LendState = (props) => {
       window.ethereum.on("accountsChanged", () => {
         window.location.reload();
       });
+
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const network = await provider.getNetwork();
+
+      // Getting user ether balance
+      let eth = await provider.getBalance(account[0]);
+      eth = ethers.utils.formatEther(eth);
 
       if (account.length) {
         setCurrentAccount(account[0]);
         setNetwork(network.name);
+        setSupplyEther(eth);
         fetchUserAssets(provider, account[0]);
       } else {
         return failMessage;
@@ -52,61 +53,40 @@ const LendState = (props) => {
   };
 
   const fetchUserAssets = async (provider, account) => {
-    //* 1. Getting supply ethers
-    let eth;
-    eth = await provider.getBalance(account);
-    eth = ethers.utils.formatEther(eth);
-    setSupplyEther(eth);
-    console.log("supply Ethers " + eth);
-    supplyTokensArray.push(["eth", "ETH", eth, true]);
+    addresses.map(async (token) => {
+      let tok;
+      const tokenContract = await new ethers.Contract(
+        token.address,
+        ERC20ABI,
+        provider
+      );
 
-    //* 2. Getting DAI balance
-    let dai;
-    const daiTokenContract = await new ethers.Contract(
-      DAI_ADDRESS,
-      ERC20ABI,
-      provider
-    );
-    dai = await daiTokenContract.balanceOf(account);
-    dai = ethers.utils.formatEther(dai, 18);
-    console.log("supply DAI " + dai);
-    setSupplyDAI(dai);
+      tok = await tokenContract.balanceOf(account);
+      tok = ethers.utils.formatUnits(tok, token.decimal);
 
-    //* 2. Getting USDC balance
-    let usdc;
-    const usdcTokenContract = await new ethers.Contract(
-      USDC_ADDRESS,
-      ERC20ABI,
-      provider
-    );
-    usdc = await usdcTokenContract.balanceOf(account);
-    usdc = ethers.utils.formatEther(usdc, 18);
-    setSupplyUSDC(usdc);
-    console.log("supply USDC tokens : " + usdc);
-
-    //* 4. Getting Weth balance
-    let weth;
-    const wethTokenContract = await new ethers.Contract(
-      WRAPPED_ETHER_ADDRESS,
-      ERC20ABI,
-      provider
-    );
-    weth = await wethTokenContract.balanceOf(account);
-    weth = ethers.utils.formatEther(weth, 18);
-    setSupplyWrapperEther(weth);
-    console.log("supply weth tokens : " + weth);
+      if (token.name == "DAI") {
+        setSupplyDAI(tok);
+      } else if (token.name == "USDC") {
+        setSupplyUSDC(tok);
+      } else if (token.name == "USDT") {
+        setSupplyUSDT(tok);
+      } else if (token.name == "WETH") {
+        setSupplyWETH(tok);
+      }
+    });
   };
 
   return (
     <LendContext.Provider
       value={{
         currentAccount,
+        network,
         connectWallet,
         supplyEther,
         supplyDAI,
         supplyUSDC,
         supplyUSDT,
-        supplyWrapperEther,
+        supplyWETH,
       }}
     >
       {props.children}
