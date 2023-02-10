@@ -5,3 +5,4 @@ export { default as usdt } from "./usdt.svg";
 export { default as dai } from "./dai.svg";
 export { default as metamask } from "./metamask.png";
 export { default as weth } from "./weth.svg";
+export { default as logo } from "./logo.png";
