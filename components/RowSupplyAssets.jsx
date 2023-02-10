@@ -9,7 +9,7 @@ const RowSupplyAssets = ({ name, image, balance, apy, isCollateral }) => {
   return (
     <>
       <tr key={name} className="align-middle text-left text-xs">
-        <td className="border-t-0 md:px-4 px-1 border align-middle border-l-0 border-r-0 md:whitespace-nowrap md:p-4">
+        <td className="md:px-4 px-1 align-middle border-b-[1px] border-blueGrey-100 md:whitespace-nowrap md:p-4">
           <div className="flex items-center">
             <Image
               src={image}
@@ -18,37 +18,37 @@ const RowSupplyAssets = ({ name, image, balance, apy, isCollateral }) => {
               className="card-img-top"
               alt="coin-image"
             />
-            <div className="pl-[8px] font-semibold text-[13px]">{name}</div>
+            <p className="pl-[8px] font-semibold text-[13px]">{name}</p>
           </div>
         </td>
-        <td className="border-t-0 md:px-4 px-1 border align-middle border-l-0 border-r-0  md:whitespace-nowrap md:p-4">
-          <div className="text-center text-[12px] text-gray-600 font-semibold">
+        <td className="md:px-4 px-1 align-middle border-b-[1px] border-blueGrey-100  md:whitespace-nowrap md:p-4">
+          <p className="text-center text-[12px] text-gray-600 font-semibold">
             {Number(balance).toFixed(2).toString(2).length < 10
               ? Number(balance).toFixed(2).toString().slice(0, 10)
               : `${Number(balance).toFixed(2).toString().slice(0, 10)}...`}
-          </div>
+          </p>
         </td>
-        <td className="border-t-0 md:px-4 px-1 border align-middle border-l-0 border-r-0 md:whitespace-nowrap md:p-4">
-          <div className="text-center text-[12px] text-gray-600 font-semibold">
+        <td className="md:px-4 px-1 align-middle border-b-[1px] border-blueGrey-100 md:whitespace-nowrap md:p-4">
+          <p className="text-center text-[12px] text-gray-600 font-semibold">
             {apy} %
-          </div>
+          </p>
         </td>
-        <td className="border-t-0 md:px-4 px-1 border align-middle border-l-0 border-r-0 md:whitespace-nowrap md:p-4">
+        <td className="md:px-4 px-1 align-middle border-b-[1px] border-blueGrey-100 md:whitespace-nowrap md:p-4">
           {isCollateral ? (
-            <div className="text-green-700 text-lg font-large text-center">
+            <p className="text-green-700 text-lg font-large text-center">
               {" "}
               &#10004;{" "}
-            </div>
+            </p>
           ) : (
-            <div className="text-red-700 text-lg font-large text-center">
+            <p className="text-red-700 text-lg font-large text-center">
               {" "}
               &#10006;{" "}
-            </div>
+            </p>
           )}
         </td>
-        <td className="border-t-0 md:px-4 px-1 border align-middle border-l-0 border-r-0 md:whitespace-nowrap md:p-4">
+        <td className="md:px-4 px-1 align-middle border-b-[1px] border-blueGrey-100 md:whitespace-nowrap md:p-4">
           <button
-            className="border-spacing-2 bg-slate-200 hover:bg-slate-300 px-4 py-[6px] rounded-[4px] text-black text-sm font-semibold outline-none"
+            className="border-spacing-1 py-[6px] ml-1 rounded-[4px] outline-none text-[13px] text-black bg-slate-50 border border-slate-200 p-2 hover:border-slate-500"
             onClick={() => setShowModal(true)}
           >
             Supply

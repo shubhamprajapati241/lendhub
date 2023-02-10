@@ -1,0 +1,72 @@
+import Image from "next/image";
+import React, { useState } from "react";
+import Switch from "react-switch";
+
+const RowYourSupply = ({ name, image, apy, balance, isCollateral }) => {
+  const [checked, setChecked] = useState();
+  return (
+    <>
+      <tr key={name} className>
+        <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4 ">
+          <div className="flex items-center">
+            <Image
+              src={image}
+              alt="coin-image"
+              width={28}
+              height={28}
+              className="card-img-top"
+            />
+            <p className="pl-[8px] font-semibold text-[13px]">{name}</p>
+          </div>
+        </td>
+        <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4 ">
+          <p className="text-center text-[13px] text-gray-600 font-semibold">
+            {Number(balance).toFixed(2).toString(2).length < 10
+              ? Number(balance).toFixed(2).toString().slice(0, 10)
+              : `${Number(balance).toFixed(2).toString().slice(0, 10)}...`}
+          </p>
+
+          <p className="text-center text-[11px] text-gray-600 font-medium">
+            {" "}
+            $
+            {Number(200).toFixed(2).toString(2).length < 10
+              ? Number(200).toFixed(2).toString().slice(0, 10)
+              : `${Number(200).toFixed(2).toString().slice(0, 10)}...`}
+          </p>
+        </td>
+        <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4 ">
+          <p className="text-center text-[12px] text-gray-600 font-semibold">
+            {apy} %
+          </p>
+        </td>
+        <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4 justify-center text-center ">
+          <Switch
+            checked={checked}
+            checkedIcon={false}
+            uncheckedIcon={false}
+            handleDiameter={0}
+            height={18}
+            onColor="#0ba34d"
+            width={35}
+            activeBoxShadow="0 0 2px 3px #3bf"
+            onChange={() => {
+              setChecked(!checked);
+            }}
+          />
+        </td>
+        <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4 ">
+          <div className="flex item-center justify-end">
+            <button className="border-spacing-1 py-[6px] rounded-[4px] outline-none text-[13px] text-white bg-[#383D51] hover:bg-[#212430] p-2">
+              Withdraw
+            </button>
+            <button className="border-spacing-1 py-[6px] ml-1 rounded-[4px] outline-none text-[13px] text-black bg-slate-50 border border-slate-200 p-2 hover:border-slate-500">
+              Supply
+            </button>
+          </div>
+        </td>
+      </tr>
+    </>
+  );
+};
+
+export default RowYourSupply;
