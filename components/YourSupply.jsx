@@ -1,34 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
 import { RowYourSupply, YourSupplyDetails } from "../components";
-
-import { eth, dai, usdc, usdt, weth } from "../assets";
+import lendContext from "../context/lendContext";
 
 const YourSupply = () => {
-  const tokenArray = [
-    {
-      image: eth,
-      name: "ETH",
-      balance: "100",
-      apy: 3.18,
-      isCollateral: true,
-    },
-    {
-      image: dai,
-      name: "DAI",
-      balance: "120",
-      apy: "3.18",
-      isCollateral: true,
-    },
-  ];
+  const { supplyAssets, supplyDetails } = useContext(lendContext);
   return (
     <div className="w-full md:w-1/2 h-30 bg-white rounded-md ">
       <h1 className="px-6 py-5 font-semibold text-md">Your supplies</h1>
       {/* <p className="py-5 p-6 text-sm text-gray-500">Nothing supplied yet</p> */}
 
       <YourSupplyDetails
-        totalBalance={"10.603.20"}
-        totalAPY={"43.61"}
-        totalCollateral={"10.608.30"}
+        totalBalance={supplyDetails.totalBalance}
+        totalAPY={supplyDetails.totalAPY}
+        totalCollateral={supplyDetails.totalCollateral}
       />
 
       <div className="pt-3">
@@ -52,11 +36,12 @@ const YourSupply = () => {
           </thead>
 
           <tbody>
-            {tokenArray.map((token, index) => (
+            {supplyAssets.map((token, index) => (
               <RowYourSupply
                 key={index}
                 name={token.name}
                 balance={token.balance}
+                dollarPrice={token.dollarPrice}
                 image={token.image}
                 apy={token.apy}
                 isCollateral={token.isCollateral}

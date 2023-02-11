@@ -4,7 +4,7 @@ import lendContext from "../context/lendContext";
 
 const ConnectButton = () => {
   const { currentAccount, network, connectWallet } = useContext(lendContext);
-  console.log(typeof network);
+
   return (
     <div>
       {!currentAccount ? (

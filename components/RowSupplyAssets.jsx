@@ -51,7 +51,7 @@ const RowSupplyAssets = ({ name, image, balance, apy, isCollateral }) => {
             className="border-spacing-1 py-[6px] ml-1 rounded-[4px] outline-none text-[13px] text-black bg-slate-50 border border-slate-200 p-2 hover:border-slate-500"
             onClick={() => setShowModal(true)}
           >
-            Supply
+            Lend
           </button>
         </td>
       </tr>

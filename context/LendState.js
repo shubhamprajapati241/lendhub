@@ -3,28 +3,36 @@ import LendContext from "./lendContext";
 import { ethers } from "ethers";
 
 const ERC20ABI = require("./erc20_abi.json");
-const addresses = require("../token-list-goerli.json");
+const addresses = require("../token-list-goerli");
+
+import { ethIcon, usdcIcon, usdtIcon, daiIcon, wethIcon } from "../assets";
 
 const LendState = (props) => {
+  //* Declaring all the states
+
+  // for user account
   const [currentAccount, setCurrentAccount] = useState("");
+
+  // for network
   const [network, setNetwork] = useState("");
 
-  // for user supply assets
-  const [supplyEther, setSupplyEther] = useState(0);
-  const [supplyDAI, setSupplyDAI] = useState(0);
-  const [supplyUSDC, setSupplyUSDC] = useState(0);
-  const [supplyUSDT, setSupplyUSDT] = useState(0);
-  const [supplyWETH, setSupplyWETH] = useState(0);
+  // for storing user assets from metamask
+  const [metamaskAssets, setMetamaskAssets] = useState([]);
 
-  const failMessage = "Please install Metamask & connect your Metamask";
+  // for storing user supply assets in the lending pool
+  const [supplyAssets, setSupplyAssets] = useState([]);
+
+  const [supplyDetails, setSupplyDetails] = useState({});
 
   const connectWallet = async () => {
     const { ethereum } = window;
+    const failMessage = "Please install Metamask & connect your Metamask";
     try {
       if (!ethereum) return console.log(failMessage);
       const account = await ethereum.request({
         method: "eth_requestAccounts",
       });
+
       window.ethereum.on("chainChanged", () => {
         window.location.reload();
       });
@@ -35,14 +43,9 @@ const LendState = (props) => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const network = await provider.getNetwork();
 
-      // Getting user ether balance
-      let eth = await provider.getBalance(account[0]);
-      eth = ethers.utils.formatEther(eth);
-
       if (account.length) {
         setCurrentAccount(account[0]);
         setNetwork(network.name);
-        setSupplyEther(eth);
         fetchUserAssets(provider, account[0]);
       } else {
         return failMessage;
@@ -53,27 +56,65 @@ const LendState = (props) => {
   };
 
   const fetchUserAssets = async (provider, account) => {
-    addresses.map(async (token) => {
-      let tok;
-      const tokenContract = await new ethers.Contract(
-        token.address,
-        ERC20ABI,
-        provider
-      );
+    const assets = await Promise.all(
+      addresses.token.map(async (token) => {
+        let tok;
 
-      tok = await tokenContract.balanceOf(account);
-      tok = ethers.utils.formatUnits(tok, token.decimal);
+        if (token.address) {
+          const tokenContract = await new ethers.Contract(
+            token.address,
+            ERC20ABI,
+            provider
+          );
+          tok = await tokenContract.balanceOf(account);
+          tok = ethers.utils.formatUnits(tok, token.decimal);
+        } else {
+          tok = await provider.getBalance(account);
+          tok = ethers.utils.formatEther(tok);
+        }
+        let asset = {
+          image: token.image,
+          name: token.name,
+          apy: token.apy,
+          isCollateral: token.isCollateral,
+          balance: tok,
+        };
+        return asset;
+      })
+    );
+    setMetamaskAssets(assets);
 
-      if (token.name == "DAI") {
-        setSupplyDAI(tok);
-      } else if (token.name == "USDC") {
-        setSupplyUSDC(tok);
-      } else if (token.name == "USDT") {
-        setSupplyUSDT(tok);
-      } else if (token.name == "WETH") {
-        setSupplyWETH(tok);
-      }
-    });
+    fetchSupplyAssets();
+  };
+
+  const fetchSupplyAssets = () => {
+    const assets = [
+      {
+        image: ethIcon,
+        name: "ETH",
+        balance: "100",
+        dollarPrice: "300",
+        apy: 3.18,
+        isCollateral: true,
+      },
+      {
+        image: daiIcon,
+        name: "DAI",
+        balance: "120",
+        dollarPrice: "120",
+        apy: "3.18",
+        isCollateral: false,
+      },
+    ];
+
+    const detailsOfSupply = {
+      totalBalance: "10.603.20",
+      totalAPY: "43.61",
+      totalCollateral: "10.603.20",
+    };
+
+    setSupplyAssets(assets);
+    setSupplyDetails(detailsOfSupply);
   };
 
   return (
@@ -82,11 +123,9 @@ const LendState = (props) => {
         currentAccount,
         network,
         connectWallet,
-        supplyEther,
-        supplyDAI,
-        supplyUSDC,
-        supplyUSDT,
-        supplyWETH,
+        metamaskAssets,
+        supplyAssets,
+        supplyDetails,
       }}
     >
       {props.children}

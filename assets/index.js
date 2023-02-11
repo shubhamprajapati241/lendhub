@@ -1,8 +1,9 @@
-export { default as eth } from "./eth.svg";
-export { default as ether } from "./ether.svg";
-export { default as usdc } from "./usdc.svg";
-export { default as usdt } from "./usdt.svg";
-export { default as dai } from "./dai.svg";
-export { default as metamask } from "./metamask.png";
-export { default as weth } from "./weth.svg";
+export { default as ethIcon } from "./eth-icon.svg";
+export { default as usdcIcon } from "./usdc-icon.svg";
+export { default as usdtIcon } from "./usdt-icon.svg";
+export { default as daiIcon } from "./dai-icon.svg";
+export { default as wethIcon } from "./weth-icon.svg";
+
+export { default as ether } from "./home-ether.svg";
 export { default as logo } from "./logo.png";
+export { default as metamask } from "./metamask.png";

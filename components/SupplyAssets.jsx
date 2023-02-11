@@ -1,52 +1,13 @@
-import Image from "next/image";
 import React, { useContext } from "react";
 
 import lendContext from "../context/lendContext";
 import { RowSupplyAssets } from "../components";
 
-import { eth, dai, usdc, usdt, weth } from "../assets";
-
 const SupplyAssets = () => {
-  const { supplyEther, supplyDAI, supplyUSDC, supplyUSDT, supplyWETH } =
-    useContext(lendContext);
+  const { metamaskAssets } = useContext(lendContext);
 
-  const tokenArray = [
-    {
-      image: eth,
-      name: "ETH",
-      balance: supplyEther,
-      apy: "3.18",
-      isCollateral: true,
-    },
-    {
-      image: dai,
-      name: "DAI",
-      balance: supplyDAI,
-      apy: "3.18",
-      isCollateral: true,
-    },
-    {
-      image: usdc,
-      name: "USDC",
-      balance: supplyUSDC,
-      apy: "3.18",
-      isCollateral: true,
-    },
-    {
-      image: usdt,
-      name: "USDT",
-      balance: supplyUSDT,
-      apy: "3.18",
-      isCollateral: true,
-    },
-    {
-      image: weth,
-      name: "WETH",
-      balance: supplyWETH,
-      apy: 3.18,
-      isCollateral: false,
-    },
-  ];
+  console.log("Metamask Assets");
+  console.log(metamaskAssets);
 
   return (
     <div className="w-full md:w-1/2 h-30 bg-white rounded-md ">
@@ -73,7 +34,7 @@ const SupplyAssets = () => {
           </thead>
 
           <tbody>
-            {tokenArray.map((token, index) => (
+            {metamaskAssets.map((token, index) => (
               <RowSupplyAssets
                 key={index}
                 name={token.name}

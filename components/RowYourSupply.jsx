@@ -2,11 +2,18 @@ import Image from "next/image";
 import React, { useState } from "react";
 import Switch from "react-switch";
 
-const RowYourSupply = ({ name, image, apy, balance, isCollateral }) => {
-  const [checked, setChecked] = useState();
+const RowYourSupply = ({
+  name,
+  image,
+  apy,
+  balance,
+  dollarPrice,
+  isCollateral,
+}) => {
+  const [checked, setChecked] = useState(true);
   return (
     <>
-      <tr key={name} className>
+      <tr key={name}>
         <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4 ">
           <div className="flex items-center">
             <Image
@@ -29,9 +36,9 @@ const RowYourSupply = ({ name, image, apy, balance, isCollateral }) => {
           <p className="text-center text-[11px] text-gray-600 font-medium">
             {" "}
             $
-            {Number(200).toFixed(2).toString(2).length < 10
-              ? Number(200).toFixed(2).toString().slice(0, 10)
-              : `${Number(200).toFixed(2).toString().slice(0, 10)}...`}
+            {Number(dollarPrice).toFixed(2).toString(2).length < 10
+              ? Number(dollarPrice).toFixed(2).toString().slice(0, 10)
+              : `${Number(dollarPrice).toFixed(2).toString().slice(0, 10)}...`}
           </p>
         </td>
         <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4 ">
@@ -41,7 +48,7 @@ const RowYourSupply = ({ name, image, apy, balance, isCollateral }) => {
         </td>
         <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4 justify-center text-center ">
           <Switch
-            checked={checked}
+            checked={isCollateral}
             checkedIcon={false}
             uncheckedIcon={false}
             handleDiameter={0}
@@ -49,9 +56,8 @@ const RowYourSupply = ({ name, image, apy, balance, isCollateral }) => {
             onColor="#0ba34d"
             width={35}
             activeBoxShadow="0 0 2px 3px #3bf"
-            onChange={() => {
-              setChecked(!checked);
-            }}
+            disabled={true}
+            onChange={() => {}}
           />
         </td>
         <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4 ">
@@ -60,7 +66,7 @@ const RowYourSupply = ({ name, image, apy, balance, isCollateral }) => {
               Withdraw
             </button>
             <button className="border-spacing-1 py-[6px] ml-1 rounded-[4px] outline-none text-[13px] text-black bg-slate-50 border border-slate-200 p-2 hover:border-slate-500">
-              Supply
+              Lend
             </button>
           </div>
         </td>
