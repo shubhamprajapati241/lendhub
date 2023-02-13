@@ -1,6 +1,7 @@
 import Image from "next/image";
 import React, { useState } from "react";
 import Switch from "react-switch";
+import { ModalBorderLayout, ModalSupply, ModalWithdraw } from "../components";
 
 const RowYourSupply = ({
   name,
@@ -10,7 +11,9 @@ const RowYourSupply = ({
   dollarPrice,
   isCollateral,
 }) => {
-  const [checked, setChecked] = useState(true);
+  const [showSupplyModal, setShowSupplyModal] = useState(false);
+  const [showWithdrawModal, setShowWihdrawModal] = useState(false);
+
   return (
     <>
       <tr key={name}>
@@ -62,15 +65,49 @@ const RowYourSupply = ({
         </td>
         <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4 ">
           <div className="flex item-center justify-end">
-            <button className="border-spacing-1 py-[6px] rounded-[4px] outline-none text-[13px] text-white bg-[#383D51] hover:bg-[#212430] p-2">
+            <button
+              className="border-spacing-1 py-[6px] rounded-[4px] outline-none text-[13px] text-white bg-[#383D51] hover:bg-[#212430] p-2"
+              onClick={() => setShowWihdrawModal(true)}
+            >
               Withdraw
             </button>
-            <button className="border-spacing-1 py-[6px] ml-1 rounded-[4px] outline-none text-[13px] text-black bg-slate-50 border border-slate-200 p-2 hover:border-slate-500">
+            <button
+              className="border-spacing-1 py-[6px] ml-1 rounded-[4px] outline-none text-[13px] text-black bg-slate-50 border border-slate-200 p-2 hover:border-slate-500"
+              onClick={() => setShowSupplyModal(true)}
+            >
               Lend
             </button>
           </div>
         </td>
       </tr>
+
+      <ModalBorderLayout
+        isVisible={showSupplyModal}
+        onClose={() => setShowSupplyModal(false)}
+      >
+        <ModalSupply
+          name={name}
+          balance={balance}
+          image={image}
+          apy={apy}
+          isCollateral={isCollateral}
+          onClose={() => setShowSupplyModal(false)}
+        />
+      </ModalBorderLayout>
+
+      <ModalBorderLayout
+        isVisible={showWithdrawModal}
+        onClose={() => setShowWihdrawModal(false)}
+      >
+        {" "}
+        <ModalWithdraw
+          name={name}
+          image={image}
+          balance={balance}
+          remainingSupply={balance}
+          onClose={() => setShowWihdrawModal(false)}
+        />
+      </ModalBorderLayout>
     </>
   );
 };

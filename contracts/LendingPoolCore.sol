@@ -130,7 +130,7 @@ contract LendingPoolCore is ReentrancyGuard, Ownable {
     */
     function updateBorrowFee(uint _borrowFee) external onlyOwner{
         // The fee levied when someone borrows, pass 100, it will be converted to 1%
-            borrowFee = _borrowFee/100;
+        borrowFee = _borrowFee/100;
     }
 
     function istokenInTheLendingPool(address _token) internal view returns(bool){
