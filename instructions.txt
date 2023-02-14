@@ -1,0 +1,12 @@
+1. Start the node
+npx hardhat node
+
+2. Compile, Test, Deploy
+npx hardhat Compile
+npx hardhat test
+npx hardhat run scripts/deployBank.js --network localhost
+
+3. Copy the Contract address and paste it into addresses.js
+
+4. Run the project
+npm run dev

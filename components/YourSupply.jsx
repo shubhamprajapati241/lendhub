@@ -3,16 +3,16 @@ import { RowYourSupply, YourSupplyDetails } from "../components";
 import lendContext from "../context/lendContext";
 
 const YourSupply = () => {
-  const { supplyAssets, supplyDetails } = useContext(lendContext);
+  const { supplyDetails } = useContext(lendContext);
   return (
     <div className="w-full md:w-1/2 h-30 bg-white rounded-md ">
       <h1 className="px-6 py-5 font-semibold text-md">Your supplies</h1>
       {/* <p className="py-5 p-6 text-sm text-gray-500">Nothing supplied yet</p> */}
 
       <YourSupplyDetails
-        totalBalance={supplyDetails.totalBalance}
-        totalAPY={supplyDetails.totalAPY}
-        totalCollateral={supplyDetails.totalCollateral}
+        totalBalance={supplyDetails.details.totalBalance}
+        totalAPY={supplyDetails.details.totalAPY}
+        totalCollateral={supplyDetails.details.totalCollateral}
       />
 
       <div className="pt-3">
@@ -36,7 +36,7 @@ const YourSupply = () => {
           </thead>
 
           <tbody>
-            {supplyAssets.map((token, index) => (
+            {supplyDetails.assets.map((token, index) => (
               <RowYourSupply
                 key={index}
                 name={token.name}

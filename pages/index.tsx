@@ -11,7 +11,7 @@ import {
 } from "../components";
 
 const Home: NextPage = () => {
-  const { connectWallet, currentAccount } = useContext(lendContext);
+  const { connectWallet, metamaskDetails } = useContext(lendContext);
 
   useEffect(() => {
     connectWallet();
@@ -32,7 +32,11 @@ const Home: NextPage = () => {
             <MainCard />
           </div>
 
-          {!currentAccount ? <DisconnectedTab /> : <LendingPool />}
+          {!metamaskDetails.currentAccount ? (
+            <DisconnectedTab />
+          ) : (
+            <LendingPool />
+          )}
         </div>
       </main>
     </div>

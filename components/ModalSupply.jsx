@@ -1,15 +1,38 @@
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { MdLocalGasStation } from "react-icons/md";
 import { FiAlertCircle } from "react-icons/fi";
+import lendContext from "../context/lendContext";
 
 const ModalSupply = ({ name, balance, image, apy, isCollateral, onClose }) => {
+  const { supplyAssetsToPool } = useContext(lendContext);
   const [dollerPrice, setDollerPrice] = useState(0);
 
-  const [inputValue, setInputValue] = useState();
+  const [isInputValidate, setInputValidate] = useState(false);
+  const [inputValue, setInputValue] = useState("");
 
   const setMax = () => {
     setInputValue(balance);
+    setInputValidate(true);
+  };
+
+  const validateInput = (input) => {
+    console.log(input);
+    if (input) {
+      console.log("Not empty");
+      var pattern = new RegExp(/^\d*\.?\d*$/);
+      if (!pattern.test(input)) {
+        setInputValue("");
+        setInputValidate(false);
+      } else {
+        setInputValue(input);
+        setInputValidate(true);
+      }
+    } else {
+      console.log("empty");
+      setInputValue("");
+      setInputValidate(false);
+    }
   };
   return (
     <div>
@@ -47,13 +70,7 @@ const ModalSupply = ({ name, balance, image, apy, isCollateral, onClose }) => {
             <input
               type="text"
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={(event) => {
-                var pattern = new RegExp(/^\d*\.?\d*$/);
-                if (!pattern.test(event.key)) {
-                  event.preventDefault();
-                }
-              }}
+              onChange={(e) => validateInput(e.target.value)}
               className="bg-transparent outline-none text-xl font-semibold w-1/2"
               placeholder="0.00"
             />
@@ -112,7 +129,7 @@ const ModalSupply = ({ name, balance, image, apy, isCollateral, onClose }) => {
         </div>
       </div>
 
-      <div className="mb-10 flex items-center">
+      <div className="mb-5 flex items-center">
         <MdLocalGasStation />
         <p className="text-sm text-[#A5A8B6] pl-1">
           $<span className="pl-[2px]">0.00</span>
@@ -120,11 +137,18 @@ const ModalSupply = ({ name, balance, image, apy, isCollateral, onClose }) => {
       </div>
 
       <div className="">
-        <button className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2">
-          Approve {name} to continue
-        </button>
-        <button className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold">
-          Supply {name}
+        <button
+          className={
+            isInputValidate
+              ? "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
+              : "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold"
+          }
+          onClick={() => {
+            if (!inputValue) return;
+            else supplyAssetsToPool(name, inputValue);
+          }}
+        >
+          {isInputValidate ? `Supply ${name}` : "Enter an amount"}
         </button>
       </div>
     </div>

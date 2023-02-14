@@ -3,8 +3,6 @@ import React, { useState } from "react";
 import { ModalBorderLayout, ModalSupply } from "../components";
 
 const RowSupplyAssets = ({ name, image, balance, apy, isCollateral }) => {
-  console.log(name + balance + " " + typeof balance);
-
   const [showModal, setShowModal] = useState(false);
   return (
     <>
