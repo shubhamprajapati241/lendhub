@@ -1,113 +1,95 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.6;
 
-/**
-Smart Contract Modules for DeFi Lending Project
-1. LendingPoolCore contract - Core Contract
-    * Lending Pool Contract (Holds bunch of coins and/or Tokens) - Reserves
-    * Deposit
-    * Redeem
-    * Borrow
-    * Repay
-    * Liquidation
-    * tokenization
-        * aTokens
-        * tokens that map the liquidity deposited and accrue the interests of the deposited underlying assets
-        * Atokens are minted upon deposit, their value increases until they are burned on redeem or liquidated
-
-**/
-
-/**
-* Only Owner can mint LHT Tokens
-* Lender should be able to add to supply Coins/Tokens
-    * Supply must increase by the number of tokens added to the liquidity pools
-    * Mint LHT on each coin lent
-    * Lender’s supply must  be locked in for a pre-determined period
-    * Lender’s accrual to start from the day of deposit -  set block.timestamp
-* Lender must be able to withdraw his supply
-    * Remove supply from the liquidity pool
-    * Burn LHT on withdraw
-* Borrower must be able to withdraw money
-    * Lender’s interest accrual to start from the day of borrow -  set block.timestamp and calculate interest based on a predetermined interest rate
-    * Lender’s accrual to start from the day of deposit -  set block.timestamp
-*/
-
 /***
-Application Requirements
-● Create an application to lend and borrow cryptocurrencies(Matic/Ether/etc.)
-● The three important entities in this application are the Lender,Borrower and DeFi
-lending platform.
-● The lender can deposit money in the platform(which will be some smart contracts)
-similar to how people deposit money in their banks.
-● The Borrower can deposit crypto assets(Ether/Matic..etc) as collateral and obtain
-cryptocurrency loans(a stablecoin like USDT/Dai..etc) with a specified loan maturity
-period and interest rate.
-● The borrower first deposits crypto collateral
-● He receives a specified amount of loan after successful deposit of collateral
-● He makes periodic payments to the platform ,which in turn pay the amount to the
-lender similar to how banks work.
-● After successful payment of the loan , the borrower gets back his collateral and the
-lender receives his investment amount with a certain interest.
+Application Requirements:
+    ● Create an application to lend and borrow cryptocurrencies(Matic/Ether/etc.)
+    ● The three important entities in this application are the Lender,Borrower and DeFi lending platform.
+    ● The lender can deposit money in the platform(which will be some smart contracts) 
+      similar to how people deposit money in their banks.
+    ● The Borrower can deposit crypto assets(Ether/Matic..etc) as collateral and obtain cryptocurrency 
+      loans(a stablecoin like USDT/Dai..etc) with a specified loan maturity period and interest rate.
+    ● The borrower first deposits crypto collateral
+    ● He receives a specified amount of loan after successful deposit of collateral
+    ● He makes periodic payments to the platform ,which in turn pay the amount to the lender similar to how banks work.
+    ● After successful payment of the loan, the borrower gets back his collateral and the lender 
+      receives his investment amount with a certain interest.
 **/
 
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "./LHToken.sol";
-import "./LendingDataProvider.sol";
-// import "./LendHubHelper.sol";
+// import "@openzeppelin/contracts/access/Ownable.sol";
+// import "./LendingDataProvider.sol";
+// , Ownable
 
-contract LendingPoolCore is ReentrancyGuard, Ownable {
+contract LendingPoolCore is ReentrancyGuard {
 
-    uint public borrowFee;
-    uint public interestRate;
     address deployer;
+    uint256 public immutable interestRate=350;
+    uint256 public immutable borrowRate=450;
 
-    // using Counters for Counters.Counter;
-    // Counters.Counter private depositId;
-
-    // LendHubHelper lendHubHelper;
-    LendingDataProvider lendingDataProvider;
-    LHToken lHToken;
-
-    // struct Lends {
-    //     uint LendId;
-    //     address lender;
-    //     uint amount;
-    //     uint interestRate;
-    //     uint statkingDuration;
-    //     uint maturityAmount;
-    // }
-
-    // Deposit[] private deposits;
-
-    // asset => reserve qty
+    // asset token => reserve qty
     mapping (address => uint) public reserves;
     // asset exits - to check if an asset exists in the reserve Pool
-    mapping (address => bool) public assetsInPool;
-    // lender => asset => balance
-    mapping (address => mapping(address => uint)) public lenderAssets;
-    // lender => asset => LHTokens
-    mapping (address => mapping(address => uint)) public assetToLHTokens;
-    // lender => asset => accrual start time
-    mapping (address => mapping(address => uint)) public InterestAccrualStartTime;
-    // lender => asset => interest charging start time
-    mapping (address => mapping(address => uint)) public interestChargedOnBorrow;
-
+    mapping (address => bool) public assetInPool;
+    // user address => asset token address
+    mapping(address => address) public lenderAssetList;
+    // user address => asset token address => lent asset qty
+    mapping(address => mapping(address => uint)) public lenderAssets;
+    // user address => asset token address => borrowed asset qty
+    mapping(address => mapping(address => uint)) public borrowedAssets;
+    // user address => addresss of token lent => lent timestamp
+    mapping(address => mapping(address => uint)) public lenderTimestamp;
+    // user address => addresss of token borrowed => borrwed timestamp
+    mapping(address => mapping(address => uint)) public borrowerTimestamp;
+    // Token address => tokensymbol
+    mapping(address => string) tokenMap;
+    
     using SafeMath for uint;
 
     modifier onlyActiveReserve(address _token) {
-        require(reserves[_token] > 0, "No Reserve fo Asset");
+        require(reserves[_token] > 0, "No Reserve for Asset");
         _;
     }
 
-    constructor(uint _interestRate, uint _borrowFee) {
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not owner, cannot perform operation");
+        _;
+    }
+
+    modifier updateRewardTokens(){
+        tokenRewards=rewardPerToken();
+        lastUpdateTime=block.timestamp;
+        rewardEarned[msg.sender]=earned();
+        _;
+    }
+
+    // modifier hasReserves(address _token, uint256 _amount) {
+    //     require(reserves[_token] > _amount,"Not Enough Reserves to Borrow");
+    //     _;
+    // }
+
+
+    modifier hasEnoughCollateral(address _token, uint256 _amount) {
+        // ETHAddress - get ETH Address
+        // uint eThPrice = uint(lendingDataProvider.getLatestPrice(ETHAddress)); 
+        // uint eThPrice = uint(lendingDataProvider.getLatestPrice(_token)); 
+        //Calculate the number of LHT tokens to be minted and awarded to Lender - as placeholders
+        //This will be at the current token price and not the issue price
+        // uint lhtTokens = tokenToLHT(tokenPrice,lHToken.getLHTokenPrice());
+
+        require(lenderAssets[msg.sender][ETHAddress] >= _amount, "Not enough collateral to borrow");
+        _;
+    }
+
+    constructor(uint256 _interestRate, uint256 _borrowRate) {
         deployer = msg.sender;
+        // If interest rate is 3.5, pass 350, - this doesnt work as there is no fixed point representation in Solidity
+        // Use logic like REWARDS staking
+        interestRate  = _interestRate;
         // If interest rate is 3.5, pass 350, it will be converted to 3.5
-        interestRate  = _interestRate/100;
-        // If interest rate is 3.5, pass 350, it will be converted to 3.5
-        borrowFee = _borrowFee/100;
+        borrowRate = _borrowRate;
     } 
 
     /*
@@ -116,81 +98,36 @@ contract LendingPoolCore is ReentrancyGuard, Ownable {
     */
     function updateInterestRate(uint _interestRate) external onlyOwner{
         // If interest rate is 3.5, pass 350, it will be converted to 3.5
-        interestRate = _interestRate/100;
-    }
-
-    //Helper function 
-    function tokenToLHT(uint _lentTokenPrice, uint _mintTokenPrice) internal pure returns (uint) {
-        return _lentTokenPrice/_mintTokenPrice; //returns the number of LHTs to be minted per the tokens lent
+        interestRate = _interestRate;
     }
 
     /*
     * @dev : This function must only be called by the owner to update the borrow fee
-    * @param _borrowFee : borrow 
+    * @param _borrowFee : upadate borrowRate 
     */
-    function updateBorrowFee(uint _borrowFee) external onlyOwner{
+    function updateBorrowFee(uint _borrowRate) external onlyOwner{
         // The fee levied when someone borrows, pass 100, it will be converted to 1%
-        borrowFee = _borrowFee/100;
+            borrowRate = _borrowRate;
     }
-
+    
+    // Is this necessary?
     function istokenInTheLendingPool(address _token) internal view returns(bool){
-        return assetsInPool[_token];
-    }
-
-    function addToLenderAssets(address _token, uint256 _amount) internal {
-        lenderAssets[msg.sender][_token]=_amount;
+        return assetInPool[_token];
     }
 
     /************* Lender functions ************************/
-
-    function addToReserve(address _token, uint _amount) public onlyActiveReserve(_token){
-        reserves[_token] += _amount;
-        assetsInPool[_token] = true;
-    }
-
-    function rewardToken(uint _amount, uint maturityTime) internal{
-        // Calculte simple interest
-        uint maturityAmount = 
-            interestRate 
-            * (block.timestamp - InterestAccrualStartTime[msg.sender][_token]) 
-            * lenderAssets[msg.sender][_token];
-        // Add the interest to lender assets
-        lenderAssets[msg.sender][_token] += accruedInterest;
-    }
 
     /*
     * @dev : This function is called when a Lender supplies assets to the Lending Pool
     * @param _token  : Address of the token lent
     * @param _amount : Amount of the token lent
     */
-    function lend(address _token, uint256 _amount, uint statkingDuration) public {
-        
-        // depositId.increment();
+    function lend(address _token, uint256 _amount) public {
         // Add to Lender assets 
-        addToLenderAssets(_token, _amount);
-        //Add the token reserve in the lending Pool
-        addToReserve(_token, _amount);
-        //Retrieve TWAP price from Chainlink Price Oracle
-        uint tokenPrice = uint(lendingDataProvider.getLatestPrice(_token)); 
-        //Calculate the number of LHT tokens to be minted and awarded to Lender - as placeholders
-        uint lhtTokensToMint = tokenToLHT(tokenPrice,lHToken.getLHTokenPrice());
-        //Mint as many LHT obtained by the exchange of tokens Lent on deposit
-        lHToken.mintOnDeposit(msg.sender, lhtTokensToMint);
-        //Set accrual start time for interest
-        InterestAccrualStartTime[msg.sender][_token]=block.timestamp;
-        // uint maturityAmount = calcMaturityAmount(_amount, maturityTime);
-        // deposit = Deposit(depositId, msg.sender, _amount, interestRate, statkingDuration, maturityAmount);
-
-    }
-
-    function payAccruedInterest(address _token) internal{
-        // Calculte simple interest
-        uint accruedInterest = 
-            interestRate 
-            * (block.timestamp - InterestAccrualStartTime[msg.sender][_token]) 
-            * lenderAssets[msg.sender][_token];
-        // Add the interest to lender assets
-        lenderAssets[msg.sender][_token] += accruedInterest;
+        lenderAssets[msg.sender][_token]=_amount;
+        lenderAssetList[msg.sender]=_token;
+        // Always add to the existing reserve
+        reserves[_token] += _amount;
     }
 
     /*
@@ -198,53 +135,56 @@ contract LendingPoolCore is ReentrancyGuard, Ownable {
     * @param _token  : Address of the token to borrow
     * @param _amount : Amount of the token to borrow
     */
-    function withdraw(address _token, uint256 _amount) external nonReentrant {
-        address lender = msg.sender;
-        // Pay accrued interest - in terms of USDC or lent token?
-        payAccruedInterest(_token);
+    function withdraw(address _token, uint256 _amount) external nonReentrant updateRewardTokens onlyOwner returns(bool) {
+        // Pay accrued interest - in lent token
+        // payAccruedInterest(_token);
+        lenderAssets[lender][_token] += _amount;
+        require (reserves[_token] > 0, "Not enough qty to withdraw");
         // Remove from Reserves
         reserves[_token] -= _amount;
         // Remove from Lender assets
         lenderAssets[lender][_token] -= _amount;
-        //Retrieve TWAP price from Chainlink Price Oracle
-        uint tokenPrice = uint(lendingDataProvider.getLatestPrice(_token)); 
-        //Calculate the number of LHT tokens to be minted and awarded to Lender - as placeholders
-        //This will be at the current token price and not the issue price
-        uint lhtTokensToBurn = tokenToLHT(tokenPrice,lHToken.getLHTokenPrice());
-        //Mint lend hub tokens on on deposit
-        lHToken.burnOnWithdrawlOrLiquidation(lender, lhtTokensToBurn);
-
         (bool success, ) = lender.call{value: lenderAssets[lender][_token]}("");
         require (success);
     }
 
+    /*
+    * @dev : This function is called when a Lender supplies assets to the Lending Pool
+    * @param _lender : Address of the lender to caculate the reward tokens
+    */
+
+    //how much reward a token gets based on how long its been in the contract
+    function calculateRewardTokens(address _token) public view returns(uint256){
+        return lenderAssets[lender][_token]+(((block.timestamp-lenderTimestamp[lender][_token])*INTEREST_RATE*1e18)/reserves[_token]);
+    }   
+
+    function earned(address account) public view returns(uint256){
+        return((s_balances[account]*(rewardPerToken()-s_userRewardPerTokenPaid[account]))/1e18)+s_rewards[account];
+    }
+
+    function getLenderAssets(address _lender) public view returns (address[] memory){
+        address[] memory assetList;
+        for (uint16 i =0; i < assetList.length; i = unchecked_inc(i)){
+            assetList.push(lenderAssetList[lender]);
+        }
+        return assetList;
+    }
+
+    // unchecked skips the uint check and saves gas
+    function unchecked_inc(uint i) internal returns(uint){
+        unchecked {
+            return i;
+        }
+    }
+
     /************* Borrower functions ************************/
-
-
-    modifier hasEnoughCollateral(_token) {
-        // ETHAddress - get ETH Address
-        uint eThPrice = uint(lendingDataProvider.getLatestPrice(ETHAddress)); 
-        uint eThPrice = uint(lendingDataProvider.getLatestPrice(_token)); 
-        //Calculate the number of LHT tokens to be minted and awarded to Lender - as placeholders
-        //This will be at the current token price and not the issue price
-        uint lhtTokens = tokenToLHT(tokenPrice,lHToken.getLHTokenPrice());
-
-
-        require(lenderAssets[msg.sender][ETHAddress] > lenderAssets[msg.sender][ETHAddress])
-        _;
-    }
-
-    modifier hasReserves(_token, _borrowAmount) {
-        require(reserves[_token] > _borrowAmount,"Not Enough Reserves to Borrow")
-        _;
-    }
 
     /*
     * @dev : This function is called when a Lender supplies assets to the Lending Pool
     * @param _token  : Address of the token to borrow
     * @param _amount : Amount of the token to borrow
     */
-    function borrow(address _token, uint256 _borrowAmount) public is hasReserves(_token, _borrowAmount) hasEnoughCollateral(_token){
+    function borrow(address _token, uint256 _amount) public hasEnoughCollateral(_token, _amount){
         // Check if the borrower has enough collateral of ETH
         // Set accrual start time for interest charged
         interestChargedOnBorrow[msg.sender][_token]=block.timestamp;
@@ -271,44 +211,7 @@ contract LendingPoolCore is ReentrancyGuard, Ownable {
         lenderAssets[msg.sender][_token] += _amount;
     }
 
-    function interestAccrualsOnBorrow() internal returns(uint){
+    function interestAccrualsOnBorrow() internal pure returns(uint){
         return 0;
     }
-    // // why would we have to delete from the Pool?
-    // function deleteFromPool(string memory _token) public onlyOwner{
-    //     require(lendingPool[_token] == 0, "Token has reserves, cannot delete");
-    //     delete lendingPool[_token];
-    //     delete tokens[_token];
-    // }
-
-
-    // function deposit(address _account, address _token, uint256 _amount, uint256 _timestamp) {
-
-    // }
-
-    // function redeem() {}
-    // function borrow() {}
-    // function repay() {}
-    // function liquidation() {}
-
-   
-
-    // This seems to be redundant
-    // function getTokenReserve(string memory _token) external view returns(uint) {
-    //     if (lendingPool[_token] > 0) {
-    //         return lendingPool[_token];
-    //     }
-    //     else {
-    //         return 0;
-    //     }
-    // }
-
 }
-
-
-
-/***
-1. What are we not doing?
-2. We are not doing like pause contract and freeze asset.
-3. user is redirecting his interest towards someone else
-*/
