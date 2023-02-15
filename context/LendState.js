@@ -161,18 +161,12 @@ const LendState = (props) => {
     const gasLimit = await bankContract.estimateGas.depositAsset(name, {
       value: price,
     });
-
     let totalGas = (
       await metamaskDetails.provider.getFeeData()
     ).maxFeePerGas.mul(gasLimit);
 
     totalGas = ethers.utils.formatUnits(totalGas, "ether");
     console.log("Total GAS : " + totalGas);
-
-    // console.log(estimateGas);
-    // let gas = parseInt(Number(estimateGas._hex)).toString();
-    // const gas2 = ethers.utils.parseUnits(gas, "ether");
-    // console.log(gas2);
 
     // //* Writing the contract
     const transcation = await bankContract.depositAsset(name, {
