@@ -9,7 +9,7 @@ import { ethIcon, usdcIcon, usdtIcon, daiIcon, wethIcon } from "../assets";
 
 // Importing Bank contract details
 import { BankContractAddress } from "../addresses";
-import BankContactAbi from "../artifacts/contracts/Bank.sol/Bank.json";
+import BankContractABI from "../contractAbis/Bank.json";
 
 const LendState = (props) => {
   //* Declaring all the states
@@ -151,7 +151,7 @@ const LendState = (props) => {
     //* connecting with contract
     const bankContract = new ethers.Contract(
       BankContractAddress,
-      BankContactAbi.abi,
+      BankContractABI,
       metamaskDetails.signer
     );
     setContract({ bankContract: bankContract });
@@ -161,12 +161,18 @@ const LendState = (props) => {
     const gasLimit = await bankContract.estimateGas.depositAsset(name, {
       value: price,
     });
+
     let totalGas = (
       await metamaskDetails.provider.getFeeData()
     ).maxFeePerGas.mul(gasLimit);
 
     totalGas = ethers.utils.formatUnits(totalGas, "ether");
     console.log("Total GAS : " + totalGas);
+
+    // console.log(estimateGas);
+    // let gas = parseInt(Number(estimateGas._hex)).toString();
+    // const gas2 = ethers.utils.parseUnits(gas, "ether");
+    // console.log(gas2);
 
     // //* Writing the contract
     const transcation = await bankContract.depositAsset(name, {

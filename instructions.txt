@@ -2,7 +2,7 @@
 npx hardhat node
 
 2. Compile, Test, Deploy
-npx hardhat Compile
+npx hardhat compile
 npx hardhat test
 npx hardhat run scripts/deployBank.js --network localhost
 
