@@ -9,6 +9,7 @@ const ModalSupply = ({ name, balance, image, apy, isCollateral, onClose }) => {
   const [dollerPrice, setDollerPrice] = useState(0);
 
   const [isInputValidate, setInputValidate] = useState(false);
+  const [isApproved, setApproved] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
   const setMax = () => {
@@ -19,17 +20,19 @@ const ModalSupply = ({ name, balance, image, apy, isCollateral, onClose }) => {
   const validateInput = (input) => {
     console.log(input);
     if (input) {
-      console.log("Not empty");
       var pattern = new RegExp(/^\d*\.?\d*$/);
       if (!pattern.test(input)) {
         setInputValue("");
         setInputValidate(false);
       } else {
-        setInputValue(input);
+        if (Number(input) > Number(balance)) {
+          setInputValue(balance);
+        } else {
+          setInputValue(input);
+        }
         setInputValidate(true);
       }
     } else {
-      console.log("empty");
       setInputValue("");
       setInputValidate(false);
     }
@@ -66,15 +69,15 @@ const ModalSupply = ({ name, balance, image, apy, isCollateral, onClose }) => {
           Amount
         </h1>
         <div className="border border-[#A5A8B6] border-opacity-20 p-2 rounded  flex flex-col">
-          <div className="flex flex-row justify-between  mb-1">
+          <div className="flex flex-row justify-between mb-1">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => validateInput(e.target.value)}
-              className="bg-transparent outline-none text-xl font-semibold w-1/2"
+              className="bg-transparent outline-none text-xl font-medium w-3/4"
               placeholder="0.00"
             />
-            <div className="font-semibold flex flex-row items-center justify-end w-1/2">
+            <div className="font-semibold flex flex-row items-center justify-end w-1/4">
               <Image
                 src={image}
                 width={22}
@@ -136,19 +139,39 @@ const ModalSupply = ({ name, balance, image, apy, isCollateral, onClose }) => {
         </p>
       </div>
 
-      <div className="">
+      <div className={!inputValue ? "block" : "hidden"}>
+        <button className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold">
+          Enter an amount
+        </button>
+      </div>
+
+      <div className={!inputValue ? "hidden" : "block"}>
         <button
           className={
-            isInputValidate
-              ? "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
-              : "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold"
+            isApproved
+              ? "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2"
+              : "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
           }
           onClick={() => {
-            if (!inputValue) return;
-            else supplyAssetsToPool(name, inputValue);
+            if (isInputValidate) setApproved(true);
           }}
         >
-          {isInputValidate ? `Supply ${name}` : "Enter an amount"}
+          {!isApproved ? "Aprrove to continue" : "Approved Confirmed !"}
+        </button>
+
+        <button
+          className={
+            isApproved
+              ? "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
+              : "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2"
+          }
+          onClick={() => {
+            if (!isApproved) return;
+            else supplyAssetsToPool(name, inputValue);
+            setApproved(false);
+          }}
+        >
+          Supply {name}
         </button>
       </div>
     </div>

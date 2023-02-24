@@ -80,7 +80,6 @@ const RowYourSupply = ({
           </div>
         </td>
       </tr>
-
       <ModalBorderLayout
         isVisible={showSupplyModal}
         onClose={() => setShowSupplyModal(false)}
@@ -94,7 +93,6 @@ const RowYourSupply = ({
           onClose={() => setShowSupplyModal(false)}
         />
       </ModalBorderLayout>
-
       <ModalBorderLayout
         isVisible={showWithdrawModal}
         onClose={() => setShowWihdrawModal(false)}

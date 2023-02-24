@@ -111,9 +111,6 @@ const ModalWithdraw = ({ name, balance, image, remainingSupply, onClose }) => {
       </div>
 
       <div className="">
-        <button className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2">
-          Approve to continue
-        </button>
         <button className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold">
           Withdraw {name}
         </button>

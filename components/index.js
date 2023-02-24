@@ -5,6 +5,7 @@ export { default as LendingPool } from "./LendingPool";
 export { default as DisconnectedTab } from "./DisconnectedTab";
 export { default as ConnectButton } from "./ConnectButton";
 export { default as ModalBorderLayout } from "./ModalBorderLayout";
+export { default as LoaderSkeleton } from "./LoaderSkeleton";
 
 // assets to supply
 export { default as SupplyAssets } from "./SupplyAssets";

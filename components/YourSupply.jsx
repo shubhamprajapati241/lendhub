@@ -1,5 +1,9 @@
 import React, { useContext } from "react";
-import { RowYourSupply, YourSupplyDetails } from "../components";
+import {
+  RowYourSupply,
+  YourSupplyDetails,
+  LoaderSkeleton,
+} from "../components";
 import lendContext from "../context/lendContext";
 
 const YourSupply = () => {
@@ -36,17 +40,21 @@ const YourSupply = () => {
           </thead>
 
           <tbody>
-            {supplyDetails.assets.map((token, index) => (
-              <RowYourSupply
-                key={index}
-                name={token.name}
-                balance={token.balance}
-                dollarPrice={token.dollarPrice}
-                image={token.image}
-                apy={token.apy}
-                isCollateral={token.isCollateral}
-              />
-            ))}
+            {supplyDetails.length > 0 ? (
+              supplyDetails.assets.map((token, index) => (
+                <RowYourSupply
+                  key={index}
+                  name={token.name}
+                  balance={token.balance}
+                  dollarPrice={token.dollarPrice}
+                  image={token.image}
+                  apy={token.apy}
+                  isCollateral={token.isCollateral}
+                />
+              ))
+            ) : (
+              <LoaderSkeleton />
+            )}
           </tbody>
         </table>
       </div>

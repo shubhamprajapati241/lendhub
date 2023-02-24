@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 
 import lendContext from "../context/lendContext";
-import { RowSupplyAssets } from "../components";
+import { LoaderSkeleton, RowSupplyAssets } from "../components";
 
 const SupplyAssets = () => {
   const { metamaskAssets } = useContext(lendContext);
@@ -34,16 +34,20 @@ const SupplyAssets = () => {
           </thead>
 
           <tbody>
-            {metamaskAssets.map((token, index) => (
-              <RowSupplyAssets
-                key={index}
-                name={token.name}
-                image={token.image}
-                apy={token.apy}
-                balance={token.balance}
-                isCollateral={token.isCollateral}
-              />
-            ))}
+            {metamaskAssets.length > 0 ? (
+              metamaskAssets.map((token, index) => (
+                <RowSupplyAssets
+                  key={index}
+                  name={token.name}
+                  image={token.image}
+                  apy={token.apy}
+                  balance={token.balance}
+                  isCollateral={token.isCollateral}
+                />
+              ))
+            ) : (
+              <LoaderSkeleton />
+            )}
           </tbody>
         </table>
       </div>

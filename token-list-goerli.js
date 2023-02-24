@@ -12,7 +12,7 @@ export const token = [
   {
     image: daiIcon,
     name: "DAI",
-    address: "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60",
+    address: "0xBa8DCeD3512925e52FE67b1b5329187589072A55",
     decimal: "18",
     apy: 3.18,
     isCollateral: false,
@@ -20,7 +20,7 @@ export const token = [
   {
     image: usdcIcon,
     name: "USDC",
-    address: "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C",
+    address: "0x65aFADD39029741B3b8f0756952C74678c9cEC93",
     decimal: "6",
     apy: 3.18,
     isCollateral: false,

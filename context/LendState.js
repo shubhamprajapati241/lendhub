@@ -8,7 +8,7 @@ const addresses = require("../token-list-goerli");
 import { ethIcon, usdcIcon, usdtIcon, daiIcon, wethIcon } from "../assets";
 
 // Importing Bank contract details
-import { BankContractAddress } from "../addresses";
+// import { BankContractAddress } from "../addresses";
 import BankContractABI from "../contractAbis/Bank.json";
 
 const LendState = (props) => {
@@ -58,59 +58,59 @@ const LendState = (props) => {
       const signer = provider.getSigner();
 
       if (account.length) {
-        let currentAccount = account[0];
+        let currentAddress = account[0];
         setMetamaskDetails({
           provider: provider,
           networkName: networkName,
           signer: signer,
-          currentAccount: currentAccount,
+          currentAccount: currentAddress,
         });
-        fetchUserAssets(provider, currentAccount);
+        fetchUserAssets(provider, currentAddress, networkName);
       } else {
         return failMessage;
       }
     } catch (e) {
-      console.log("error" + e);
+      reportError(error);
     }
   };
 
-  const fetchUserAssets = async (provider, account) => {
-    console.log("fetch user assets");
-    console.log(account);
-    const assets = await Promise.all(
-      addresses.token.map(async (token) => {
-        let tok;
-
-        if (token.address) {
-          // for localhost network -> token will be 0
-          if (metamaskDetails.networkName == "unknown") {
-            const tokenContract = new ethers.Contract(
-              token.address,
-              ERC20ABI,
-              provider
-            );
-            tok = await tokenContract.balanceOf(account);
-            tok = ethers.utils.formatUnits(tok, token.decimal);
+  const fetchUserAssets = async (provider, account, networkName) => {
+    try {
+      const assets = await Promise.all(
+        addresses.token.map(async (token) => {
+          let tok;
+          if (token.name != "ETH") {
+            // for localhost network -> token will be 0
+            if (networkName != "unknown") {
+              const tokenContract = new ethers.Contract(
+                token.address,
+                ERC20ABI,
+                provider
+              );
+              tok = await tokenContract.balanceOf(account);
+              tok = ethers.utils.formatUnits(tok, token.decimal);
+            } else {
+              tok = 0;
+            }
           } else {
-            tok = 0;
+            tok = await provider.getBalance(account);
+            tok = ethers.utils.formatEther(tok);
           }
-        } else {
-          tok = await provider.getBalance(account);
-          tok = ethers.utils.formatEther(tok);
-        }
-        let asset = {
-          image: token.image,
-          name: token.name,
-          apy: token.apy,
-          isCollateral: token.isCollateral,
-          balance: tok,
-        };
-        return asset;
-      })
-    );
-    setMetamaskAssets(assets);
-
-    fetchSupplyAssets();
+          let asset = {
+            image: token.image,
+            name: token.name,
+            apy: token.apy,
+            isCollateral: token.isCollateral,
+            balance: tok,
+          };
+          return asset;
+        })
+      );
+      setMetamaskAssets(assets);
+      fetchSupplyAssets();
+    } catch (error) {
+      reportError(error);
+    }
   };
 
   const fetchSupplyAssets = () => {
@@ -143,48 +143,77 @@ const LendState = (props) => {
   };
 
   const supplyAssetsToPool = async (name, amount) => {
-    console.log("supplyAssetsToPool starting....");
+    //   console.log("supplyAssetsToPool starting....");
+    //   console.log("supply name : " + name);
+    //   console.log("supply amount : " + amount);
+    //   //* connecting with contract
+    //   const bankContract = new ethers.Contract(
+    //     BankContractAddress,
+    //     BankContractABI,
+    //     metamaskDetails.signer
+    //   );
+    //   setContract({ bankContract: bankContract });
+    //   const price = ethers.utils.parseUnits(amount, "ether");
+    //   //* estimating gas price
+    //   const gasLimit = await bankContract.estimateGas.depositAsset(name, {
+    //     value: price,
+    //   });
+    //   let totalGas = (
+    //     await metamaskDetails.provider.getFeeData()
+    //   ).maxFeePerGas.mul(gasLimit);
+    //   totalGas = ethers.utils.formatUnits(totalGas, "ether");
+    //   console.log("Total GAS : " + totalGas);
+    //   // console.log(estimateGas);
+    //   // let gas = parseInt(Number(estimateGas._hex)).toString();
+    //   // const gas2 = ethers.utils.parseUnits(gas, "ether");
+    //   // console.log(gas2);
+    //   // //* Writing the contract
+    //   const transcation = await bankContract.depositAsset(name, {
+    //     value: price,
+    //   });
+    //   await transcation.wait();
+    //   console.log("Transaction done....");
+    //   // //* Reading the contract
+    //   // let contractBalance = await bankContract.getContactBalance();
+    //   // contractBalance = contractBalance.toString();
+    //   // console.log(contractBalance);
+  };
 
-    console.log("supply name : " + name);
-    console.log("supply amount : " + amount);
+  const testApprove = async () => {
+    const daiTokenAddress = "0xBa8DCeD3512925e52FE67b1b5329187589072A55";
+    const deFiDappAddress = "0xC8e7Ac007078BD3658A79218b28A8598BcBa97A6";
+    const amount = ethers.utils.parseEther("10000000");
 
-    //* connecting with contract
-    const bankContract = new ethers.Contract(
-      BankContractAddress,
-      BankContractABI,
-      metamaskDetails.signer
-    );
-    setContract({ bankContract: bankContract });
-    const price = ethers.utils.parseUnits(amount, "ether");
+    try {
+      //* Making approve functionality
+      const tokenContract = new ethers.Contract(
+        daiTokenAddress,
+        ERC20ABI,
+        metamaskDetails.provider
+      );
 
-    //* estimating gas price
-    const gasLimit = await bankContract.estimateGas.depositAsset(name, {
-      value: price,
-    });
+      const balanceUser = await tokenContract.balanceOf(
+        metamaskDetails.currentAccount
+      );
+      console.log("balanceUser : " + balanceUser);
 
-    let totalGas = (
-      await metamaskDetails.provider.getFeeData()
-    ).maxFeePerGas.mul(gasLimit);
+      const balanceSC = await tokenContract.balanceOf(deFiDappAddress);
+      console.log("balanceSC : " + balanceSC);
 
-    totalGas = ethers.utils.formatUnits(totalGas, "ether");
-    console.log("Total GAS : " + totalGas);
+      console.log(metamaskDetails.currentAccount);
 
-    // console.log(estimateGas);
-    // let gas = parseInt(Number(estimateGas._hex)).toString();
-    // const gas2 = ethers.utils.parseUnits(gas, "ether");
-    // console.log(gas2);
+      await tokenContract
+        .connect(metamaskDetails.signer)
+        .approve(deFiDappAddress, amount);
 
-    // //* Writing the contract
-    const transcation = await bankContract.depositAsset(name, {
-      value: price,
-    });
-    await transcation.wait();
-    console.log("Transaction done....");
+      console.log("Transaction done....");
+    } catch (error) {
+      reportError(error);
+    }
+  };
 
-    // //* Reading the contract
-    // let contractBalance = await bankContract.getContactBalance();
-    // contractBalance = contractBalance.toString();
-    // console.log(contractBalance);
+  const reportError = (error) => {
+    console.log(JSON.stringify(error), "red");
   };
 
   return (
@@ -195,6 +224,7 @@ const LendState = (props) => {
         metamaskAssets,
         supplyDetails,
         supplyAssetsToPool,
+        testApprove,
       }}
     >
       {props.children}

@@ -13,7 +13,7 @@ Application Requirements:
     ● He receives a specified amount of loan after successful deposit of collateral
     ● He makes periodic payments to the platform ,which in turn pay the amount to the lender similar to how banks work.
     ● After successful payment of the loan, the borrower gets back his collateral and the lender 
-      receives his investment amount with a certain interest.
+      receives his investment amount with a certain intersest.
 **/
 
 import "@openzeppelin/contracts/utils/Counters.sol";
