@@ -69,7 +69,7 @@ const LendState = (props) => {
       } else {
         return failMessage;
       }
-    } catch (e) {
+    } catch (error) {
       reportError(error);
     }
   };

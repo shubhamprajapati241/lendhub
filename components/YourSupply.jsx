@@ -23,24 +23,24 @@ const YourSupply = () => {
         <table className="item-center w-full border-col bg-transparent">
           <thead>
             <tr>
-              <th className="font-medium text-xs px-3 text-[#62677B] text-center align-middle whitespace-nowrap p-[6px] border-b-[1px] border-blueGrey-100 ">
+              <th className="font-medium text-[11px] md:text-xs  px-3 text-[#62677B] text-center align-middle whitespace-nowrap p-[6px] border-b-[1px] border-blueGrey-100 ">
                 Asset
               </th>
-              <th className="font-medium text-xs px-3 text-[#62677B] text-center align-middle whitespace-nowrap p-[6px] border-b-[1px] border-blueGrey-100 ">
+              <th className="font-medium text-[11px] md:text-xs  px-3 text-[#62677B] text-center align-middle whitespace-nowrap p-[6px] border-b-[1px] border-blueGrey-100 ">
                 Balance
               </th>
-              <th className="font-medium text-xs px-3 text-[#62677B] text-center align-middle whitespace-nowrap p-[6px] border-b-[1px] border-blueGrey-100 ">
+              <th className="font-medium text-[11px] md:text-xs  px-3 text-[#62677B] text-center align-middle whitespace-nowrap p-[6px] border-b-[1px] border-blueGrey-100 ">
                 APY
               </th>
-              <th className="font-medium text-xs px-3 text-[#62677B] text-center align-middle whitespace-nowrap p-[6px] border-b-[1px] border-blueGrey-100 ">
+              <th className="font-medium text-[11px] md:text-xs  px-3 text-[#62677B] text-center align-middle whitespace-nowrap p-[6px] border-b-[1px] border-blueGrey-100 ">
                 Collateral
               </th>
-              <th className="font-medium text-xs px-3 text-[#62677B] text-center align-middle whitespace-nowrap p-[6px] border-b-[1px] border-blueGrey-100 "></th>
+              <th className="font-medium text-[11px] md:text-xs  px-3 text-[#62677B] text-center align-middle whitespace-nowrap p-[6px] border-b-[1px] border-blueGrey-100 "></th>
             </tr>
           </thead>
 
           <tbody>
-            {supplyDetails.length > 0 ? (
+            {supplyDetails.assets.length > 0 ? (
               supplyDetails.assets.map((token, index) => (
                 <RowYourSupply
                   key={index}
