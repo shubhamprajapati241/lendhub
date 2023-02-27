@@ -9,16 +9,20 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 // import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./LendingConfig.sol";
 import "./AggregatorV3Interface.sol";
+import "./AddressToTokenMap.sol";
 
 contract LendingPoolV2 is ReentrancyGuard {
-    LendingConfig config;
+    LendingConfig lendingConfig;
+    AddressToTokenMap addressToTokenMap;
    
     using SafeMath for uint;
     //* 1. Declaring the variables
     address deployer;
     uint256 public INTEREST_RATE;
     uint256 public BORROW_RATE;
+     uint256 public constant DECIMALS = 18;
     uint256 public constant BORROW_THRESHOLD = 80;
+    uint256 public constant LIQUIDATION_THRESHOLD = 10;
     //* 2. Declaring the mapping
     // asset token => reserve qty
     mapping (address => uint) public reserves;
@@ -114,9 +118,27 @@ contract LendingPoolV2 is ReentrancyGuard {
 
     function lend(address _token, uint256 _amount) public payable {
         address lender = msg.sender;
+        bool _usageAsCollateralEnabled = (keccak256(abi.encodePacked(_token)) == keccak256(abi.encodePacked("ETH"))) ? true: false;
 
-        address ethAddress = config.getAssetByTokenSymbol("ETH").token;
+        string memory _symbol = addressToTokenMap.getAddress(_token);
+        
+        if(!lendingConfig.isTokenInAssets(_token)) {
+            lendingConfig.addAsset(
+                _token,
+                true,
+                _usageAsCollateralEnabled,
+                false, //_isfrozen
+                true, //_isActive
+                _symbol,
+                DECIMALS,
+                BORROW_THRESHOLD,
+                LIQUIDATION_THRESHOLD 
+            );
+        }
 
+        address ethAddress = lendingConfig.getAssetByTokenSymbol("ETH").token;
+
+         // transfer from the lender's wallet to DeFi app or SC 
         if(_token == ethAddress) {
             // Call for ETH : from lender's wallet to SC
             (bool success, ) = payable(address(this)).call{value : _amount}("");
@@ -208,7 +230,7 @@ contract LendingPoolV2 is ReentrancyGuard {
     }
 
     function getLenderETHBalanceUSD(address _lender) public view returns(int256) {
-        address token = config.getAssetByTokenSymbol("ETH").token;
+        address token = lendingConfig.getAssetByTokenSymbol("ETH").token;
         int256 tokenUSDBalance = int256(getLatestPrice(token)) * int256(lenderETHLendQty[_lender]);
         return tokenUSDBalance;
     }
@@ -245,7 +267,7 @@ contract LendingPoolV2 is ReentrancyGuard {
         }
 
         // Updating lenderETHLendQty
-        address ethAddress = config.getAssetByTokenSymbol("ETH").token;
+        address ethAddress = lendingConfig.getAssetByTokenSymbol("ETH").token;
         if(_token == ethAddress) {
             lenderETHLendQty[lender] -= _amount;
         }
