@@ -12,10 +12,8 @@ import "./AggregatorV3Interface.sol";
 import "./AddressToTokenMap.sol";
 
 contract LendingPoolV2 is ReentrancyGuard {
-    LendingConfig lendingConfig;
-    AddressToTokenMap addressToTokenMap;
-   
     using SafeMath for uint;
+
     //* 1. Declaring the variables
     address deployer;
     uint256 public INTEREST_RATE;
@@ -23,6 +21,10 @@ contract LendingPoolV2 is ReentrancyGuard {
      uint256 public constant DECIMALS = 18;
     uint256 public constant BORROW_THRESHOLD = 80;
     uint256 public constant LIQUIDATION_THRESHOLD = 10;
+
+    LendingConfig lendingConfig;
+    AddressToTokenMap addressToTokenMap;
+   
     //* 2. Declaring the mapping
     // asset token => reserve qty
     mapping (address => uint) public reserves;
@@ -68,14 +70,7 @@ contract LendingPoolV2 is ReentrancyGuard {
         uint256 apy;
     }
 
-
-    //* 4. Declaring modifiers
-    modifier onlyOwner(address _token) {
-        require(isLenderTokenOwner(_token), "Not token owner");
-        _;        
-    }
-
-    constructor(uint256 _interestRate, uint256 _borrowRate) {
+     constructor(uint256 _interestRate, uint256 _borrowRate) {
         deployer = msg.sender;
         // Use logic like REWARDS staking
         INTEREST_RATE  = _interestRate;
@@ -83,6 +78,23 @@ contract LendingPoolV2 is ReentrancyGuard {
         BORROW_RATE = _borrowRate;
     }
 
+    //* 4. Declaring modifiers
+    modifier onlyOwner(address _token) {
+        require(isLenderTokenOwner(_token), "Not token owner");
+        _;        
+    }
+
+    modifier onlyAmountGreaterThanZero(uint256 amount) {
+        require(amount > 0, "Amount must be greater than zero");
+        _;
+    }
+
+    modifier onlyTokenInReserve(address _token) {
+        require(isTokenInReserve(_token), "Token must be in reserve"); // checking token is in reserve or NOT
+        _;
+    }
+
+   
 
     // Aggregator functionality from chainlink
     function getLatestPrice(address _tokenAddress) public view returns (int) {
@@ -113,6 +125,16 @@ contract LendingPoolV2 is ReentrancyGuard {
     //     return false;
     // }
 
+    function isTokenInReserve(address _token) public view returns(bool) {
+        uint reservesAssetsLength = reverseAssets.length;
+        for(uint i=0; i < reservesAssetsLength; i++) {
+            if(reverseAssets[i] == _token) {
+                return true;
+            }
+        }
+        return false;
+    } 
+
    /************* Lender functions ************************/
     receive() external payable {}
 
@@ -122,7 +144,7 @@ contract LendingPoolV2 is ReentrancyGuard {
 
         string memory _symbol = addressToTokenMap.getAddress(_token);
         
-        if(!lendingConfig.isTokenInAssets(_token)) {
+        // if(!lendingConfig.isTokenInAssets(_token)) {
             lendingConfig.addAsset(
                 _token,
                 true,
@@ -134,7 +156,7 @@ contract LendingPoolV2 is ReentrancyGuard {
                 BORROW_THRESHOLD,
                 LIQUIDATION_THRESHOLD 
             );
-        }
+        // }
 
         address ethAddress = lendingConfig.getAssetByTokenSymbol("ETH").token;
 
@@ -250,7 +272,7 @@ contract LendingPoolV2 is ReentrancyGuard {
         // check if the owner has reserve
         require(getLenderAssetBal(lender, _token) >= _amount,"Not enough balance to withdraw");
         // we update the earned rewwards before the lender can withdraw
-    //updateEarned(lender, _token); //100 + 0.00001 eth , 2 // TODO: implement 
+        //updateEarned(lender, _token); //100 + 0.00001 eth , 2 // TODO: implement 
         // Reserve must have enough withdrawl qty 
         require (reserves[_token] >= _amount, "Not enough qty in reserve pool to withdraw");
         // Remove from reserve
@@ -281,7 +303,7 @@ contract LendingPoolV2 is ReentrancyGuard {
     }
 
     /********************* BORROW FUNCTIONS ******************/
-     function Borrow(address _token, uint _amount) public returns(bool) {
+     function Borrow(address _token, uint _amount) public nonReentrant onlyAmountGreaterThanZero(_amount) onlyTokenInReserve(_token) returns(bool) {
         /* TODO 
             1. Checking lenderETHAssets >= _amount 
             2. Checking reserve[_token] >= _amount & Updating Reserves
@@ -290,11 +312,12 @@ contract LendingPoolV2 is ReentrancyGuard {
             5. Updating lenderBalanceQty
             6. Token Transfer from SC to User : Add reentrancy
         */
-        
+
         address borrower = msg.sender;
 
         // 1. Checking lenderETHAssets >= _amount 
         uint lenderETHAmount = uint256(getLenderETHBalanceUSD(borrower));
+        
         require(lenderETHAmount >= _amount, "Not enough balance to borrow");
 
         // 2. Checking reserve[_token] >= _amount
