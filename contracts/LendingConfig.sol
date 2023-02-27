@@ -2,7 +2,7 @@
 pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
+import "./LendingPoolAddressProvider.sol";
 // Should we make it so that we can only LendingPoolV2 can add the assets when someone lends?
 // address(LendingPoolV2)
 
@@ -17,11 +17,24 @@ contract LendingConfig {
     event UpdateAssetStatus(address token, AssetStatus isActive);
     event UpdateAssetFrozen(address token, Freeze isfrozen);
 
+    LendingPoolAddressProvider addressesProvider;
+
     modifier onlyOwner() {
         require(owner == msg.sender, "Not Owner, cannot perfrm OP");
         _;
     }
     
+    /**
+    * @dev only lending pools configurator can use functions affected by this modifier
+    **/
+    modifier onlyLendingPool {
+        require(
+            addressesProvider.getLendingPool() == msg.sender,
+            "The caller must be a lending pool configurator contract"
+        );
+        _;
+    }
+
     constructor(){
         owner = msg.sender;
     }
@@ -38,7 +51,7 @@ contract LendingConfig {
         bool isfrozen;
         bool isActive;
     }
-    Asset[] private assets;
+    Asset[] internal assets;
 
     function addAsset(
         address _token, 
@@ -50,7 +63,7 @@ contract LendingConfig {
         uint256 _decimals,
         uint256 _borrowThreshold,
         uint256 _liquidationThreshold
-    ) external onlyOwner returns (bool){
+    ) external onlyOwner onlyLendingPool returns (bool){ //TODO: Remove onlyOwner later
 
         assets.push(
             Asset({
@@ -71,6 +84,15 @@ contract LendingConfig {
         return true;
     }
 
+    function isTokenInAssets(address _token) internal view returns(bool){
+        uint256 assetCount = assets.length;
+        for (uint i = 0; i < assetCount; i++) {
+            if (assets[i].token == _token){
+                return true;
+            }
+        }
+        return false;
+    }
     function makeAssetActiveInactive(address _token, AssetStatus _choice) external onlyOwner returns(bool){
         uint256 assetsLen = assets.length;
         for (uint i = 0; i < assetsLen; i++) {
