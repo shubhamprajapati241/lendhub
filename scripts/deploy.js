@@ -15,6 +15,12 @@ async function main() {
   await addressToTokenMap.deployed();
   console.log("Address of AddressToTokenMap : ", addressToTokenMap.address);
 
+  /********************** Deploy LendingConfig *************************/
+  const LendingConfig = await ethers.getContractFactory("LendingConfig");
+  const lendingConfig = await LendingConfig.deploy();
+  await lendingConfig.deployed();
+  console.log("Address of LendingConfig : ", lendingConfig.address);
+
   /********************** Deploy LendingPoolV2 *************************/
   const LendingPoolV2 = await ethers.getContractFactory("LendingPoolV2");
   const lendingPoolV2 = await LendingPoolV2.deploy(3, 4);
