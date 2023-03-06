@@ -63,7 +63,7 @@ contract LendingConfig {
         uint256 _decimals,
         uint256 _borrowThreshold,
         uint256 _liquidationThreshold
-    ) external onlyOwner onlyLendingPool returns (bool){ //TODO: Remove onlyOwner later
+    ) external onlyLendingPool returns (bool){ //TODO: Remove onlyOwner later
 
         assets.push(
             Asset({

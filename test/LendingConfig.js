@@ -46,11 +46,11 @@ describe("Test Lending Config", async () => {
       .connect(lendingPoolAddressProvider.address)
       .setLendingPool(LENDING_POOL, lendingPool.address);
 
-    // expect(
-    //   await lendingPoolAddressProvider
-    //     .connect(lendingPoolAddressProvider.address)
-    //     .getLendingPool()
-    // ).to.equal(lendingPool.address);
+    expect(
+      await lendingPoolAddressProvider
+        .connect(lendingPoolAddressProvider.address)
+        .getLendingPool()
+    ).to.equal(lendingPool.address);
 
     await expect(
       lendingConfig

@@ -98,6 +98,14 @@ contract LendingPoolV2 is ReentrancyGuard {
         _;
     }
 
+    // To initially transfer some ETH 
+    function transfer() public payable {
+    }
+
+    function getContractBalance() public view returns(uint){
+        return address(this).balance;
+    } 
+
 
     function isLenderTokenOwner(address _token) internal view returns(bool) {
         address lender = msg.sender; 
