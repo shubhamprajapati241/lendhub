@@ -156,17 +156,18 @@ contract LendingPoolV2 is ReentrancyGuard {
     function lend(address _token, uint256 _amount) public payable {
         address lender = msg.sender;
 
-        bool _usageAsCollateralEnabled = (keccak256(abi.encodePacked(_token)) == keccak256(abi.encodePacked("ETH"))) ? true: false;
-        // Borrowing disabled for the ETH right
-        bool _usageAsBorrowEnabled = (keccak256(abi.encodePacked(_token)) == keccak256(abi.encodePacked("ETH"))) ? false: true;
+        // bool _usageAsCollateralEnabled = (keccak256(abi.encodePacked(_token)) == keccak256(abi.encodePacked("ETH"))) ? true: false;
+        // // Borrowing disabled for the ETH right
+        // bool _usageAsBorrowEnabled = (keccak256(abi.encodePacked(_token)) == keccak256(abi.encodePacked("ETH"))) ? false: true;
         
         string memory _symbol = addressToTokenMap.getAddress(_token);
         
         if(!lendingConfig.isTokenInAssets(_token)) {
             lendingConfig.addAsset(
                 _token,
-                _usageAsBorrowEnabled, 
-                _usageAsCollateralEnabled,
+                true, false,
+                // _usageAsBorrowEnabled, 
+                // _usageAsCollateralEnabled,
                 false, //_isfrozen
                 true, //_isActive
                 _symbol,

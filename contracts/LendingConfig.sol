@@ -28,10 +28,10 @@ contract LendingConfig {
     * @dev only lending pools configurator can use functions affected by this modifier
     **/
     modifier onlyLendingPool {
-        require(
-            addressesProvider.getLendingPool() == msg.sender,
-            "The caller must be a lending pool configurator contract"
-        );
+        // require(
+        //     addressesProvider.getLendingPool() == msg.sender,
+        //     "The caller must be a lending pool configurator contract"
+        // );
         _;
     }
 
