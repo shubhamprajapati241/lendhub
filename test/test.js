@@ -46,7 +46,7 @@ describe("LendHub Tests", async () => {
   let deployerAddress;
   let otherAddress;
 
-  before(async () => {
+  beforeEach(async () => {
     /******** Deploy  AddressStorage *********/
     const AddressStorage = await ethers.getContractFactory("AddressStorage");
     addressStorage = await AddressStorage.deploy();
@@ -82,16 +82,16 @@ describe("LendHub Tests", async () => {
     otherAddress = accounts[2];
 
     /******** Transfer inital ETH ********/
-    const lendingPoolContractBalanceBefore =
-      await lendingPool.getContractBalance();
-    console.log(lendingPoolContractBalanceBefore);
+    // const lendingPoolContractBalanceBefore =
+    //   await lendingPool.getContractBalance();
+    // console.log(lendingPoolContractBalanceBefore);
     // transfering initial ETH to the LendingPool contract
     const valueOption = { value: numberToEthers(10) };
     await lendingPool.connect(deployerAddress).transfer(valueOption);
 
-    const lendingPoolContractBalanceAfter =
-      await lendingPool.getContractBalance();
-    console.log(lendingPoolContractBalanceAfter);
+    // const lendingPoolContractBalanceAfter =
+    //   await lendingPool.getContractBalance();
+    // console.log(lendingPoolContractBalanceAfter);
   });
 
   // describe("AddressStorage Tests", async () => {
@@ -103,7 +103,7 @@ describe("LendHub Tests", async () => {
   // });
 
   describe("AddressToTokenMap Tests", async () => {
-    before(async () => {
+    beforeEach(async () => {
       await addressToTokenMap._setAddress(GOERLI_ETH_ADDRESS, "ETH");
       await addressToTokenMap._setAddress(GOERLI_DAI_ADDRESS, "DAI");
       await addressToTokenMap._setAddress(GOERLI_USDC_ADDRESS, "USDC");
@@ -134,7 +134,7 @@ describe("LendHub Tests", async () => {
     });
 
     describe("LendingConfig Tests", async () => {
-      before(async () => {
+      beforeEach(async () => {
         await lendingPoolAddressProvider
           .connect(deployerAddress)
           .setLendingPool(lendingPool.address);
@@ -178,9 +178,9 @@ describe("LendHub Tests", async () => {
           );
 
         //after transaction balance
-        const lendingPoolContractBalanceAfter =
-          await lendingPool.getContractBalance();
-        console.log(lendingPoolContractBalanceAfter);
+        // const lendingPoolContractBalanceAfter =
+        //   await lendingPool.getContractBalance();
+        // console.log(lendingPoolContractBalanceAfter);
       });
 
       it("DAI Token should be in assets", async () => {
@@ -241,7 +241,7 @@ describe("LendHub Tests", async () => {
 
     /********** LendingPool **************/
     describe("LendingPool Tests", async () => {
-      before(async () => {
+      beforeEach(async () => {
         await lendingPoolAddressProvider
           .connect(deployerAddress)
           .setLendingPool(lendingPool.address);

@@ -23,7 +23,7 @@ describe("Test Address Storage", async () => {
     await addressStorage._setAddress("DAI", GOERLI_DAI_ADDRESS);
     // const address = await addressStorage.getAddress("DAI");
     // console.log("DAI address" + address);
-    await expect(addressStorage.getAddress("DAI")).to.equal(
+    expect(addressStorage.getAddress("DAI")).to.equal(
       "0xdc31ee1784292379fbb2964b3b9c4124d8f89c60"
     );
   });
