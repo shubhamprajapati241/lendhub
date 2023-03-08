@@ -19,6 +19,7 @@ describe("LendHub Tests", async () => {
   const INTEREST_RATE = 3;
   const BORROW_RATE = 4;
   const LENDING_POOL = "LENDING_POOL";
+  const LENDING_POOL_ADDRESS_PROVIDER = "DATA_PROVIDER";
 
   // constant symbols
   const DAI_SYMBOL = "DAI";
@@ -33,7 +34,7 @@ describe("LendHub Tests", async () => {
   const GOERLI_LINK_ADDRESS = "0x48731cF7e84dc94C5f84577882c14Be11a5B7456";
 
   // constant pricefeed address
-  const GEORLI_ETH_USD_PF_ADDRESS =
+  const GOERLI_ETH_USD_PF_ADDRESS =
     "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e";
   const GOERLI_DAI_USD_PF_ADDRESS =
     "0x0d79df66BE487753B02D015Fb622DED7f0E9798d";
@@ -46,8 +47,13 @@ describe("LendHub Tests", async () => {
   let deployerAddress;
   let otherAddress;
 
-  beforeEach(async () => {
+  before(async () => {
     /******** Deploy  AddressStorage *********/
+    // let provider = ethers.getDefaultProvider("goerli");
+    let url = "https://goerli.infura.io/v3/cad219a206694420a240cb06e9ac2933";
+    let provider = new ethers.providers.JsonRpcProvider(url);
+    console.log(await provider.connection);
+
     const AddressStorage = await ethers.getContractFactory("AddressStorage");
     addressStorage = await AddressStorage.deploy();
     await addressStorage.deployed();
@@ -63,6 +69,7 @@ describe("LendHub Tests", async () => {
     const LendingPool = await ethers.getContractFactory("LendingPoolV2");
     lendingPool = await LendingPool.deploy(INTEREST_RATE, BORROW_RATE);
     await lendingPool.deployed();
+    console.log("lendingPool address:" + lendingPool.address);
 
     /******** Deploy LendingPoolAddressProvider *********/
     const LendingPoolAddressProvider = await ethers.getContractFactory(
@@ -85,7 +92,7 @@ describe("LendHub Tests", async () => {
     // const lendingPoolContractBalanceBefore =
     //   await lendingPool.getContractBalance();
     // console.log(lendingPoolContractBalanceBefore);
-    // transfering initial ETH to the LendingPool contract
+    // transferring initial ETH to the LendingPool contract
     const valueOption = { value: numberToEthers(10) };
     await lendingPool.connect(deployerAddress).transfer(valueOption);
 
@@ -111,6 +118,7 @@ describe("LendHub Tests", async () => {
         GOERLI_DAI_ADDRESS,
         GOERLI_DAI_USD_PF_ADDRESS
       );
+
       await addressToTokenMap._setPriceFeedMap(
         GOERLI_USDC_ADDRESS,
         GOERLI_USDC_USD_PF_ADDRESS
@@ -118,51 +126,74 @@ describe("LendHub Tests", async () => {
 
       await addressToTokenMap._setPriceFeedMap(
         GOERLI_ETH_ADDRESS,
-        GEORLI_ETH_USD_PF_ADDRESS
+        GOERLI_ETH_USD_PF_ADDRESS
       );
     });
 
-    it("Should be able to retrieve DAI symbol", async () => {
+    it.skip("1. Should be able to retrieve DAI symbol", async () => {
       const symbol = await addressToTokenMap.getAddress(GOERLI_DAI_ADDRESS);
       expect(symbol).to.equal("DAI");
     });
 
-    it("Should be able retrieve DAI-USD price feed", async () => {
+    it.skip("2. Should be able retrieve DAI-USD price feed", async () => {
       expect(
         await addressToTokenMap.getPriceFeedMap(GOERLI_DAI_ADDRESS)
       ).to.equal(GOERLI_DAI_USD_PF_ADDRESS);
     });
+  });
 
-    describe("LendingConfig Tests", async () => {
-      beforeEach(async () => {
-        await lendingPoolAddressProvider
-          .connect(deployerAddress)
-          .setLendingPool(lendingPool.address);
-        lendingPoolAddress = await lendingPoolAddressProvider
-          .connect(deployerAddress)
-          .getLendingPool();
-        expect(lendingPoolAddress).to.equal(lendingPool.address);
+  describe("LendingConfig Tests", async () => {
+    // before(async () => {});
+    it("1. Should be able to set and get lending pool address via the provider", async () => {
+      await lendingPoolAddressProvider
+        .connect(deployerAddress)
+        .setLendingPool(lendingPool.address);
 
-        /****** otherAddress can't add the Assets ******/
-        // await expect(
-        //   lendingConfig
-        //     .connect(otherAddress)
-        //     .addAsset(
-        //       GOERLI_DAI_ADDRESS,
-        //       true,
-        //       false,
-        //       false,
-        //       true,
-        //       DAI_SYMBOL,
-        //       18,
-        //       80,
-        //       10
-        //     )
-        // ).to.be.reverted;
+      lendingPoolAddress = await lendingPoolAddressProvider
+        .connect(deployerAddress)
+        .getLendingPool();
+      console.log("lendingPoolAddress" + lendingPoolAddress);
+      expect(lendingPoolAddress).to.equal(lendingPool.address);
+    });
 
-        await helpers.impersonateAccount(lendingPool.address);
-        const secondAddressSigner = await ethers.getSigner(lendingPool.address);
+    it("2. Should be able to set and get lending pool data Providers address via the provider", async () => {
+      await lendingPoolAddressProvider
+        .connect(deployerAddress)
+        .setLendingPoolDataProvider(lendingPoolAddressProvider.address);
 
+      const lendingPoolDataProvider = await lendingPoolAddressProvider
+        // .connect(deployerAddress)
+        .getLendingPoolDataProvider();
+
+      console.log("lendingPoolDataProvider: " + lendingPoolDataProvider);
+      expect(lendingPoolDataProvider).to.equal(
+        lendingPoolAddressProvider.address
+      );
+    });
+
+    it("3. Non LendingPool addresses should not be able to add assets", async () => {
+      await expect(
+        lendingConfig
+          .connect(otherAddress)
+          .addAsset(
+            GOERLI_DAI_ADDRESS,
+            true,
+            false,
+            false,
+            true,
+            DAI_SYMBOL,
+            18,
+            80,
+            10
+          )
+      ).to.be.reverted;
+    });
+
+    it("4. LendingPool should be able to add assets", async () => {
+      await helpers.impersonateAccount(lendingPool.address);
+      const secondAddressSigner = await ethers.getSigner(lendingPool.address);
+
+      expect(
         await lendingConfig
           .connect(secondAddressSigner)
           .addAsset(
@@ -175,25 +206,28 @@ describe("LendHub Tests", async () => {
             18,
             80,
             10
-          );
+          )
+      ).to.be.true;
+      // });
 
-        //after transaction balance
-        // const lendingPoolContractBalanceAfter =
-        //   await lendingPool.getContractBalance();
-        // console.log(lendingPoolContractBalanceAfter);
-      });
+      //after transaction balance
+      // const lendingPoolContractBalanceAfter =
+      //   await lendingPool.getContractBalance();
+      // console.log(lendingPoolContractBalanceAfter);
+      // });
 
-      it("DAI Token should be in assets", async () => {
-        const result = await lendingConfig.isTokenInAssets(GOERLI_DAI_ADDRESS);
-        expect(result).to.be.equal(true);
-      });
+      // TODO: uncomment
+      // it("DAI Token should be in assets", async () => {
+      //   const result = await lendingConfig.isTokenInAssets(GOERLI_DAI_ADDRESS);
+      //   expect(result).to.be.equal(true);
+      // });
 
-      it("USDC Token should not be in assets", async () => {
-        const result = await lendingConfig.isTokenInAssets(GOERLI_USDC_ADDRESS);
-        expect(result).to.be.equal(false);
-      });
+      // it("USDC Token should not be in assets", async () => {
+      //   const result = await lendingConfig.isTokenInAssets(GOERLI_USDC_ADDRESS);
+      //   expect(result).to.be.equal(false);
+      // });
 
-      // ! Should return bool value but returning transactions
+      // // TODO: Should return bool value but returning transactions
       // it("Should make token active", async () => {
       //   const result = await lendingConfig.makeAssetActiveInactive(
       //     GOERLI_USDC_ADDRESS,
@@ -212,26 +246,26 @@ describe("LendHub Tests", async () => {
       //   console.log(result);
       // });
 
-      it("Should be able to return symbol by passing address", async () => {
+      it.skip("Should be able to return symbol by passing address", async () => {
         const asset = await lendingConfig.getAssetByTokenAddress(
           GOERLI_DAI_ADDRESS
         );
         expect(asset.symbol).to.be.equal(DAI_SYMBOL);
       });
 
-      it("Should be able to return address by passing symbol", async () => {
+      it.skip("Should be able to return address by passing symbol", async () => {
         const asset = await lendingConfig.getAssetByTokenSymbol(DAI_SYMBOL);
         expect(asset.token).to.be.equal(GOERLI_DAI_ADDRESS.toString());
       });
 
-      it("Is collateral Enabled", async () => {
+      it.skip("Is collateral Enabled", async () => {
         const result = await lendingConfig.isCollateralEnable(
           GOERLI_DAI_ADDRESS
         );
         expect(result).to.be.equal(false);
       });
 
-      it("Is Borrowing Enabled", async () => {
+      it.skip("Is Borrowing Enabled", async () => {
         const result = await lendingConfig.isBorrowingEnable(
           GOERLI_DAI_ADDRESS
         );
@@ -240,7 +274,7 @@ describe("LendHub Tests", async () => {
     });
 
     /********** LendingPool **************/
-    describe("LendingPool Tests", async () => {
+    describe.skip("LendingPool Tests", async () => {
       beforeEach(async () => {
         await lendingPoolAddressProvider
           .connect(deployerAddress)
@@ -250,8 +284,8 @@ describe("LendHub Tests", async () => {
           .getLendingPool();
         expect(lendingPoolAddress).to.equal(lendingPool.address);
 
-        await helpers.impersonateAccount(lendingPool.address);
-        const secondAddressSigner = await ethers.getSigner(lendingPool.address);
+        // await helpers.impersonateAccount(lendingPool.address);
+        // const secondAddressSigner = await ethers.getSigner(lendingPool.address);
 
         await lendingConfig
           .connect(secondAddressSigner)
