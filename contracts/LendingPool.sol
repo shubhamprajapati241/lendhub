@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.6;
 
-// import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-// import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "./LendingConfig.sol";
+
 import "./AggregatorV3Interface.sol";
-import "./AddressToTokenMap.sol";
-contract LendingPoolV2 is ReentrancyGuard {
+
+contract LendingPool is ReentrancyGuard {
     using SafeMath for uint;
 
     //* 1. Declaring the variables
@@ -24,9 +22,6 @@ contract LendingPoolV2 is ReentrancyGuard {
     uint32 public constant BORROW_DURATION_60 = 60 days;
     uint32 public constant BORROW_DURATION_90 = 90 days;
 
-    LendingConfig lendingConfig;
-    AddressToTokenMap addressToTokenMap;
-   
     //* 2. Declaring the mapping
     // asset token => reserve qty
     mapping (address => uint) public reserves;
@@ -78,6 +73,11 @@ contract LendingPoolV2 is ReentrancyGuard {
     }
 
     //* 4. Declare modifiers
+
+    modifier onlyOwner {
+        require(msg.sender == deployer, "Not owner");
+        _; 
+    }
     modifier onlyLender(address _token) {
         require(isLenderTokenOwner(_token), "Not token owner");
         _;        
@@ -106,8 +106,8 @@ contract LendingPoolV2 is ReentrancyGuard {
         return address(this).balance;
     } 
 
-
-    function isLenderTokenOwner(address _token) internal view returns(bool) {
+    // TODO : make internal
+    function isLenderTokenOwner(address _token) public view returns(bool) {
         address lender = msg.sender; 
         uint256 lenderAssetCount = lenderAssets[lender].length;
         for (uint i = 0; i < lenderAssetCount; i++) {
@@ -156,18 +156,18 @@ contract LendingPoolV2 is ReentrancyGuard {
     function lend(address _token, uint256 _amount) public payable {
         address lender = msg.sender;
 
-        // bool _usageAsCollateralEnabled = (keccak256(abi.encodePacked(_token)) == keccak256(abi.encodePacked("ETH"))) ? true: false;
-        // // Borrowing disabled for the ETH right
-        // bool _usageAsBorrowEnabled = (keccak256(abi.encodePacked(_token)) == keccak256(abi.encodePacked("ETH"))) ? false: true;
+        bool _usageAsCollateralEnabled = (keccak256(abi.encodePacked(_token)) == keccak256(abi.encodePacked("ETH"))) ? true: false;
+
+        // Borrowing disabled for the ETH
+        bool _usageAsBorrowEnabled = (keccak256(abi.encodePacked(_token)) == keccak256(abi.encodePacked("ETH"))) ? false: true;
         
-        string memory _symbol = addressToTokenMap.getAddress(_token);
+        string memory _symbol = getAddress(_token);
         
-        if(!lendingConfig.isTokenInAssets(_token)) {
-            lendingConfig.addAsset(
+        if(!isTokenInAssets(_token)) {
+            addAsset(
                 _token,
-                true, false,
-                // _usageAsBorrowEnabled, 
-                // _usageAsCollateralEnabled,
+                _usageAsBorrowEnabled, 
+                _usageAsCollateralEnabled,
                 false, //_isfrozen
                 true, //_isActive
                 _symbol,
@@ -177,17 +177,14 @@ contract LendingPoolV2 is ReentrancyGuard {
             );
         }
 
-        address ethAddress = lendingConfig.getAssetByTokenSymbol("ETH").token;
-
-        // transfer from the lender's wallet to DeFi app or SC 
-        if(_token == ethAddress) {
-            // // Call for ETH : from lender's wallet to SC
-            // (bool success, ) = payable(address(this)).call{value : _amount}("");
+        if(keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked("ETH"))) {
+            // (bool success, ) = address(this).call{value : _amount}("");
             // require(success, "Deposit failed");
 
             // * Borrow is against ETH Only => Balance of lentAssets is display only
             lenderETHBalance[lender] += _amount;
         }else {
+
             // //transfer token from the lender's wallet to DeFi app or SC 
             // IERC20(_token).transferFrom(lender,address(this),_amount);
         }
@@ -201,14 +198,9 @@ contract LendingPoolV2 is ReentrancyGuard {
         // Add to lenders assets with amount - Add to userAssets struct
         // can use the mapping instead of loop over struct array
         uint lenderAssetLength = lenderAssets[lender].length;
-        for (uint i = 0; i < lenderAssetLength; i++) {
-            if(lenderAssets[lender][i].token == _token) {
-                // amount += lenderAssets[lender][i].lentQty;
-                lenderAssets[lender][i].lentApy = INTEREST_RATE;
-                lenderAssets[lender][i].lentQty += _amount;
-                lenderAssets[lender][i].lendStartTimeStamp = block.timestamp;
-            }else {
-                UserAsset memory userAsset = UserAsset({
+
+        if(lenderAssetLength == 0 ) {
+             UserAsset memory userAsset = UserAsset({
                     user: lender,
                     token: _token,
                     lentQty: _amount,
@@ -222,11 +214,36 @@ contract LendingPoolV2 is ReentrancyGuard {
                 });
                 // add to lender asset list
                 lenderAssets[lender].push(userAsset);
+        }else {
+              for (uint i = 0; i < lenderAssetLength; i++) {
+                if(lenderAssets[lender][i].token == _token) {
+                    // amount += lenderAssets[lender][i].lentQty;
+                    lenderAssets[lender][i].lentApy = INTEREST_RATE;
+                    lenderAssets[lender][i].lentQty += _amount;
+                    lenderAssets[lender][i].lendStartTimeStamp = block.timestamp;
+                }else {
+                    UserAsset memory userAsset = UserAsset({
+                        user: lender,
+                        token: _token,
+                        lentQty: _amount,
+                        borrowQty: 0,
+                        lentApy: INTEREST_RATE,
+                        borrowApy: 0,
+                        lendStartTimeStamp: block.timestamp,
+                        borrowStartTimeStamp:0,
+                        borrowEndTimeStamp : 0,
+                        maturityPeriod : 0
+                    });
+                    // add to lender asset list
+                    lenderAssets[lender].push(userAsset);
 
-                // Push to the struct array
-                // userAssets.push(userAsset);                
+                    // Push to the struct array
+                    // userAssets.push(userAsset);                
+                }
             }
         }
+      
+
 
         emit Lend(lender, _amount, reserves[_token], lenderETHBalance[lender]);
 
@@ -242,6 +259,11 @@ contract LendingPoolV2 is ReentrancyGuard {
         // });
         // add to lender asset list
         // lenderAssets[lender].push(userAsset);
+    }
+    
+    function getLenderETH() public view returns(uint) {
+        uint amount = lenderETHBalance[msg.sender];
+        return amount;
     }
 
 
@@ -268,7 +290,7 @@ contract LendingPoolV2 is ReentrancyGuard {
         }
 
         // Updating lenderETHBalance
-        address ethAddress = lendingConfig.getAssetByTokenSymbol("ETH").token;
+        address ethAddress = getAssetByTokenSymbol("ETH").token;
         if(_token == ethAddress) {
             lenderETHBalance[lender] -= _amount;
         }
@@ -308,7 +330,7 @@ contract LendingPoolV2 is ReentrancyGuard {
         uint count = 0;
         for(uint i = 0 ; i< length; i++) {
             address token = reserveAssets[i];
-            if(lendingConfig.isCollateralEnable(token)) {
+            if(isCollateralEnable(token)) {
                 count = count + 1;
             }
         }
@@ -318,7 +340,7 @@ contract LendingPoolV2 is ReentrancyGuard {
         uint borrowAssetsCount = 0;
         for(uint i = 0; i < length; i++) {
             address token = reserveAssets[i];
-            if(lendingConfig.isBorrowingEnable(token)) {
+            if(isBorrowingEnable(token)) {
                 // Get Token total amount from reserve
                 uint reserveAmountInUSD = getAmountInUSD(token, reserves[token]);
                 //  4. Check reserve qty > borrow qty 
@@ -424,52 +446,52 @@ contract LendingPoolV2 is ReentrancyGuard {
         return true;
     } 
 
-    function repay(address _token, uint256 _amount) public onlyBorrower(msg.sender) onlyAmountGreaterThanZero(_amount) {
-        /* TODO
+    // function repay(address _token, uint256 _amount) public onlyBorrower(msg.sender) onlyAmountGreaterThanZero(_amount) {
+    //     /* TODO
 
-        1. Transfer token from User to SC
-        2. Update Reserve
-        3. Update BorowerETHBalanceAmount
-        4. Update BorrowAssets
-        */
-        address borrower = msg.sender;
+    //     1. Transfer token from User to SC
+    //     2. Update Reserve
+    //     3. Update BorowerETHBalanceAmount
+    //     4. Update BorrowAssets
+    //     */
+    //     address borrower = msg.sender;
 
-        // checking require conditions
-        require(isTokenBorrowed(borrower, _token), "Token haven't borrowed yet");
+    //     // checking require conditions
+    //     require(isTokenBorrowed(borrower, _token), "Token haven't borrowed yet");
 
-        uint totalBorrowAmount = getBorrowerAssetTotalBal(borrower, _token);
-        require(_amount <= totalBorrowAmount, "Repay amount should be less than borrowed amount");
+    //     uint totalBorrowAmount = getBorrowerAssetTotalBal(borrower, _token);
+    //     require(_amount <= totalBorrowAmount, "Repay amount should be less than borrowed amount");
 
-        // 1. Transfer token from User to SC
-        bool success = IERC20(_token).transferFrom(borrower, address(this), _amount);
-        require(success, "Transfer to user's wallet not succcessful");
+    //     // 1. Transfer token from User to SC
+    //     bool success = IERC20(_token).transferFrom(borrower, address(this), _amount);
+    //     require(success, "Transfer to user's wallet not succcessful");
 
-        // 2. Update Token in Reserve
-        reserves[_token] += _amount;
+    //     // 2. Update Token in Reserve
+    //     reserves[_token] += _amount;
 
-        // 3. Update BorowerETHBalanceAmount
-        uint amountToUSD = getAmountInUSD(_token, _amount); 
-        // TODO: : ASK to SASI : Convert USD TO ETH 
-        uint amountToETH = amountToUSD;
-        lenderETHBalance[borrower] += amountToETH;
+    //     // 3. Update BorowerETHBalanceAmount
+    //     uint amountToUSD = getAmountInUSD(_token, _amount); 
+    //     // TODO: : ASK to SASI : Convert USD TO ETH 
+    //     uint amountToETH = amountToUSD;
+    //     lenderETHBalance[borrower] += amountToETH;
 
-        // 4. Update BorrowAssets 
-        // TODO : ASK to SASI : When are dealing with BORROW_DURATION so how we can update any borrowAssetsTimestamp => Need borrowAssets ID
-        uint assetsLen = borrowerAssets[borrower].length;
-        for (uint i = 0; i < assetsLen; i++) {
-            if(borrowerAssets[borrower][i].token == _token) {
-                // subtract the quantity
-                borrowerAssets[borrower][i].borrowQty -= _amount;
-                borrowerAssets[borrower][i].lendStartTimeStamp = block.timestamp;
-            }
+    //     // 4. Update BorrowAssets 
+    //     // TODO : ASK to SASI : When are dealing with BORROW_DURATION so how we can update any borrowAssetsTimestamp => Need borrowAssets ID
+    //     uint assetsLen = borrowerAssets[borrower].length;
+    //     for (uint i = 0; i < assetsLen; i++) {
+    //         if(borrowerAssets[borrower][i].token == _token) {
+    //             // subtract the quantity
+    //             borrowerAssets[borrower][i].borrowQty -= _amount;
+    //             borrowerAssets[borrower][i].lendStartTimeStamp = block.timestamp;
+    //         }
 
-            if(borrowerAssets[borrower][i].borrowQty == 0) {
-                // TODO : Remove the assets from borrowerAssets
-            }
-        }
+    //         if(borrowerAssets[borrower][i].borrowQty == 0) {
+    //             // TODO : Remove the assets from borrowerAssets
+    //         }
+    //     }
 
-        emit Withdraw(borrower, _amount, reserves[_token], lenderETHBalance[borrower]);
-    }
+    //     emit Withdraw(borrower, _amount, reserves[_token], lenderETHBalance[borrower]);
+    // }
 
     /*************************** HELPER FUNCTIONS ***************************************/
 
@@ -520,21 +542,13 @@ contract LendingPoolV2 is ReentrancyGuard {
         return lenderAssets[_lender];
     }
 
-    function getBorrowerAssets(address _borrower) public view returns (UserAsset[] memory) {
-        return borrowerAssets[_borrower];
-    }
-
-    // Sasi oneTokenEqualToHowManyUSD code
-    // function oneTokenEqualToHowManyUSD(address _tokenAddress) public view returns (int) {
-    //     AggregatorV3Interface priceFeed;
-    //     priceFeed = AggregatorV3Interface(_tokenAddress);
-    //     (,int price,,,) = priceFeed.latestRoundData();
-    //     return price / 1e8; //1e8 as per 8 decimals in chainlink doc 
+    // function getBorrowerAssets(address _borrower) public view returns (UserAsset[] memory) {
+    //     return borrowerAssets[_borrower];
     // }
 
     function oneTokenEqualToHowManyUSD(address _tokenAddress) public view returns(uint)  {
         AggregatorV3Interface priceFeed;
-        address tokenToUSDAddress = addressToTokenMap.getPriceFeedMap(_tokenAddress);
+        address tokenToUSDAddress = getPriceFeedMap(_tokenAddress);
         priceFeed = AggregatorV3Interface(tokenToUSDAddress);
         (,int price,,,) = priceFeed.latestRoundData();
         uint256 decimal = priceFeed.decimals();
@@ -551,7 +565,7 @@ contract LendingPoolV2 is ReentrancyGuard {
 
     // SHORT METHOD
     function getLenderETHBalanceForBorrowInUSD(address _lender) public view returns(uint256) {
-        address token = lendingConfig.getAssetByTokenSymbol("ETH").token;
+        address token = getAssetByTokenSymbol("ETH").token;
         uint256 tokenUSDBalance = getAmountInUSD(token, lenderETHBalance[_lender]);
         return tokenUSDBalance;
     }    
@@ -563,7 +577,7 @@ contract LendingPoolV2 is ReentrancyGuard {
         uint256 totalLendETH = 0;
 
         // 1. Getting ETH address from lendingConfig
-        address ethAddress = lendingConfig.getAssetByTokenSymbol("ETH").token;
+        address ethAddress = getAssetByTokenSymbol("ETH").token;
         
         // 2. Total lendETH in lenderAssets
         uint256 lenderAssetLength = lenderAssets[_user].length;
@@ -587,63 +601,130 @@ contract LendingPoolV2 is ReentrancyGuard {
         // 5. Returns available amount for borrow in USD
         return userTotalETHLendAmoutInUSD - userTotalBorrowAmountInUSD;
     }
- 
+
+
+    /**************** AddressToTokenMap Start ***********/
+    mapping(address => string) private addresses;
+
+    // tokenAddress => tokenToUSD pair PriceFeed Address
+    mapping(address => address) private priceFeedMap;
+
+    function getAddress(address _key) public view returns (string memory) {
+        return addresses[_key];
+    }
+
+    function _setAddress(address _key, string memory _value) public onlyOwner {
+        addresses[_key] = _value;
+    }
+
+   function getPriceFeedMap(address _tokenAddress) public view returns(address) {
+    return priceFeedMap[_tokenAddress];
+   }
+
+   function _setPriceFeedMap(address _tokenAddress, address _pairAddress) public onlyOwner {
+        priceFeedMap[_tokenAddress] = _pairAddress;
+   }
+    /**************** AddressToTokenMap End ***********/
+
+
+    /*************** Lending Cofig Start **************/
+    struct Asset {
+        address token;
+        string symbol;
+        uint256 decimals;
+        uint borrowThreshold;
+        uint liquidationThreshold;
+        uint lastUpdateTimestamp;
+        bool borrowingEnabled;
+        bool usageAsCollateralEnabled;
+        bool isfrozen;
+        bool isActive;
+    }
+    Asset[] internal assets;
+
+    event AddAsset(address token, string symbol, uint borrowThreshold, uint liquidationThreshold);
+
+    function addAsset(
+        address _token, 
+        bool _borrowingEnabled,
+        bool _usageAsCollateralEnabled,
+        bool _isfrozen,
+        bool _isActive,
+        string memory _symbol, 
+        uint256 _decimals,
+        uint256 _borrowThreshold,
+        uint256 _liquidationThreshold
+    ) public returns (bool){
+
+        assets.push(
+            Asset({
+                token: _token,
+                symbol: _symbol,
+                decimals: _decimals,
+                borrowThreshold: _borrowThreshold, 
+                liquidationThreshold: _liquidationThreshold,
+                lastUpdateTimestamp: block.timestamp,
+                borrowingEnabled: _borrowingEnabled,
+                usageAsCollateralEnabled: _usageAsCollateralEnabled,
+                isfrozen: _isfrozen,
+                isActive: _isActive
+            })
+        );
+
+        emit AddAsset(_token, _symbol, _borrowThreshold, _liquidationThreshold);
+        return true;
+    }
+
+    function isTokenInAssets(address _token) public view returns(bool){
+        uint256 assetCount = assets.length;
+        for (uint i = 0; i < assetCount; i++) {
+            if (assets[i].token == _token){
+                return true;
+            }
+        }
+        return false;
+    }
+
+     function getAssetByTokenAddress(address _token) public view returns(Asset memory) {
+        uint256 assetsLen = assets.length;
+        for (uint i = 0; i < assetsLen; i++) {
+            if (assets[i].token == _token){
+                return assets[i];
+            }
+        }
+        revert("Asset not found");
+    }
+
+    function getAssetByTokenSymbol(string memory _symbol) public view returns(Asset memory) {
+        uint256 assetsLen = assets.length;
+        for (uint i = 0; i < assetsLen; i++) {
+            if (keccak256(abi.encodePacked(assets[i].symbol)) == keccak256(abi.encodePacked(_symbol))){
+                return assets[i];
+            }
+        }
+        revert("Asset not found");
+    }
+
+     function isCollateralEnable(address _token) public view returns(bool) {
+        uint256 assetsLen = assets.length;
+        for(uint i=0; i < assetsLen; i++) {
+            if(assets[i].token == _token && assets[i].usageAsCollateralEnabled) {
+                return true;
+            }
+        }
+        return false;
+    } 
+
+    function isBorrowingEnable(address _token) public view returns(bool) {
+        uint256 assetsLen = assets.length;
+        for(uint i=0; i < assetsLen; i++) {
+            if(assets[i].token == _token && assets[i].borrowingEnabled) {
+                return true;
+            }
+        }
+        return false;
+    } 
+
+    /*************** Lending Cofig End **************/
 
 }
-
-// for (uint i = 0; i < lenderAssetList[msg.sender].length; i++) {
-//     if (lenderAssetList[msg.sender][i] == _token){
-//         return true;
-//     }
-// }
-
-// 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4  - owner
-
-// 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2 - lender
-
-// Chainlink - https://docs.chain.link/data-feeds/price-feeds/addresses/
-
-// 0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e - ETH - 3
-// 0x0d79df66BE487753B02D015Fb622DED7f0E9798d - DAI - 33
-// 0xAb5c49580294Aff77670F839ea425f5b78ab3Ae7 - USDC - 13
-// 0x48731cF7e84dc94C5f84577882c14Be11a5B7456 - LINK - 23
-
-/*
-BTC / USD 0xA39434A63A52E749F02807ae27335515BA4b07F7 - 8
-DAI / USD 0x0d79df66BE487753B02D015Fb622DED7f0E9798d- 8
-ETH / USD 0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e- 8
-LINK / USD 0x48731cF7e84dc94C5f84577882c14Be11a5B7456 - 8
-USDC / USD 0xAb5c49580294Aff77670F839ea425f5b78ab3Ae7- 8
-*/
-
-      // LendingConfig lc;
-        // lc.addAsset(
-        //     _token, 
-        //     true,
-        //     false,
-        //     false,
-        //     true,
-        //     "ETH",
-        //     18,
-        //     80,
-        //     10
-        // );
-
-    // struct UserAsset{
-    //     address user;
-    //     address token;
-    //     uint256 lentQty;
-    //     uint256 borrowQty;
-    //     uint256 interestRate;
-    //     uint256 borrowRate;
-    //     uint256 lendStartTimeStamp;
-    //     uint256 borrowStartTimeStamp;
-    // }
-
-        // struct ReservePool {
-    //     address token;
-    //     uint amount;
-    //     bool isfrozen;
-    //     bool isActive;
-    // }
-    // ReservePool[] reservePool;
