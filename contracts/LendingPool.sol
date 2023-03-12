@@ -107,8 +107,8 @@ contract LendingPool is ReentrancyGuard {
         return address(this).balance;
     }
 
-    function getcontractTokenBalance(address _token) public view returns(uint) {
-        return IERC20(_token).balanceOf(address(this));
+    function getTokenBalance(address _address, address _token) public view returns(uint) {
+        return IERC20(_token).balanceOf(_address);
     }
 
     // TODO : make internal
@@ -254,9 +254,13 @@ contract LendingPool is ReentrancyGuard {
     }
 
 
-    function withdraw(address _lender1, address _token, uint256 _amount) external onlyLender(_token) payable returns(bool) {
+    function withdraw(address _token, uint256 _amount) external onlyLender(_token) payable returns(bool) {
+         address lender  = msg.sender;
+        //  (bool success, ) = payable(lender).call{value: _amount}(""); //ETH Value
+        //   require (success,"Tranfer to user's wallet not successful");
 
-        address lender  = msg.sender;
+        //   return success; 
+       
         // check if the owner has reserve
         require(getLenderAssetBal(lender, _token) >= _amount,"Not enough balance to withdraw");
         // we update the earned rewwards before the lender can withdraw
@@ -274,6 +278,8 @@ contract LendingPool is ReentrancyGuard {
                 // Reset lender timestamp - this might cause an error
                 lenderAssets[lender][i].lendStartTimeStamp = block.timestamp;
             }
+
+            // if(lenderAssets[lender][i])
         }
 
         // Updating lenderETHBalance
@@ -281,15 +287,13 @@ contract LendingPool is ReentrancyGuard {
 
         if(_token == ethAddress) {
             lenderETHBalance[lender] -= _amount;
-            (bool success, ) = payable(_lender1).call{value: _amount}(""); //ETH Value
-
+            (bool success, ) = payable(lender).call{value: _amount}("");
             require (success,"Tranfer to user's wallet not successful");
         }else {
-             // bool success = IERC20(_token).transferFrom(address(this),lender,_amount);
+            IERC20(_token).transfer(lender,_amount);
         }
 
-        // transfer from contract to lender's wallet - apprval not necessary
-       
+
 
         emit Withdraw(lender, _amount, reserves[_token], lenderETHBalance[lender]);
         // Emit withrawl event
