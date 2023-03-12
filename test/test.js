@@ -161,78 +161,118 @@ describe("LendHub Tests", async () => {
 
   /******************** LEND FUNCTIONALIY ***************************/
 
-  it("11. Should lend ETH assets", async () => {
-    //   const valueOption = { value: numberToEthers(10) };
+  it("11. Should lend 10 ETH", async () => {
+    const valueOption = { value: numberToEthers(10) };
     const amount = numberToEthers(10);
     const asset = GOERLI_ETH_ADDRESS;
-    // const beforeBalance = await lendingPool.getContractBalance();
 
-    const tx = await lendingPool.connect(deployerAddress).lend(asset, amount);
+    // 1. lending the ETH
+    const beforeBalance = await lendingPool.getContractETHBalance();
+    const tx = await lendingPool
+      .connect(deployerAddress)
+      .lend(asset, amount, valueOption);
     await tx.wait();
-    // const afterBalance = await lendingPool.getContractBalance();
-    // expect(afterBalance).to.be.lessThan(beforeBalance);
 
+    // 2. Checking contract ETH balance
+    const afterBalance = await lendingPool.getContractETHBalance();
+    expect(afterBalance).to.be.greaterThan(beforeBalance);
+    console.log(afterBalance);
+
+    // 3. checking Reserves
     let result = await lendingPool.reserves(asset);
     expect(result).to.be.equal(amount);
 
+    // 4. checking token is in assets or not
     result = await lendingPool.isTokenInAssets(asset);
     expect(result).to.be.true;
 
-    result = await lendingPool.connect(deployerAddress).getLenderETH();
+    // 5. checking lender ETH balance
+    result = await lendingPool.getLenderETHBalance(deployerAddress.address);
     expect(result).to.be.equal(amount);
 
+    // 6. checking lender Assets
     result = await lendingPool.getLenderAssets(deployerAddress.address);
-    // console.log(result);
-    // expect(result[0].token).to.be.equal(asset);
+    expect(result[0].token).to.be.equal(asset);
   });
 
-  it("12. Should lend ETH 2 assets", async () => {
-    //   const valueOption = { value: numberToEthers(10) };
+  it("12. Should lend 20 ETH", async () => {
+    const valueOption = { value: numberToEthers(10) };
     const amount = numberToEthers(10);
     const asset = GOERLI_ETH_ADDRESS;
-    // const beforeBalance = await lendingPool.getContractBalance();
 
-    const tx = await lendingPool.connect(deployerAddress).lend(asset, amount);
+    // 1. lending the ETH
+    const beforeBalance = await lendingPool.getContractETHBalance();
+    const tx = await lendingPool
+      .connect(deployerAddress)
+      .lend(asset, amount, valueOption);
     await tx.wait();
-    // const afterBalance = await lendingPool.getContractBalance();
-    // expect(afterBalance).to.be.lessThan(beforeBalance);
 
-    // let result = await lendingPool.reserves(asset);
-    // expect(result).to.be.equal(amount);
+    // 2. Checking contract ETH balance
+    const afterBalance = await lendingPool.getContractETHBalance();
+    expect(afterBalance).to.be.greaterThan(beforeBalance);
+    console.log(afterBalance);
 
+    // 3. checking Reserves
+    let result = await lendingPool.reserves(asset);
+    expect(result).to.be.greaterThan(amount);
+
+    // 4. checking token is in assets or not
     result = await lendingPool.isTokenInAssets(asset);
     expect(result).to.be.true;
 
-    // result = await lendingPool.connect(deployerAddress).getLenderETH();
-    // expect(result).to.be.equal(amount);
+    // 5. checking lender ETH balance
+    result = await lendingPool.getLenderETHBalance(deployerAddress.address);
+    expect(result).to.be.greaterThan(amount);
 
+    // 6. checking lender Assets
     result = await lendingPool.getLenderAssets(deployerAddress.address);
-    // console.log(result);
-    // expect(result[0].token).to.be.equal(asset);
+    expect(result[0].token).to.be.equal(asset);
   });
 
-  it("11. Should lend DAI assets", async () => {
-    //   const valueOption = { value: numberToEthers(10) };
-    const amount = numberToEthers(10);
+  it("13. Should lend 100 DAI Assets", async () => {
+    const amount = 100;
     const asset = GOERLI_DAI_ADDRESS;
-    // const beforeBalance = await lendingPool.getContractBalance();
 
+    // const beforeBalance = await lendingPool.getcontractTokenBalance(
+    //   GOERLI_DAI_ADDRESS
+    // );
+
+    // 1. Lending
     const tx = await lendingPool.connect(deployerAddress).lend(asset, amount);
     await tx.wait();
-    // const afterBalance = await lending`Pool.getContractBalance();
-    // expect(afterBalance).to.be.lessThan(beforeBalance);
 
-    // let result = await lendingPool.reserves(asset);
-    // expect(result).to.be.equal(amount);
+    // 2. Checking contract ETH balance
+    // const afterBalance = await lendingPool.getcontractTokenBalance(
+    //   GOERLI_DAI_ADDRESS
+    // );
+    // expect(afterBalance).to.be.equal(beforeBalance);
+    // console.log(afterBalance);
 
+    // 3. checking Reserves
+    let result = await lendingPool.reserves(asset);
+    expect(result).to.be.equal(amount);
+
+    // 4. checking token is in assets or not
     result = await lendingPool.isTokenInAssets(asset);
     expect(result).to.be.true;
 
-    // result = await lendingPool.connect(deployerAddress).getLenderETH();
-    // expect(result).to.be.equal(amount);
-
+    // 6. checking lender Assets
     result = await lendingPool.getLenderAssets(deployerAddress.address);
-    // console.log(result);
-    // expect(result[0].token).to.be.equal(asset);
+    expect(result[1].token).to.be.equal(asset);
+
+    // 6. checking lender lentQty
+    result = await lendingPool.getLenderAssets(deployerAddress.address);
+    expect(result[1].lentQty).to.be.equal(amount);
+    console.log(result[1].lentQty);
   });
+
+  // it("13. Should lend DAI assets", async () => {
+  //   const amount = numberToEthers(10);
+  //   const asset = GOERLI_DAI_ADDRESS;
+  //   const tx = await lendingPool.connect(deployerAddress).lend(asset, amount);
+  //   await tx.wait();
+  //   result = await lendingPool.isTokenInAssets(asset);
+  //   expect(result).to.be.true;
+  //   result = await lendingPool.getLenderAssets(deployerAddress.address);
+  // });
 });

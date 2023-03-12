@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.6;
 
+// import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -102,9 +103,13 @@ contract LendingPool is ReentrancyGuard {
     function transfer() public payable {
     }
 
-    function getContractBalance() public view returns(uint){
+     function getContractETHBalance() public view returns(uint){
         return address(this).balance;
-    } 
+    }
+
+    function getcontractTokenBalance(address _token) public view returns(uint) {
+        return IERC20(_token).balanceOf(address(this));
+    }
 
     // TODO : make internal
     function isLenderTokenOwner(address _token) public view returns(bool) {
@@ -234,35 +239,17 @@ contract LendingPool is ReentrancyGuard {
                         borrowEndTimeStamp : 0,
                         maturityPeriod : 0
                     });
-                    // add to lender asset list
-                    lenderAssets[lender].push(userAsset);
 
-                    // Push to the struct array
-                    // userAssets.push(userAsset);                
+                    // add to lender asset list
+                    lenderAssets[lender].push(userAsset);             
                 }
             }
         }
-      
-
-
         emit Lend(lender, _amount, reserves[_token], lenderETHBalance[lender]);
-
-        // UserAsset memory userAsset = UserAsset({
-        //     user: lender,
-        //     token: _token,
-        //     lentQty: amount,
-        //     borrowQty: 0,
-        //     apy: INTEREST_RATE,
-        //     borrowRate: 0,
-        //     lendStartTimeStamp: block.timestamp,
-        //     borrowStartTimeStamp:0
-        // });
-        // add to lender asset list
-        // lenderAssets[lender].push(userAsset);
     }
     
-    function getLenderETH() public view returns(uint) {
-        uint amount = lenderETHBalance[msg.sender];
+    function getLenderETHBalance(address _lender) public view returns(uint) {
+        uint amount = lenderETHBalance[_lender];
         return amount;
     }
 
