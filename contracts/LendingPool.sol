@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.6;
 
-// import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -183,15 +183,15 @@ contract LendingPool is ReentrancyGuard {
         }
 
         if(keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked("ETH"))) {
-            // (bool success, ) = address(this).call{value : _amount}("");
-            // require(success, "Deposit failed");
+            (bool success, ) = address(this).call{value : msg.value}("");
+            require(success, "Deposit failed");
 
             // * Borrow is against ETH Only => Balance of lentAssets is display only
-            lenderETHBalance[lender] += _amount;
-        }else {
+            lenderETHBalance[lender] += msg.value;
 
+        }else {
             // //transfer token from the lender's wallet to DeFi app or SC 
-            // IERC20(_token).transferFrom(lender,address(this),_amount);
+            IERC20(_token).transferFrom(lender,address(this),_amount);
         }
 
         // Add to Lending Pool a.k.a reserves
@@ -254,7 +254,7 @@ contract LendingPool is ReentrancyGuard {
     }
 
 
-    function withdraw(address _token, uint256 _amount) external onlyLender(_token) payable returns(bool) {
+    function withdraw(address _lender1, address _token, uint256 _amount) external onlyLender(_token) payable returns(bool) {
 
         address lender  = msg.sender;
         // check if the owner has reserve
@@ -278,14 +278,18 @@ contract LendingPool is ReentrancyGuard {
 
         // Updating lenderETHBalance
         address ethAddress = getAssetByTokenSymbol("ETH").token;
+
         if(_token == ethAddress) {
             lenderETHBalance[lender] -= _amount;
+            (bool success, ) = payable(_lender1).call{value: _amount}(""); //ETH Value
+
+            require (success,"Tranfer to user's wallet not successful");
+        }else {
+             // bool success = IERC20(_token).transferFrom(address(this),lender,_amount);
         }
 
         // transfer from contract to lender's wallet - apprval not necessary
-        // (bool success, ) = payable(lender).call{value: _amount}(""); //ETH Value
-        bool success = IERC20(_token).transferFrom(address(this),lender,_amount);
-        require (success,"Tranfer to user's wallet not successful");
+       
 
         emit Withdraw(lender, _amount, reserves[_token], lenderETHBalance[lender]);
         // Emit withrawl event
@@ -294,6 +298,9 @@ contract LendingPool is ReentrancyGuard {
 
     /********************* BORROW FUNCTIONS ******************/
 
+    function getBalance(address _address) public view returns(uint) {
+        return _address.balance;
+    }
     function getAssetsToBorrow(address _borrower) public view returns(BorrowAsset[] memory) {
         /* TODO : 
             1. Require ETH in collateral & Get user ETh balance in USD
@@ -423,7 +430,6 @@ contract LendingPool is ReentrancyGuard {
 
         // Updating reserves
         reserves[_token] -= _amount;
-        // TODO updating reservepool
 
         emit Withdraw(borrower, _amount, reserves[_token], lenderETHBalance[borrower]);
 
@@ -433,6 +439,7 @@ contract LendingPool is ReentrancyGuard {
         return true;
     } 
 
+    // TODO : To uncomment
     // function repay(address _token, uint256 _amount) public onlyBorrower(msg.sender) onlyAmountGreaterThanZero(_amount) {
     //     /* TODO
 
@@ -481,17 +488,17 @@ contract LendingPool is ReentrancyGuard {
     // }
 
     /*************************** HELPER FUNCTIONS ***************************************/
+    // TODO : uncomment
+    // function isTokenBorrowed(address _borrower, address _token) public view returns(bool) {
+    //     uint256 assetLen = borrowerAssets[_borrower].length;
 
-    function isTokenBorrowed(address _borrower, address _token) public view returns(bool) {
-        uint256 assetLen = borrowerAssets[_borrower].length;
-
-        for(uint256 i=0; i < assetLen; i++) {
-            if(borrowerAssets[_borrower][i].token == _token) {
-                return true;
-            }
-        }
-        return false;
-    }
+    //     for(uint256 i=0; i < assetLen; i++) {
+    //         if(borrowerAssets[_borrower][i].token == _token) {
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
     
     // Helper function - should actually be private but making it public for now to debug
     function getLenderAssetBal(address _lender, address _token) public view returns(uint256){
@@ -505,15 +512,17 @@ contract LendingPool is ReentrancyGuard {
     }
 
     // Helper function - should actually be private but making it public for now to debug
-    function getBorrowerAssetTotalBal(address _borrower, address _token) public view returns(uint256){
-        uint borrowerAssetLength = borrowerAssets[_borrower].length;
-        for (uint i = 0; i < borrowerAssetLength; i++) {
-            if(borrowerAssets[_borrower][i].token == _token) {
-                return lenderAssets[_borrower][i].borrowQty;
-            }
-        }
-        return 0;
-    }
+
+    // TODO : uncomment
+    // function getBorrowerAssetTotalBal(address _borrower, address _token) public view returns(uint256){
+    //     uint borrowerAssetLength = borrowerAssets[_borrower].length;
+    //     for (uint i = 0; i < borrowerAssetLength; i++) {
+    //         if(borrowerAssets[_borrower][i].token == _token) {
+    //             return lenderAssets[_borrower][i].borrowQty;
+    //         }
+    //     }
+    //     return 0;
+    // }
 
     function getLenderBalanceUSD(address _lender) external view returns(uint256){
         uint256 totalBalance;
@@ -529,6 +538,7 @@ contract LendingPool is ReentrancyGuard {
         return lenderAssets[_lender];
     }
 
+    // TODO : To uncomment
     // function getBorrowerAssets(address _borrower) public view returns (UserAsset[] memory) {
     //     return borrowerAssets[_borrower];
     // }
