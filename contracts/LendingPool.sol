@@ -333,138 +333,155 @@ contract LendingPool is ReentrancyGuard {
         //  1. Require ETH in collateral & Get ETH balance in USD
         // uint ethBalanceInUSD =  getLenderETHBalanceForBorrowInUSD(_borrower); // Short method
         uint ethBalanceInUSD = getUserTotalAmountAvailableForBorrowInUSD(_borrower); // long method
-
-       
-
-        // require(ethBalanceInUSD > 0 , "First Deposit ETH as Collateral");
+ 
+        // require(ethBalanceInUSD > 0 , "Should have ETH as Collateral");
 
         // 2. Calculate 80% of ETH balance
         uint maxAmountToBorrowInUSD = (ethBalanceInUSD * BORROW_THRESHOLD)/ 100; // Problem: Not getting the decimal value; 96 96.8
 
-      
+        // require(maxAmountToBorrowInUSD > 0, "Can borrow 80% of collateral only");
 
-        // 3. Get total count of not collateral assets in the reserve
+        //  Get total count of not collateral assets in the reserve
         uint length = reserveAssets.length;
-        // uint count = 0;
-        // for(uint i = 0 ; i< length; i++) {
-        //     address token = reserveAssets[i];
-        //     if(!isCollateralEnable(token)) {
-        //         count = count + 1;
-        //     }
-        // }
 
-
-        // 4. Getting assets to borrow from reserve
-        BorrowAsset[] memory borrowAsset = new BorrowAsset[](length);
+        // Getting assets to borrow from reserve
+        BorrowAsset[] memory borrowAsset = new BorrowAsset[](length - 1);
+        
         uint borrowAssetsCount = 0;
         for(uint i = 0; i < length; i++) { 
             address token = reserveAssets[i];
             if(isBorrowingEnable(token)) {
-                // Get Token total amount from reserve
-                uint reserveAmountInUSD = getAmountInUSD(token, reserves[token]);
-                //  4. Check reserve qty > borrow qty 
-                if(reserveAmountInUSD > maxAmountToBorrowInUSD) {
-                    // TODO : ASK TO SASI => make a conversion of _maxAmountToBorrowInUSD on that paricular Token Qty
-                    uint borrowQty = maxAmountToBorrowInUSD;
-                    borrowAsset[borrowAssetsCount] = BorrowAsset(token, borrowQty, BORROW_RATE);
-                    borrowAssetsCount++;
-                }
+                uint borrowQty = getReserveTokenQtyToBorrow(token, maxAmountToBorrowInUSD);
+                borrowAsset[borrowAssetsCount] = BorrowAsset(token, borrowQty, BORROW_RATE);
+                borrowAssetsCount++;
             }
         }
         return borrowAsset;
     }
 
-   
 
-    // function borrow(address _token, uint256 _amount, uint256 _borrowDuration) public nonReentrant onlyAmountGreaterThanZero(_amount) returns(bool) {
-    //     /* TODO 
-    //         1. Checking lenderETHAssets >= _amount 
-    //         2. Checking reserve[_token] >= _amount & Updating Reserves
-    //         3. Get Prev borrowAssetsLength
-    //         4. If token exits => update borrowerAssets else push userAssets into borrowerAssets
-    //         5. Updating lenderBalanceQty
-    //         6. Token Transfer from SC to User : Add reentrancy
-    //     */
+    function getReserveTokenQtyToBorrow(address _token, uint _maxAmountInUSD) public view returns(uint) {
 
-    //     address borrower = msg.sender;
+        uint reserveQty = reserves[_token];
 
-    //     // 1. Checking lenderETHAssets >= _amount 
-    //     uint256 lendETHAmount = getLenderETHBalanceForBorrowInUSD(borrower);
-    //     uint256 amountInDoller = getAmountInUSD(_token, _amount);
+        uint tokenQty = oneTokenEqualToHowManyUSD(_token);
 
-    //     // 2. Calculate 80% of ETH balance
-    //     uint256 maxAmountToBorrowInUSD = (lendETHAmount * BORROW_THRESHOLD)/ 100; // Problem: Not getting the decimal value; 96 96.8
+        uint lenderTokenQty = _maxAmountInUSD / tokenQty;
 
-    //     // 3. check amount must be less than 80% of collateral
-    //     require(amountInDoller <= maxAmountToBorrowInUSD, "Not enough balance to borrow");
+        uint borrowQty = lenderTokenQty < reserveQty ? lenderTokenQty : reserveQty;
 
-    //     // 4. Checking reserve[_token] >= _amount
-    //     require(_amount <= reserves[_token], "Not enough qty in the reserve pool to borrow");
+        return borrowQty;
+    }
 
-    //     // 4. Get Previous borrowerAssetsLength
-    //     uint256 borrowerAssetsLength =  borrowerAssets[borrower].length;
+    function borrow(address _token, uint256 _amount, uint256 _borrowDuration) public  onlyAmountGreaterThanZero(_amount)  returns(uint256) {
+        /* TODO 
+            1. Checking lenderETHAssets >= _amount 
+            2. Checking reserve[_token] >= _amount & Updating Reserves
+            3. Get Prev borrowAssetsLength
+            4. If token exits => update borrowerAssets else push userAssets into borrowerAssets
+            5. Updating lenderBalanceQty
+            6. Token Transfer from SC to User : Add reentrancy
+        */
+
+        address borrower = msg.sender;
+
+        // 1. Checking lenderETHAssets >= _amount 
+        uint256 lendETHAmount = getUserTotalAmountAvailableForBorrowInUSD(borrower);
+        uint256 borrowAmountInUSD = getAmountInUSD(_token, _amount);
+
         
-    //     // Set maturity duration & BorrowEndTimestamp of the borrower
-    //     uint256 _maturityDuration = 0;
-    //     uint256 _borrowEndTimeStamp = 0;
-    //     if(_borrowDuration == 30) {
-    //         _borrowEndTimeStamp = block.timestamp + BORROW_DURATION_30;
-    //         _maturityDuration = BORROW_DURATION_30;
 
-    //     }
-    //     if(_borrowDuration == 60) {
-    //         _borrowEndTimeStamp = block.timestamp + BORROW_DURATION_60;
-    //         _maturityDuration = BORROW_DURATION_60;
-    //     }
-    //     if(_borrowDuration == 90) {
-    //         _borrowEndTimeStamp = block.timestamp + BORROW_DURATION_90;
-    //         _maturityDuration = BORROW_DURATION_90;
-    //     }
+        // 2. Calculate 80% of ETH balance
+        uint256 maxAmountToBorrowInUSD = (lendETHAmount * BORROW_THRESHOLD)/ 100; // Problem: Not getting the decimal value; 96 96.8
 
-    //     // 5. If token exits => update borrowerAssets 
-    //     //    else push userAssets into borrowerAssets
-    //     for (uint256 i=0 ; i < borrowerAssetsLength; i++) {
-    //         if(borrowerAssets[borrower][i].token == _token) {
-    //             // TODO: implement 
-    //             // updateEarned(lender, _token); //100 + 0.00001 eth , 2 
-    //             // TODO : ASK SASI : When are dealing with BORROW_DURATION so how we can update any borrowAssets
-    //             uint256 borrowerTotalAmount = borrowerAssets[borrower][i].borrowQty + _amount;
-    //             borrowerAssets[borrower][i].borrowQty = borrowerTotalAmount;
-    //             borrowerAssets[borrower][i].borrowApy = BORROW_RATE;
-    //             borrowerAssets[borrower][i].borrowStartTimeStamp = block.timestamp;
-    //             borrowerAssets[borrower][i].borrowEndTimeStamp = _borrowEndTimeStamp;
-    //             borrowerAssets[borrower][i].maturityPeriod = _maturityDuration;
+        // 3. check amount must be less than 80% of collateral
+        require(borrowAmountInUSD <= maxAmountToBorrowInUSD, "Not enough balance to borrow");
 
-    //         }else {
-    //             UserAsset memory userAsset = UserAsset({
-    //                 user: borrower,
-    //                 token: _token,
-    //                 lentQty: 0,
-    //                 borrowQty: _amount,
-    //                 lentApy: 0,
-    //                 borrowApy: BORROW_RATE,
-    //                 lendStartTimeStamp: 0,
-    //                 borrowStartTimeStamp: block.timestamp,
-    //                 borrowEndTimeStamp : _borrowEndTimeStamp,
-    //                 maturityPeriod : _maturityDuration
-    //             });
-    //             borrowerAssets[borrower].push(userAsset);
-    //         }
-    //     }
+        // 4. Checking reserve[_token] >= _amount
+        require(_amount <= reserves[_token], "Not enough qty in the reserve pool to borrow");
 
-    //     // 5. Updating lender ETH balance for Next Borrow
-    //     lenderETHBalance[borrower] -= _amount;  // lendingLedger => lenderETHBalance
+        // // 4. Get Previous borrowerAssetsLength
+        uint256 borrowerAssetsLength =  borrowerAssets[borrower].length;
+        
+        // // Set maturity duration & BorrowEndTimestamp of the borrower
+        uint256 _maturityDuration = 0;
+        uint256 _borrowEndTimeStamp = 0;
+        if(_borrowDuration == 30) {
+            _borrowEndTimeStamp = block.timestamp + BORROW_DURATION_30;
+            _maturityDuration = BORROW_DURATION_30;
+        }
+        if(_borrowDuration == 60) {
+            _borrowEndTimeStamp = block.timestamp + BORROW_DURATION_60;
+            _maturityDuration = BORROW_DURATION_60;
+        }
+        if(_borrowDuration == 90) {
+            _borrowEndTimeStamp = block.timestamp + BORROW_DURATION_90;
+            _maturityDuration = BORROW_DURATION_90;
+        }
 
-    //     // Updating reserves
-    //     reserves[_token] -= _amount;
 
-    //     emit Withdraw(borrower, _amount, reserves[_token], lenderETHBalance[borrower]);
+        // // 5. If token exits => update borrowerAssets 
+        // //    else push userAssets into borrowerAssets
 
-    //     // 7. Token Transfer from SC to User
-    //     // bool success = IERC20(_token).transfer(borrower, _amount);
-    //     // require(success, "Tranfer to user's wallet not successful");
-    //     return true;
-    // } 
+        if(borrowerAssetsLength == 0) {
+             UserAsset memory userAsset = UserAsset({
+                    user: borrower,
+                    token: _token,
+                    lentQty: 0,
+                    borrowQty: _amount,
+                    lentApy: 0,
+                    borrowApy: BORROW_RATE,
+                    lendStartTimeStamp: 0,
+                    borrowStartTimeStamp: block.timestamp,
+                    borrowEndTimeStamp : _borrowEndTimeStamp,
+                    maturityPeriod : _maturityDuration
+                });
+                borrowerAssets[borrower].push(userAsset);
+        }else {
+             for (uint256 i=0 ; i < borrowerAssetsLength; i++) {
+            if(borrowerAssets[borrower][i].token == _token) {
+                // TODO: implement 
+                // updateEarned(lender, _token); //100 + 0.00001 eth , 2 
+                // TODO : ASK SASI : When are dealing with BORROW_DURATION so how we can update any borrowAssets
+                uint256 borrowerTotalAmount = borrowerAssets[borrower][i].borrowQty + _amount;
+                borrowerAssets[borrower][i].borrowQty = borrowerTotalAmount;
+                borrowerAssets[borrower][i].borrowApy = BORROW_RATE;
+                borrowerAssets[borrower][i].borrowStartTimeStamp = block.timestamp;
+                borrowerAssets[borrower][i].borrowEndTimeStamp = _borrowEndTimeStamp;
+                borrowerAssets[borrower][i].maturityPeriod = _maturityDuration;
+
+            }else {
+                UserAsset memory userAsset = UserAsset({
+                    user: borrower,
+                    token: _token,
+                    lentQty: 0,
+                    borrowQty: _amount,
+                    lentApy: 0,
+                    borrowApy: BORROW_RATE,
+                    lendStartTimeStamp: 0,
+                    borrowStartTimeStamp: block.timestamp,
+                    borrowEndTimeStamp : _borrowEndTimeStamp,
+                    maturityPeriod : _maturityDuration
+                });
+                borrowerAssets[borrower].push(userAsset);
+            }
+        }
+        }
+       
+
+        // 5. Updating lender ETH balance for Next Borrow
+        // lenderETHBalance[borrower] -= _amount;  // lendingLedger => lenderETHBalance
+
+        // Updating reserves
+        reserves[_token] -= _amount;
+
+        emit Withdraw(borrower, _amount, reserves[_token], lenderETHBalance[borrower]);
+
+        // // 7. Token Transfer from SC to User
+        // bool success = IERC20(_token).transfer(borrower, _amount);
+        // require(success, "Tranfer to user's wallet not successful");
+        // // return true;
+    } 
 
     // TODO : To uncomment
     // function repay(address _token, uint256 _amount) public onlyBorrower(msg.sender) onlyAmountGreaterThanZero(_amount) {
@@ -541,25 +558,25 @@ contract LendingPool is ReentrancyGuard {
     // Helper function - should actually be private but making it public for now to debug
 
     // TODO : uncomment
-    // function getBorrowerAssetTotalBal(address _borrower, address _token) public view returns(uint256){
-    //     uint borrowerAssetLength = borrowerAssets[_borrower].length;
-    //     for (uint i = 0; i < borrowerAssetLength; i++) {
-    //         if(borrowerAssets[_borrower][i].token == _token) {
-    //             return lenderAssets[_borrower][i].borrowQty;
-    //         }
-    //     }
-    //     return 0;
-    // }
-
-    function getLenderBalanceUSD(address _lender) external view returns(uint256){
-        uint256 totalBalance;
-        uint lenderAssetLength = lenderAssets[_lender].length;
-        for (uint i = 0; i < lenderAssetLength; i++) {
-            uint256 tokenUSDBalance = getAmountInUSD(lenderAssets[_lender][i].token, lenderAssets[_lender][i].lentQty);
-            totalBalance += tokenUSDBalance;
+    function getBorrowerAssetTotalBal(address _borrower, address _token) public view returns(uint256){
+        uint borrowerAssetLength = borrowerAssets[_borrower].length;
+        for (uint i = 0; i < borrowerAssetLength; i++) {
+            if(borrowerAssets[_borrower][i].token == _token) {
+                return lenderAssets[_borrower][i].borrowQty;
+            }
         }
-        return totalBalance;
+        return 0;
     }
+
+    // function getLenderBalanceUSD(address _lender) external view returns(uint256){
+    //     uint256 totalBalance;
+    //     uint lenderAssetLength = lenderAssets[_lender].length;
+    //     for (uint i = 0; i < lenderAssetLength; i++) {
+    //         uint256 tokenUSDBalance = getAmountInUSD(lenderAssets[_lender][i].token, lenderAssets[_lender][i].lentQty);
+    //         totalBalance += tokenUSDBalance;
+    //     }
+    //     return totalBalance;
+    // }
 
     function getLenderAssets(address _lender) public view returns (UserAsset[] memory) {
         return lenderAssets[_lender];
@@ -578,7 +595,7 @@ contract LendingPool is ReentrancyGuard {
             value =  1467;
         }
 
-         if(keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked('DAI'))) {
+        if(keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked('DAI'))) {
             value =  1;
         }
 
@@ -603,21 +620,9 @@ contract LendingPool is ReentrancyGuard {
 
     function getAmountInUSD(address _token, uint256 _amount) public view returns(uint) {
         // uint decimals = ERC20(_token).decimals();
-
         uint totalAmountInDollars = uint(oneTokenEqualToHowManyUSD(_token)) * (_amount / 1e18 );
-
-        
         return totalAmountInDollars;
     }
-
-    // Calculate the Assets to Borrow and return it
-
-    // SHORT METHOD => not need this 
-    function getLenderETHBalanceForBorrowInUSD(address _lender) public view returns(uint256) {
-        address token = getAssetByTokenSymbol("ETH").token;
-        uint256 tokenUSDBalance = getAmountInUSD(token, lenderETHBalance[_lender]);
-        return tokenUSDBalance;
-    }  
 
     // LONG METHOD
     function getUserTotalAmountAvailableForBorrowInUSD(address _user) public view returns(uint256) {
@@ -740,15 +745,15 @@ contract LendingPool is ReentrancyGuard {
         return false;
     }
 
-     function getAssetByTokenAddress(address _token) public view returns(Asset memory) {
-        uint256 assetsLen = assets.length;
-        for (uint i = 0; i < assetsLen; i++) {
-            if (assets[i].token == _token){
-                return assets[i];
-            }
-        }
-        revert("Asset not found");
-    }
+    //  function getAssetByTokenAddress(address _token) public view returns(Asset memory) {
+    //     uint256 assetsLen = assets.length;
+    //     for (uint i = 0; i < assetsLen; i++) {
+    //         if (assets[i].token == _token){
+    //             return assets[i];
+    //         }
+    //     }
+    //     revert("Asset not found");
+    // }
 
     function getAssetByTokenSymbol(string memory _symbol) public view returns(Asset memory) {
         uint256 assetsLen = assets.length;
@@ -760,15 +765,15 @@ contract LendingPool is ReentrancyGuard {
         revert("Asset not found");
     }
 
-     function isCollateralEnable(address _token) public view returns(bool) {
-        uint256 assetsLen = assets.length;
-        for(uint i=0; i < assetsLen; i++) {
-            if(assets[i].token == _token && assets[i].usageAsCollateralEnabled) {
-                return true;
-            }
-        }
-        return false;
-    } 
+    //  function isCollateralEnable(address _token) public view returns(bool) {
+    //     uint256 assetsLen = assets.length;
+    //     for(uint i=0; i < assetsLen; i++) {
+    //         if(assets[i].token == _token && assets[i].usageAsCollateralEnabled) {
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // } 
 
     function isBorrowingEnable(address _token) public view returns(bool) {
         uint256 assetsLen = assets.length;
