@@ -373,7 +373,7 @@ contract LendingPool is ReentrancyGuard {
         return borrowQty;
     }
 
-    function borrow(address _token, uint256 _amount, uint256 _borrowDuration) public nonReentrant onlyAmountGreaterThanZero(_amount)  returns(bool) {
+    function borrow(address _token, uint256 _amount, uint256 _borrowDuration) public  nonReentant onlyAmountGreaterThanZero(_amount)  returns(bool) {
         /* TODO 
             1. Checking lenderETHAssets >= _amount 
             2. Checking reserve[_token] >= _amount & Updating Reserves
