@@ -2,10 +2,28 @@ const { ethers } = require("hardhat");
 
 async function main() {
   /********************** Deploy AddressStorage *************************/
-  const AddressStorage = await ethers.getContractFactory("AddressStorage");
-  const addressStorage = await AddressStorage.deploy();
-  await addressStorage.deployed();
-  console.log("Address of AddressStorage : ", addressStorage.address);
+  // const AddressStorage = await ethers.getContractFactory("AddressStorage");
+  // const addressStorage = await AddressStorage.deploy();
+  // await addressStorage.deployed();
+  // console.log("Address of AddressStorage : ", addressStorage.address);
+
+  /********************** Deploy DAIToken *************************/
+  const DAIToken = await ethers.getContractFactory("DAIToken");
+  const daiToken = await DAIToken.deploy();
+  await daiToken.deployed();
+  console.log("Address of DAIToken : ", daiToken.address);
+
+  /********************** Deploy DAIToken *************************/
+  const LINKToken = await ethers.getContractFactory("DAIToken");
+  const linkToken = await LINKToken.deploy();
+  await linkToken.deployed();
+  console.log("Address of LINKToken : ", linkToken.address);
+
+  /********************** Deploy DAIToken *************************/
+  const USDCToken = await ethers.getContractFactory("DAIToken");
+  const usdcToken = await USDCToken.deploy();
+  await usdcToken.deployed();
+  console.log("Address of USDCToken : ", usdcToken.address);
 
   /********************** Deploy AddressToTokenMap *************************/
   const AddressToTokenMap = await ethers.getContractFactory(
@@ -22,21 +40,21 @@ async function main() {
   console.log("Address of LendingConfig : ", lendingConfig.address);
 
   /********************** Deploy LendingPoolV2 *************************/
-  const LendingPoolV2 = await ethers.getContractFactory("LendingPoolV2");
-  const lendingPoolV2 = await LendingPoolV2.deploy(3, 4);
-  await lendingPoolV2.deployed();
-  console.log("Address of LendingPoolV2 : ", lendingPoolV2.address);
+  const LendingPool = await ethers.getContractFactory("LendingPool");
+  const lendingPool = await LendingPool.deploy(3, 4);
+  await lendingPool.deployed();
+  console.log("Address of LendingPool : ", lendingPool.address);
 
-  /********************** Deploy LendingPoolAddressProvider *************************/
-  const LendingPoolAddressProvider = await ethers.getContractFactory(
-    "LendingPoolAddressProvider"
-  );
-  const lendingPoolAddressProvider = await LendingPoolAddressProvider.deploy();
-  await lendingPoolAddressProvider.deployed();
-  console.log(
-    "Address of LendingPoolAddressProvider : ",
-    lendingPoolAddressProvider.address
-  );
+  //   /********************** Deploy LendingPoolAddressProvider *************************/
+  //   const LendingPoolAddressProvider = await ethers.getContractFactory(
+  //     "LendingPoolAddressProvider"
+  //   );
+  //   const lendingPoolAddressProvider = await LendingPoolAddressProvider.deploy();
+  //   await lendingPoolAddressProvider.deployed();
+  //   console.log(
+  //     "Address of LendingPoolAddressProvider : ",
+  //     lendingPoolAddressProvider.address
+  //   );
 }
 
 main().catch((error) => {
