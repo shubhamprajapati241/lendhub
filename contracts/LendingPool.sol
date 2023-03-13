@@ -373,7 +373,7 @@ contract LendingPool is ReentrancyGuard {
         return borrowQty;
     }
 
-    function borrow(address _token, uint256 _amount, uint256 _borrowDuration) public  onlyAmountGreaterThanZero(_amount)  returns(uint256) {
+    function borrow(address _token, uint256 _amount, uint256 _borrowDuration) public nonReentrant onlyAmountGreaterThanZero(_amount)  returns(bool) {
         /* TODO 
             1. Checking lenderETHAssets >= _amount 
             2. Checking reserve[_token] >= _amount & Updating Reserves
@@ -390,7 +390,6 @@ contract LendingPool is ReentrancyGuard {
         uint256 borrowAmountInUSD = getAmountInUSD(_token, _amount);
 
         
-
         // 2. Calculate 80% of ETH balance
         uint256 maxAmountToBorrowInUSD = (lendETHAmount * BORROW_THRESHOLD)/ 100; // Problem: Not getting the decimal value; 96 96.8
 
@@ -400,10 +399,10 @@ contract LendingPool is ReentrancyGuard {
         // 4. Checking reserve[_token] >= _amount
         require(_amount <= reserves[_token], "Not enough qty in the reserve pool to borrow");
 
-        // // 4. Get Previous borrowerAssetsLength
+        // 4. Get Previous borrowerAssetsLength
         uint256 borrowerAssetsLength =  borrowerAssets[borrower].length;
         
-        // // Set maturity duration & BorrowEndTimestamp of the borrower
+        // Set maturity duration & BorrowEndTimestamp of the borrower
         uint256 _maturityDuration = 0;
         uint256 _borrowEndTimeStamp = 0;
         if(_borrowDuration == 30) {
@@ -418,10 +417,6 @@ contract LendingPool is ReentrancyGuard {
             _borrowEndTimeStamp = block.timestamp + BORROW_DURATION_90;
             _maturityDuration = BORROW_DURATION_90;
         }
-
-
-        // // 5. If token exits => update borrowerAssets 
-        // //    else push userAssets into borrowerAssets
 
         if(borrowerAssetsLength == 0) {
              UserAsset memory userAsset = UserAsset({
@@ -478,9 +473,9 @@ contract LendingPool is ReentrancyGuard {
         emit Withdraw(borrower, _amount, reserves[_token], lenderETHBalance[borrower]);
 
         // // 7. Token Transfer from SC to User
-        // bool success = IERC20(_token).transfer(borrower, _amount);
-        // require(success, "Tranfer to user's wallet not successful");
-        // // return true;
+        bool success = IERC20(_token).transfer(borrower, _amount);
+        require(success, "Tranfer to user's wallet not successful");
+        return true;
     } 
 
     // TODO : To uncomment
@@ -558,15 +553,15 @@ contract LendingPool is ReentrancyGuard {
     // Helper function - should actually be private but making it public for now to debug
 
     // TODO : uncomment
-    function getBorrowerAssetTotalBal(address _borrower, address _token) public view returns(uint256){
-        uint borrowerAssetLength = borrowerAssets[_borrower].length;
-        for (uint i = 0; i < borrowerAssetLength; i++) {
-            if(borrowerAssets[_borrower][i].token == _token) {
-                return lenderAssets[_borrower][i].borrowQty;
-            }
-        }
-        return 0;
-    }
+    // function getBorrowerAssetBal(address _borrower, address _token) public view returns(uint256){
+    //     uint borrowerAssetLength = borrowerAssets[_borrower].length;
+    //     for (uint i = 0; i < borrowerAssetLength; i++) {
+    //         if(borrowerAssets[_borrower][i].token == _token) {
+    //             return lenderAssets[_borrower][i].borrowQty;
+    //         }
+    //     }
+    //     return 0;
+    // }
 
     // function getLenderBalanceUSD(address _lender) external view returns(uint256){
     //     uint256 totalBalance;
@@ -583,9 +578,9 @@ contract LendingPool is ReentrancyGuard {
     }
 
     // TODO : To uncomment
-    // function getBorrowerAssets(address _borrower) public view returns (UserAsset[] memory) {
-    //     return borrowerAssets[_borrower];
-    // }
+    function getBorrowerAssets(address _borrower) public view returns (UserAsset[] memory) {
+        return borrowerAssets[_borrower];
+    }
 
     function oneTokenEqualToHowManyUSD(address _tokenAddress) public view returns(uint)  {
 
