@@ -54,6 +54,40 @@ contract LendingPool is ReentrancyGuard {
         _; 
     }
 
+    // This function will be called internally but will be called by the Web3 App so make it public 
+    modifier updateEarnedInterest(address _lender) {
+        uint lenderAssetLength = lenderAssets[_lender].length;
+        for (uint i = 0; i < lenderAssetLength; i++) {
+                lenderAssets[_lender][i].lentQty += //Principal + 
+                (
+                    ((block.timestamp - lenderAssets[_lender][i].lendStartTimeStamp)//Time
+                    /86400
+                    * INTEREST_RATE //Interest Rate 
+                    * 1e18 //Account for Decimals // TODO: Should we even include this?
+                    )/100
+                );
+                lenderAssets[_lender][i].lendStartTimeStamp = block.timestamp;
+        }
+        _;
+    }
+
+    // This function will be called internally but will be called by the Web3 App so make it public 
+    function updateAccruedInterestOnBorrow(address _borrower) internal {
+        uint borrowerAssetLength = borrowerAssets[_borrower].length;
+        for (uint i = 0; i < borrowerAssetLength; i++) {
+                borrowerAssets[_borrower][i].borrowQty += //Principal + 
+                (
+                    ((block.timestamp - borrowerAssets[_borrower][i].borrowStartTimeStamp)  //Time
+                    /86400
+                    * BORROW_RATE //Interest Rate 
+                    * 1e18 //Account for Decimals
+                    )/100
+                );
+                borrowerAssets[_borrower][i].borrowStartTimeStamp = block.timestamp;
+        }
+    }
+
+
     constructor(AddressToTokenMap _addressToTokenMapAddress, LendingConfig _lendingConfigAddress, uint256 _interestRate, uint256 _borrowRate) {
         addressToTokenMap = _addressToTokenMapAddress;
         lendingConfig = _lendingConfigAddress;
@@ -71,23 +105,11 @@ contract LendingPool is ReentrancyGuard {
     }
 
     // TODO : make internal
-    //? IMPLEMENTED
     function isLenderTokenOwner(address _token) internal view returns(bool) {
-        address lender = msg.sender;
-        uint256 lenderAssetCount = lenderAssets[lender].length;
+        uint256 lenderAssetCount = lenderAssets[msg.sender].length;
         for (uint i = 0; i < lenderAssetCount; i++) {
-            if (lenderAssets[lender][i].user == lender && lenderAssets[lender][i].token == _token){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function isBorrowerHasBorrow(address _token) internal view returns(bool) {
-        address borrower = msg.sender; 
-        uint256 totalLength = borrowerAssets[borrower].length;
-        for (uint i = 0; i < totalLength; i++) {
-            if (borrowerAssets[borrower][i].user == borrower && borrowerAssets[borrower][i].token == _token){
+            if (lenderAssets[msg.sender][i].user == msg.sender 
+                && lenderAssets[msg.sender][i].token == _token){
                 return true;
             }
         }
@@ -111,7 +133,7 @@ contract LendingPool is ReentrancyGuard {
    /************* Lender functions ************************/
     receive() external payable {}
 
-    function lend(address _token, uint256 _amount) public payable {
+    function lend(address _token, uint256 _amount) public updateEarnedInterest(msg.sender) payable {
         address lender = msg.sender;
         string memory _symbol = addressToTokenMap.getAddress(_token);
 
@@ -162,7 +184,7 @@ contract LendingPool is ReentrancyGuard {
                 lenderAssets[lender].push(userAsset);
         }else {
                 // If lender already lent the token and is lending again, update interest earned before updating lentQty
-              updateEarnedInterest(lender);
+            //   updateEarnedInterest(lender);
               for (uint i = 0; i < lenderAssetLength; i++) {
                 if(lenderAssets[lender][i].token == _token) {
                     lenderAssets[lender][i].lentApy = INTEREST_RATE;
@@ -187,30 +209,7 @@ contract LendingPool is ReentrancyGuard {
         }
     }
     
-    // This function must also call the liquidate ETH if the total balance 
-    // of borrowed assets is less than LIQUIDATION_THRESHOLD of the collateral
-    // TODO: finish by EOD 14/3/2023
-    function liquidateCollateral(address _lender) public view {
-        // 1. Get the USD Balance of the collateral
-        // 2. Get the LIQUIDATION_THRESHOLD
-    }
-
-    // This function will be called internally but will be called by the Web3 App so make it public 
-    function updateEarnedInterest(address _lender) public {
-        uint lenderAssetLength = lenderAssets[_lender].length;
-        for (uint i = 0; i < lenderAssetLength; i++) {
-                lenderAssets[_lender][i].lentQty += //Principal + 
-                (
-                    ((block.timestamp - lenderAssets[_lender][i].lendStartTimeStamp)  //Time
-                    * INTEREST_RATE //Interest Rate 
-                    * 1e18 //Account for Decimals // TODO: Should we even include this?
-                    )/100
-                );
-                lenderAssets[_lender][i].lendStartTimeStamp = block.timestamp;
-        }
-    }
-
-    function withdraw(address _token, uint256 _amount) external payable returns(bool) {
+    function withdraw(address _token, uint256 _amount) external updateEarnedInterest(msg.sender) payable returns(bool) {
         address lender  = msg.sender;
 
         //TODO
@@ -225,7 +224,7 @@ contract LendingPool is ReentrancyGuard {
         // require(getLenderAssetQty(lender, _token) >= _amount,"Not enough balance to withdraw");
 
         // we update the earned rewwards before the lender can withdraw
-        updateEarnedInterest(lender); //100 + 0.00001 eth , 2 // TODO: implement 
+        // updateEarnedInterest(lender); //100 + 0.00001 eth , 2 // TODO: implement 
 
         // amountAvailableToWithdraw must be set on the front-end (modal) to during withdrawl 
         // TODO: Use total USD for all lends instead of just ETH and the token
@@ -255,10 +254,7 @@ contract LendingPool is ReentrancyGuard {
     }
 
     /********************* BORROW FUNCTIONS ******************/
-    // TODO: make updateEarnedInterest a modifier and make the function visibility below as view
-    function getAssetsToBorrow(address _borrower) public returns(BorrowAsset[] memory) {
-        // 
-        updateEarnedInterest(_borrower);
+    function getAssetsToBorrow(address _borrower) public view returns(BorrowAsset[] memory) {
         uint maxAmountToBorrowInUSD = (getUserTotalAmountAvailableForBorrowInUSD(_borrower) * BORROW_THRESHOLD)/ 100; 
         uint length = reserveAssets.length;
 
@@ -282,7 +278,11 @@ contract LendingPool is ReentrancyGuard {
         return lenderTokenQty < reserves[_token] ? lenderTokenQty : reserves[_token];
     }
 
-    function borrow(address _token, uint256 _amount) public nonReentrant onlyAmountGreaterThanZero(_amount) returns(bool) {
+    function borrow(address _token, uint256 _amount) public 
+    nonReentrant 
+    onlyAmountGreaterThanZero(_amount) 
+    returns(bool) {
+        
         address borrower = msg.sender;
         uint256 borrowAmountInUSD = getAmountInUSD(_token, _amount);
 
@@ -291,7 +291,9 @@ contract LendingPool is ReentrancyGuard {
 
         require(_amount <= reserves[_token], "Not enough qty in the reserve pool to borrow");
         uint256 borrowerAssetsLength =  borrowerAssets[borrower].length;
-    
+
+        updateAccruedInterestOnBorrow(borrower);
+
         if(borrowerAssetsLength == 0) {
              UserAsset memory userAsset = UserAsset({
                     user: borrower,
@@ -338,23 +340,21 @@ contract LendingPool is ReentrancyGuard {
         return true;
     } 
 
-    function repay(address _token, uint256 _amount) public nonReentrant onlyAmountGreaterThanZero(_amount) {
+    function repay(address _token, uint256 _amount) public 
+    nonReentrant 
+    onlyAmountGreaterThanZero(_amount){
 
         address borrower = msg.sender;
 
         // checking require conditions
         require(isTokenBorrowed(borrower, _token), "Token was not borrowed, Can't Repay");
-
-        uint qtyBorrowed = getBorrowerAssetQty(borrower, _token);
-
-        require(_amount <= qtyBorrowed, "Repay Amount should less than borrowed amount");
-
+        require(_amount <= getBorrowerAssetQty(borrower, _token), "Repay Amount should less than borrowed amount");
         // Calculate the interest accrued on borrow
+        updateAccruedInterestOnBorrow(borrower);
 
         // 1. Transfer token from User to SC
         bool success = IERC20(_token).transferFrom(borrower, address(this), _amount);
         require(success, "Transfer to user's wallet not succcessful");
-
         // 2. Update Token in Reserve
         reserves[_token] += _amount;
 
@@ -367,8 +367,6 @@ contract LendingPool is ReentrancyGuard {
             }
 
             if(borrowerAssets[borrower][i].borrowQty == 0) {
-                // TODO : Remove the assets from borrowerAssets
-                //? IMPLEMENTED
                 delete borrowerAssets[borrower][i];
                 borrowerAssets[borrower][i] = borrowerAssets[borrower][assetsLen - 1];
                 borrowerAssets[borrower].pop();
