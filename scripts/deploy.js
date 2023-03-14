@@ -67,9 +67,16 @@ async function main() {
   /******** Setting Signer Addresses ********/
   const accounts = await ethers.getSigners();
   const deployerAddress = accounts[0];
+
+  // shubham account's addresses
   const account1 = "0x4644933680922aE17748753ae20264436ca616cc";
   const account2 = "0x021edEFA528293eB8ad9A2d9e0d71011f6297601";
   const account3 = "0xc1f33e8c427fd4126A23A4a9B721BD97Fb11dDe6";
+
+  // sasi account addresses
+  const account4 = "0x315F60449DaB3D321aF75821b576E7F436308635";
+  const account5 = "0x4B40f99E93A8814be7fDe5F6AaFA5e9823E13728";
+  const account6 = "0x3f39Ae58Cb1148ec1Ad903648319359Cfdc34a02";
 
   console.log("deployerAddress : " + deployerAddress.address);
 
@@ -90,6 +97,22 @@ async function main() {
   await daiToken.transfer(account3, numberToEthers(20000));
   await usdcToken.transfer(account3, numberToEthers(50000));
   await linkToken.transfer(account3, numberToEthers(30000));
+
+  console.log(" Transfering assets to account4");
+  await daiToken.transfer(account4, numberToEthers(20000));
+  // console.log(JSON.stringify(tx));
+  await usdcToken.transfer(account4, numberToEthers(50000));
+  await linkToken.transfer(account4, numberToEthers(30000));
+
+  console.log("Transfering assets to account5");
+  await daiToken.transfer(account5, numberToEthers(20000));
+  await usdcToken.transfer(account5, numberToEthers(50000));
+  await linkToken.transfer(account5, numberToEthers(30000));
+
+  console.log("Transfering assets to account6");
+  await daiToken.transfer(account6, numberToEthers(20000));
+  await usdcToken.transfer(account6, numberToEthers(50000));
+  await linkToken.transfer(account6, numberToEthers(30000));
 
   /****************** Adding Assets ******************/
   await addressToTokenMap._setAddress(ETH_ADDRESS, "ETH");

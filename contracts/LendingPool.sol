@@ -187,7 +187,7 @@ contract LendingPool is ReentrancyGuard {
 
         /* TODO : 
             1. withdraw amount = lend amount - borrow amount
-            Hold : 2. lender can't withdraw before locking period expires
+            Hold => V2: 2. lender can't withdraw before locking period expires
         */
 
         require(isLenderTokenOwner(_token), "Not token owner");
