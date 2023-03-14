@@ -13,6 +13,12 @@ module.exports = {
       accounts: [process.env.MAIN_ACCOUNT],
       chainId: 5,
     },
+
+    mumbai: {
+      url: process.env.INFURA_MUMBAI_API_URL,
+      accounts: [process.env.MAIN_ACCOUNT],
+      chainIds: 80001, // mumbai testnet
+    },
   },
   gasReporter: {
     enabled: true,

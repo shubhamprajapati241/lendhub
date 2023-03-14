@@ -39,7 +39,6 @@ describe("LendHub Tests", async () => {
 
   before(async () => {
     /******** Deploy Contracts *********/
-
     const AddressToTokenMap = await ethers.getContractFactory(
       "AddressToTokenMap"
     );
