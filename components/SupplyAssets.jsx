@@ -38,6 +38,7 @@ const SupplyAssets = () => {
               metamaskAssets.map((token, index) => (
                 <RowSupplyAssets
                   key={index}
+                  address={token.address}
                   name={token.name}
                   image={token.image}
                   apy={token.apy}

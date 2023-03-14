@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import LendContext from "./lendContext";
 import { ethers } from "ethers";
 
-const ERC20ABI = require("./erc20_abi.json");
-const addresses = require("../token-list-goerli");
+const ERC20ABI = require("./dai_token_abi.json");
+const tokensList = require("../token-list-goerli");
 
 import { ethIcon, usdcIcon, usdtIcon, daiIcon, wethIcon } from "../assets";
 
@@ -77,27 +77,24 @@ const LendState = (props) => {
   const fetchUserAssets = async (provider, account, networkName) => {
     try {
       const assets = await Promise.all(
-        addresses.token.map(async (token) => {
+        tokensList.token.map(async (token) => {
           let tok;
           if (token.name != "ETH") {
-            // for localhost network -> token will be 0
-            if (networkName != "unknown") {
-              const tokenContract = new ethers.Contract(
-                token.address,
-                ERC20ABI,
-                provider
-              );
-              tok = await tokenContract.balanceOf(account);
-              tok = ethers.utils.formatUnits(tok, token.decimal);
-            } else {
-              tok = 0;
-            }
+            const tokenContract = new ethers.Contract(
+              token.address,
+              ERC20ABI,
+              provider
+            );
+
+            tok = await tokenContract.balanceOf(account);
+            tok = token ? ethers.utils.formatUnits(tok, token.decimal) : 0;
           } else {
             tok = await provider.getBalance(account);
             tok = ethers.utils.formatEther(tok);
           }
           let asset = {
             image: token.image,
+            address: token.address,
             name: token.name,
             apy: token.apy,
             isCollateral: token.isCollateral,
@@ -212,6 +209,11 @@ const LendState = (props) => {
     }
   };
 
+  const ApproveToContinue = async (token, amount) => {
+    console.log("token : " + token);
+    console.log("amount : " + amount);
+  };
+
   const reportError = (error) => {
     console.log(JSON.stringify(error), "red");
   };
@@ -225,6 +227,7 @@ const LendState = (props) => {
         supplyDetails,
         supplyAssetsToPool,
         testApprove,
+        ApproveToContinue,
       }}
     >
       {props.children}

@@ -1,18 +1,27 @@
 // Deployed on Mumbai Test Net
 
-// npx hardhat run scripts/deploy.js --network mumbai
-
 export const BankContractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 // export const AddressStorage = "0xc52DD5479516c332e45Ede69cA198d1773585473";
 // export const LendingPoolAddressProvider =
 //   "0x2F1bd3AE5247C8FF898e2995F505aFFCf4F022f6";
 
-export const DAITokenAddress = "0xf9e4302807674051bc1776915fdc5e902fb8b91a";
-export const LINKTokenAddress = "0xa6423f899e11db249271faddc94b11523b7d242c";
-export const USDCTokenAddress = "0xcdf2b66ae55cb956398142a898f8a6ca5c0dc576";
-export const AddressToTokenMap = "0xf526b0e808f91f352602333d85ed90f10aa5ff33";
-export const LendingConfig = "0xfad72d31068ad2d1f941bb4b3e7d9c0d2026f0e9";
-export const LendingPool = "0x81edaae214d5a628b2b164cca5b42813b0329944";
+// npx hardhat run scripts/deploy.js --network mumbai
+// export const DAITokenAddress = "0xf9e4302807674051bc1776915fdc5e902fb8b91a";
+// export const LINKTokenAddress = "0xa6423f899e11db249271faddc94b11523b7d242c";
+// export const USDCTokenAddress = "0xcdf2b66ae55cb956398142a898f8a6ca5c0dc576";
+// export const AddressToTokenMap = "0xf526b0e808f91f352602333d85ed90f10aa5ff33";
+// export const LendingConfig = "0xfad72d31068ad2d1f941bb4b3e7d9c0d2026f0e9";
+// export const LendingPool = "0x81edaae214d5a628b2b164cca5b42813b0329944";
+
+// npx hardhat run scripts/deploy.js --network localhost
+export const DAITokenAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
+export const LINKTokenAddress = "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512";
+export const USDCTokenAddress = "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0";
+export const AddressToTokenMapAddress =
+  "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9";
+export const LendingConfigAddress =
+  "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9";
+export const LendingPoolAddress = "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707";
 
 // shubham account's addresses
 // const account1 = "0x4644933680922aE17748753ae20264436ca616cc";

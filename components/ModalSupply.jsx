@@ -4,8 +4,16 @@ import { MdLocalGasStation } from "react-icons/md";
 import { FiAlertCircle } from "react-icons/fi";
 import lendContext from "../context/lendContext";
 
-const ModalSupply = ({ name, balance, image, apy, isCollateral, onClose }) => {
-  const { supplyAssetsToPool } = useContext(lendContext);
+const ModalSupply = ({
+  address,
+  name,
+  balance,
+  image,
+  apy,
+  isCollateral,
+  onClose,
+}) => {
+  const { supplyAssetsToPool, ApproveToContinue } = useContext(lendContext);
   const [dollerPrice, setDollerPrice] = useState(0);
 
   const [isInputValidate, setInputValidate] = useState(false);
@@ -153,7 +161,7 @@ const ModalSupply = ({ name, balance, image, apy, isCollateral, onClose }) => {
               : "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
           }
           onClick={() => {
-            if (isInputValidate) setApproved(true);
+            if (isInputValidate) ApproveToContinue(address, inputValue);
           }}
         >
           {!isApproved ? "Aprrove to continue" : "Approved Confirmed !"}

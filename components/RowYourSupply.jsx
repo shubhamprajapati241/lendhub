@@ -1,7 +1,7 @@
 import Image from "next/image";
 import React, { useState } from "react";
 import Switch from "react-switch";
-import { ModalBorderLayout, ModalSupply, ModalWithdraw } from "../components";
+import { ModalBorderLayout, ModalWithdraw } from "../components";
 
 const RowYourSupply = ({
   name,
@@ -11,7 +11,6 @@ const RowYourSupply = ({
   dollarPrice,
   isCollateral,
 }) => {
-  const [showSupplyModal, setShowSupplyModal] = useState(false);
   const [showWithdrawModal, setShowWihdrawModal] = useState(false);
 
   return (
@@ -71,28 +70,9 @@ const RowYourSupply = ({
             >
               Withdraw
             </button>
-            <button
-              className="border-spacing-1 py-[6px] ml-1 rounded-[4px] outline-none text-[12px] md:text-[13px] text-black bg-slate-50 border border-slate-200 p-2 hover:border-slate-500"
-              onClick={() => setShowSupplyModal(true)}
-            >
-              Lend
-            </button>
           </div>
         </td>
       </tr>
-      <ModalBorderLayout
-        isVisible={showSupplyModal}
-        onClose={() => setShowSupplyModal(false)}
-      >
-        <ModalSupply
-          name={name}
-          balance={balance}
-          image={image}
-          apy={apy}
-          isCollateral={isCollateral}
-          onClose={() => setShowSupplyModal(false)}
-        />
-      </ModalBorderLayout>
       <ModalBorderLayout
         isVisible={showWithdrawModal}
         onClose={() => setShowWihdrawModal(false)}

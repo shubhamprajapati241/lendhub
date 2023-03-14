@@ -2,7 +2,14 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { ModalBorderLayout, ModalSupply } from "../components";
 
-const RowSupplyAssets = ({ name, image, balance, apy, isCollateral }) => {
+const RowSupplyAssets = ({
+  address,
+  name,
+  image,
+  balance,
+  apy,
+  isCollateral,
+}) => {
   const [showModal, setShowModal] = useState(false);
   return (
     <>
@@ -58,6 +65,7 @@ const RowSupplyAssets = ({ name, image, balance, apy, isCollateral }) => {
         onClose={() => setShowModal(false)}
       >
         <ModalSupply
+          address={address}
           name={name}
           balance={balance}
           image={image}
