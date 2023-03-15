@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import LendContext from "./lendContext";
 import { ethers } from "ethers";
 
@@ -44,21 +44,23 @@ const LendState = (props) => {
     currentAccount: null,
   });
 
+  const [userAssets, setUserAssets] = useState([]);
+  const [supplyAssets, setSupplyAssets] = useState([]);
+
   //  contract details setting
   const [contract, setContract] = useState({
     bankContract: null,
   });
 
-  // for storing user assets from metamask
-  const [metamaskAssets, setMetamaskAssets] = useState([]);
-
   // for storing user supply assets in the lending pool
-  const [supplyDetails, setSupplyDetails] = useState({
-    assets: [],
-    details: "",
+  const [supplySummary, setSupplySummary] = useState({
+    totalUSDBalance: 0,
+    weightedAvgAPY: 0,
+    totalUSDCollateral: 0,
   });
 
   const connectWallet = async () => {
+    console.warn("Connecting to wallet...");
     const { ethereum } = window;
     const failMessage = "Please install Metamask & connect your Metamask";
     try {
@@ -87,9 +89,7 @@ const LendState = (props) => {
           signer: signer,
           currentAccount: currentAddress,
         });
-
-        console.log("Connected to wallet....");
-        fetchUserAssets(provider, currentAddress, networkName);
+        console.warn("Connected to wallet....");
       } else {
         return failMessage;
       }
@@ -98,23 +98,27 @@ const LendState = (props) => {
     }
   };
 
-  const fetchUserAssets = async (provider, account, networkName) => {
+  const getUserAssets = async () => {
+    console.warn("Getting user Assets...");
     try {
       const assets = await Promise.all(
         tokensList.token.map(async (token) => {
           let tok;
-          console.log(token.name + " : " + token.address);
+
           if (token.name != "ETH") {
+            // TODO : getContract()
+            // 2. Toke
             const tokenContract = new ethers.Contract(
               token.address,
-              TokenABI,
-              provider
+              TokenABI.abi,
+              metamaskDetails.provider
             );
-
-            tok = await tokenContract.balanceOf(account);
+            tok = await tokenContract.balanceOf(metamaskDetails.currentAccount);
             tok = token ? ethers.utils.formatUnits(tok, token.decimal) : 0;
           } else {
-            tok = await provider.getBalance(account);
+            tok = await metamaskDetails.provider.getBalance(
+              metamaskDetails.currentAccount
+            );
             tok = ethers.utils.formatEther(tok);
           }
           let asset = {
@@ -125,11 +129,14 @@ const LendState = (props) => {
             isCollateral: token.isCollateral,
             balance: tok,
           };
+
           return asset;
         })
       );
-      setMetamaskAssets(assets);
-      fetchLendAssets(account);
+
+      setUserAssets(assets);
+
+      return assets;
     } catch (error) {
       reportError(error);
     }
@@ -245,7 +252,7 @@ const LendState = (props) => {
 
       await transaction.wait();
       console.log("Supply Transaction done....");
-      fetchLendAssets(metamaskDetails.currentAccount);
+      getSupplyAssets(metamaskDetails.currentAccount);
       return true;
     } catch (error) {
       reportError(error);
@@ -253,63 +260,101 @@ const LendState = (props) => {
     }
   };
 
-  // const structuredAssets = (assets) => {
-  //   return assets.map((asset) => ({
-  //     token: asset.token,
-  //     balance: Number(asset.lentQty),
-  //     apy: Number(asset.lentApy),
-  //   }));
-  // };
+  const structuredAssets2 = (assets) => {
+    var result = tokensList.token
+      .filter((tokenList) => {
+        return assets.some((assetList) => {
+          return tokenList.address == assetList.token;
+        });
+      })
+      .map((itm) => ({
+        ...assets.find((item) => item.token === itm.address && item),
+        ...itm,
+      }));
+    return result;
+  };
+
+  const structuredAssets = (assets) => {
+    // TODO : getAmountInUSD() => lendUSD => total USD
+    return assets.map((asset) => ({
+      token: asset.token,
+      balance: Number(asset.lentQty) / 1e18,
+      apy: Number(asset.lentApy),
+    }));
+  };
 
   /*************************** Component : Your Supplies ***************************/
-  const fetchLendAssets = async (account) => {
-    console.log("Fetching Supply assets");
+  const getSupplyAssets = async () => {
+    console.warn("Getting Supply assets.......");
+
     try {
-      const contract = await getContract(LendingPoolAddress, LendingPoolABI);
-      const assets = await contract.getLenderAssets(account);
-
-      const ass = assets.map((asset) => ({
-        token: asset.token,
-        balance: Number(asset.lentQty),
-        apy: Number(asset.lentApy),
-      }));
-
-      console.log(ass);
-
-      console.log("Lender Supply Assets");
+      const contract = new ethers.Contract(
+        LendingPoolAddress,
+        LendingPoolABI.abi,
+        metamaskDetails.provider
+      );
+      const assets = await contract.getLenderAssets(
+        metamaskDetails.currentAccount
+      );
       // console.log(assets);
-      console.log("Supply Transaction done....");
-      // return true;
+      const supplyAssets = structuredAssets(assets);
+
+      console.log(supplyAssets);
+      const supplyAsset2 = structuredAssets2(supplyAssets);
+      console.log(JSON.stringify(supplyAsset2));
+
+      const totalUSDBalance = supplyAssets.reduce((bal, item) => {
+        return bal + item.balance;
+      }, 0);
+
+      const weightedAvgAPY = supplyAssets.reduce((bal, item) => {
+        return bal + item.apy;
+      }, 0);
+
+      const totalUSDCollateral = supplyAssets.reduce((bal, item) => {
+        return bal + item.balance;
+      }, 0);
+
+      let summary = {
+        totalUSDBalance: totalUSDBalance,
+        weightedAvgAPY: weightedAvgAPY / supplyAssets.length,
+        totalUSDCollateral: totalUSDCollateral,
+      };
+
+      setSupplySummary(summary);
+      setSupplyAssets(supplyAsset2);
+      console.log("Got Supply assets.....");
     } catch (error) {
       reportError(error);
       return error;
     }
-    let assets = [
-      {
-        image: ethIcon,
-        name: "ETH",
-        balance: "100",
-        dollarPrice: "300",
-        apy: 3.18,
-        isCollateral: true,
-      },
-      {
-        image: daiIcon,
-        name: "DAI",
-        balance: "120",
-        dollarPrice: "120",
-        apy: "3.18",
-        isCollateral: false,
-      },
-    ];
 
-    let details = {
-      totalBalance: "10.603.20",
-      totalAPY: "43.61",
-      totalCollateral: "10.603.20",
-    };
+    // let assets = [
+    //   {
+    //     image: ethIcon,
+    //     name: "ETH",
+    //     balance: "100",
+    //     dollarPrice: "300",
+    //     apy: 3.18,
+    //     isCollateral: true,
+    //   },
+    //   {
+    //     image: daiIcon,
+    //     name: "DAI",
+    //     balance: "120",
+    //     dollarPrice: "120",
+    //     apy: "3.18",
+    //     isCollateral: false,
+    //   },
+    // ];
 
-    setSupplyDetails({ assets: assets, details: details });
+    // let details = {
+    //   totalBalance: "10.603.20",
+    //   totalAPY: "43.61",
+    //   totalCollateral: "10.603.20",
+    // };
+
+    // setSupplyDetails({ assets: assets, details: details });
   };
 
   const getAssets = async () => {
@@ -344,13 +389,16 @@ const LendState = (props) => {
       value={{
         metamaskDetails,
         connectWallet,
-        metamaskAssets,
-        supplyDetails,
+        getUserAssets,
+        supplySummary,
         supplyAssetsToPool,
         testApprove,
         ApproveToContinue,
         LendAsset,
         getAssets,
+        userAssets,
+        getSupplyAssets,
+        supplyAssets,
       }}
     >
       {props.children}

@@ -7,16 +7,16 @@ import {
 import lendContext from "../context/lendContext";
 
 const YourSupply = () => {
-  const { supplyDetails } = useContext(lendContext);
+  const { supplySummary, supplyAssets } = useContext(lendContext);
   return (
     <div className="w-full md:w-1/2 h-30 bg-white rounded-md ">
       <h1 className="px-6 py-5 font-semibold text-md">Your supplies</h1>
       {/* <p className="py-5 p-6 text-sm text-gray-500">Nothing supplied yet</p> */}
 
       <YourSupplyDetails
-        totalBalance={supplyDetails.details.totalBalance}
-        totalAPY={supplyDetails.details.totalAPY}
-        totalCollateral={supplyDetails.details.totalCollateral}
+        totalBalance={supplySummary.totalUSDBalance}
+        totalAPY={supplySummary.weightedAvgAPY}
+        totalCollateral={supplySummary.totalUSDCollateral}
       />
 
       <div className="pt-3">
@@ -40,8 +40,8 @@ const YourSupply = () => {
           </thead>
 
           <tbody>
-            {supplyDetails.assets.length > 0 ? (
-              supplyDetails.assets.map((token, index) => (
+            {supplyAssets.length > 0 ? (
+              supplyAssets.map((token, index) => (
                 <RowYourSupply
                   key={index}
                   name={token.name}

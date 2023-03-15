@@ -1,14 +1,10 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 
 import lendContext from "../context/lendContext";
 import { LoaderSkeleton, RowSupplyAssets } from "../components";
 
 const SupplyAssets = () => {
-  const { metamaskAssets } = useContext(lendContext);
-
-  console.log("Metamask Assets");
-  console.log(metamaskAssets);
-
+  const { userAssets } = useContext(lendContext);
   return (
     <div className="w-full md:w-1/2 h-30 bg-white rounded-md ">
       <h1 className="px-6 py-5 font-semibold text-md">Assets to supply</h1>
@@ -34,8 +30,8 @@ const SupplyAssets = () => {
           </thead>
 
           <tbody>
-            {metamaskAssets.length > 0 ? (
-              metamaskAssets.map((token, index) => (
+            {userAssets.length > 0 ? (
+              userAssets.map((token, index) => (
                 <RowSupplyAssets
                   key={index}
                   address={token.address}

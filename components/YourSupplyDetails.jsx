@@ -13,7 +13,7 @@ const YourSupplyDetails = ({ totalBalance, totalAPY, totalCollateral }) => {
       <div className="flex border border-slate-200 rounded-md md:text-[13px] text-[12px] p-1 gap-1">
         <p className="text-slate-500 font-normal">APY</p>
         <div className="font-medium">
-          {totalAPY ? `$${totalAPY}` : <LoaderDiv />}
+          {totalAPY ? `${totalAPY}` : <LoaderDiv />}
         </div>
       </div>
       <div className="flex border border-slate-200 rounded-md md:text-[13px] text-[12px] p-1 gap-1">

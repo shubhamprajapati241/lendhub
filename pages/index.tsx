@@ -11,12 +11,17 @@ import {
 } from "../components";
 
 const Home: NextPage = () => {
-  const { connectWallet, metamaskDetails } = useContext(lendContext);
+  const { connectWallet, metamaskDetails, getUserAssets, getSupplyAssets } =
+    useContext(lendContext);
 
   useEffect(() => {
     connectWallet();
   }, []);
 
+  useEffect(() => {
+    getUserAssets();
+    getSupplyAssets();
+  }, [metamaskDetails]);
   return (
     <div>
       <Head>
