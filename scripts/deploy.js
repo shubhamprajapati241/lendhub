@@ -1,4 +1,5 @@
 const { ethers } = require("hardhat");
+// const { ETHAddress } = require("../addresses");
 
 const numberToEthers = (number) => {
   return ethers.utils.parseEther(number.toString());
@@ -33,21 +34,21 @@ async function main() {
   const daiToken = await DAIToken.deploy();
   await daiToken.deployed();
   const DAI_ADDRESS = daiToken.address;
-  console.log("export const DAITokenAddress = ", DAI_ADDRESS);
+  console.log('export const DAITokenAddress = "' + DAI_ADDRESS + '"');
 
   /********************** Deploy DAIToken *************************/
   const LINKToken = await ethers.getContractFactory("LinkToken");
   const linkToken = await LINKToken.deploy();
   await linkToken.deployed();
   const LINK_ADDRESS = linkToken.address;
-  console.log("export const LINKTokenAddress =", LINK_ADDRESS);
+  console.log('export const LINKTokenAddress = "' + LINK_ADDRESS + '"');
 
   /********************** Deploy DAIToken *************************/
   const USDCToken = await ethers.getContractFactory("USDCToken");
   const usdcToken = await USDCToken.deploy();
   await usdcToken.deployed();
   const USDC_ADDRESS = usdcToken.address;
-  console.log("export const USDCTokenAddress =", USDC_ADDRESS);
+  console.log('export const USDCTokenAddress = "' + USDC_ADDRESS + '"');
 
   /********************** Deploy AddressToTokenMap *************************/
   const AddressToTokenMap = await ethers.getContractFactory(
@@ -55,13 +56,19 @@ async function main() {
   );
   const addressToTokenMap = await AddressToTokenMap.deploy();
   await addressToTokenMap.deployed();
-  console.log("export const AddressToTokenMap =", addressToTokenMap.address);
+  console.log(
+    'export const AddressToTokenMapAddress = "' +
+      addressToTokenMap.address +
+      '"'
+  );
 
   /********************** Deploy LendingConfig *************************/
   const LendingConfig = await ethers.getContractFactory("LendingConfig");
   const lendingConfig = await LendingConfig.deploy();
   await lendingConfig.deployed();
-  console.log("export const LendingConfig =", lendingConfig.address);
+  console.log(
+    'export const LendingConfigAddress = "' + lendingConfig.address + '"'
+  );
 
   /********************** Deploy LendingPoolV2 *************************/
   const LendingPool = await ethers.getContractFactory("LendingPool");
@@ -72,7 +79,9 @@ async function main() {
     4
   );
   await lendingPool.deployed();
-  console.log("export const LendingPool =", lendingPool.address);
+  console.log(
+    'export const LendingPoolAddress = "' + lendingPool.address + '"'
+  );
 
   /******** Setting Signer Addresses ********/
   const accounts = await ethers.getSigners();

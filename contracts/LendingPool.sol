@@ -132,6 +132,7 @@ contract LendingPool is ReentrancyGuard {
 
    /************* Lender functions ************************/
     receive() external payable {}
+    fallback() external payable {}
 
     function lend(address _token, uint256 _amount) public updateEarnedInterest(msg.sender) payable {
         address lender = msg.sender;
@@ -167,45 +168,39 @@ contract LendingPool is ReentrancyGuard {
             reserveAssets.push(_token);
         }
 
+        
+        // 1. Get the length on userasset array
+        // 2. If no assets => create a asset struct => push
+        // 3. If array not empty => check is token is in array or not 
+        // 4. If token is in array => update values
+        // 5. If token is not in array => create a asset struct => push
+
         uint lenderAssetLength = lenderAssets[lender].length;
-        if(lenderAssetLength == 0 ) {
-             UserAsset memory userAsset = UserAsset({
-                    user: lender,
-                    token: _token,
-                    lentQty: _amount,
-                    borrowQty: 0,
-                    lentApy: INTEREST_RATE,
-                    borrowApy: 0,
-                    lendStartTimeStamp: block.timestamp,
-                    borrowStartTimeStamp:0,
-                    borrowEndTimeStamp : 0,
-                    maturityPeriod : 0
-                });
-                lenderAssets[lender].push(userAsset);
+        // token is not owned by lender so push into lender asset
+        if(!isLenderTokenOwner(_token)) { 
+            UserAsset memory userAsset = UserAsset({
+                user: lender,
+                token: _token,
+                lentQty: _amount,
+                borrowQty: 0,
+                lentApy: INTEREST_RATE,
+                borrowApy: 0,
+                lendStartTimeStamp: block.timestamp,
+                borrowStartTimeStamp:0,
+                borrowEndTimeStamp : 0,
+                maturityPeriod : 0
+            });
+            lenderAssets[lender].push(userAsset);
         }else {
-                // If lender already lent the token and is lending again, update interest earned before updating lentQty
+            // If lender already lent the token and is lending again, update interest earned before updating lentQty
             //   updateEarnedInterest(lender);
               for (uint i = 0; i < lenderAssetLength; i++) {
                 if(lenderAssets[lender][i].token == _token) {
                     lenderAssets[lender][i].lentApy = INTEREST_RATE;
                     lenderAssets[lender][i].lentQty += _amount;
                     lenderAssets[lender][i].lendStartTimeStamp = block.timestamp;
-                }else {
-                    UserAsset memory userAsset = UserAsset({
-                        user: lender,
-                        token: _token,
-                        lentQty: _amount,
-                        borrowQty: 0,
-                        lentApy: INTEREST_RATE,
-                        borrowApy: 0,
-                        lendStartTimeStamp: block.timestamp,
-                        borrowStartTimeStamp:0,
-                        borrowEndTimeStamp : 0,
-                        maturityPeriod : 0
-                    });
-                    lenderAssets[lender].push(userAsset); 
                 }
-            }
+              }
         }
     }
     

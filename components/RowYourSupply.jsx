@@ -29,7 +29,7 @@ const RowYourSupply = ({
           </div>
         </td>
         <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4">
-          <p className="text-center md:text-[13px] text-[12px] text-gray-600 font-semibold">
+          {/* <p className="text-center md:text-[13px] text-[12px] text-gray-600 font-semibold">
             {Number(balance).toFixed(2).toString(2).length < 10
               ? Number(balance).toFixed(2).toString().slice(0, 10)
               : `${Number(balance).toFixed(2).toString().slice(0, 10)}...`}
@@ -41,7 +41,7 @@ const RowYourSupply = ({
             {Number(dollarPrice).toFixed(2).toString(2).length < 10
               ? Number(dollarPrice).toFixed(2).toString().slice(0, 10)
               : `${Number(dollarPrice).toFixed(2).toString().slice(0, 10)}...`}
-          </p>
+          </p> */}
         </td>
         <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4">
           <p className="text-center md:text-[13px] text-[12px] text-gray-600 font-semibold">

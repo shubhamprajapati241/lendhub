@@ -1,47 +1,45 @@
-import { ethIcon, usdcIcon, usdtIcon, daiIcon, wethIcon } from "./assets";
+import { ethIcon, usdcIcon, daiIcon, linkIcon } from "./assets";
+import {
+  ETHAddress,
+  DAITokenAddress,
+  USDCTokenAddress,
+  LINKTokenAddress,
+} from "./addresses";
 
 export const token = [
   {
     image: ethIcon,
     name: "ETH",
-    address: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
+    address: ETHAddress,
     decimal: "18",
-    apy: 3.18,
+    apy: 3,
     isCollateral: true,
   },
 
   {
     image: daiIcon,
     name: "DAI",
-    address: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+    address: DAITokenAddress,
     decimal: "18",
-    apy: 3.18,
+    apy: 3,
     isCollateral: false,
   },
   {
     image: usdcIcon,
     name: "USDC",
-    address: "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+    address: USDCTokenAddress,
     decimal: "18",
-    apy: 3.18,
+    apy: 3,
     isCollateral: false,
   },
-  // {
-  //   image: usdtIcon,
-  //   name: "USDT",
-  //   address: "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
-  //   decimal: "6",
-  //   apy: 3.18,
-  //   isCollateral: false,
-  // },
-  // {
-  //   image: wethIcon,
-  //   name: "WETH",
-  //   address: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
-  //   decimal: "18",
-  //   apy: 3.18,
-  //   isCollateral: false,
-  // },
+  {
+    image: linkIcon,
+    name: "LINK",
+    address: LINKTokenAddress,
+    decimal: "18",
+    apy: 3,
+    isCollateral: false,
+  },
 ];
 
 // export const token = [

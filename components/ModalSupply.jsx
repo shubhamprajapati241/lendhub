@@ -2,7 +2,11 @@ import Image from "next/image";
 import React, { useState, useContext } from "react";
 import { MdLocalGasStation } from "react-icons/md";
 import { FiAlertCircle } from "react-icons/fi";
+import { CgSpinner } from "react-icons/ci";
+
 import lendContext from "../context/lendContext";
+import { toast } from "react-toastify";
+import { ReactComponent as Loader } from "../assets/loader.svg";
 
 const ModalSupply = ({
   address,
@@ -13,11 +17,13 @@ const ModalSupply = ({
   isCollateral,
   onClose,
 }) => {
-  const { supplyAssetsToPool, ApproveToContinue } = useContext(lendContext);
+  const { supplyAssetsToPool, ApproveToContinue, LendAsset, connectWallet } =
+    useContext(lendContext);
   const [dollerPrice, setDollerPrice] = useState(0);
 
   const [isInputValidate, setInputValidate] = useState(false);
-  const [isApproved, setApproved] = useState(false);
+  const [loadingOnApprove, setLoadingOnApprove] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
   const setMax = () => {
@@ -45,6 +51,25 @@ const ModalSupply = ({
       setInputValidate(false);
     }
   };
+
+  const handleApprove = async () => {
+    const isTokenapprove = await ApproveToContinue(address, inputValue);
+    console.log(isTokenapprove);
+    toast.success(`Approved ${inputValue} ${name}`);
+    if (isTokenapprove) setIsApproved(true);
+  };
+
+  const handleSupply = async () => {
+    const isSupplied = await LendAsset(address, inputValue);
+    console.log(isSupplied);
+
+    toast.success(`Supplied ${inputValue} ${name}`);
+    if (isSupplied) {
+      onClose();
+      await connectWallet();
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-between mb-3">
@@ -154,33 +179,50 @@ const ModalSupply = ({
       </div>
 
       <div className={!inputValue ? "hidden" : "block"}>
-        <button
-          className={
-            isApproved
-              ? "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2"
-              : "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
-          }
-          onClick={() => {
-            if (isInputValidate) ApproveToContinue(address, inputValue);
-          }}
-        >
-          {!isApproved ? "Aprrove to continue" : "Approved Confirmed !"}
-        </button>
-
-        <button
-          className={
-            isApproved
-              ? "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
-              : "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2"
-          }
-          onClick={() => {
-            if (!isApproved) return;
-            else supplyAssetsToPool(name, inputValue);
-            setApproved(false);
-          }}
-        >
-          Supply {name}
-        </button>
+        {name == "ETH" ? (
+          <button
+            className={
+              "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
+            }
+            onClick={() => {
+              if (isInputValidate) handleSupply();
+            }}
+          >
+            Supply {name}
+          </button>
+        ) : (
+          <div>
+            {" "}
+            <button
+              className={
+                isApproved
+                  ? "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2"
+                  : "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
+              }
+              onClick={() => {
+                if (isInputValidate) {
+                  setLoadingOnApprove(true);
+                  handleApprove();
+                }
+              }}
+            >
+              {!isApproved ? "Aprrove to continue" : "Approved Confirmed !"}
+            </button>
+            <button
+              className={
+                isApproved
+                  ? "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
+                  : "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2"
+              }
+              onClick={() => {
+                if (!isApproved) return;
+                else handleSupply();
+              }}
+            >
+              Supply {name}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

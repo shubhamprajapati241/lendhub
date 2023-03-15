@@ -66,6 +66,10 @@ contract LendingConfig {
         return true;
     }
 
+    function getAssets() public view returns(Asset[] memory) {
+        return assets;
+    }
+
     function isTokenInAssets(address _token) public view returns(bool){
         uint256 assetCount = assets.length;
         for (uint i = 0; i < assetCount; i++) {

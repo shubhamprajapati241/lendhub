@@ -2,14 +2,36 @@ import React, { useState } from "react";
 import LendContext from "./lendContext";
 import { ethers } from "ethers";
 
-const ERC20ABI = require("./dai_token_abi.json");
+// TODO : use in Goerli
+// const TokenABI = require("./contractAbis/tokenAbi.json");
+// const LendingPoolABI = require("./contractAbis/lendingPoolAbi.json");
+// const LendingConfigABI = require("./contractAbis/lendingConfigAbi.json");
+// const AddressToTokenMapABI = require("./contractAbis/addressToTokenMapAbi.json");
+
+const TokenABI = require("../artifacts/contracts/DAIToken.sol/DAIToken.json");
+const LendingPoolABI = require("../artifacts/contracts/LendingPool.sol/LendingPool.json");
+const LendingConfigABI = require("../artifacts/contracts/LendingConfig.sol/LendingConfig.json");
+const AddressToTokenMapABI = require("../artifacts/contracts/AddressToTokenMap.sol/AddressToTokenMap.json");
+
 const tokensList = require("../token-list-goerli");
 
 import { ethIcon, usdcIcon, usdtIcon, daiIcon, wethIcon } from "../assets";
 
 // Importing Bank contract details
-// import { BankContractAddress } from "../addresses";
-import BankContractABI from "../contractAbis/Bank.json";
+import {
+  BankContractAddress,
+  DAITokenAddress,
+  LINKTokenAddress,
+  USDCTokenAddress,
+  AddressToTokenMapAddress,
+  LendingConfigAddress,
+  LendingPoolAddress,
+} from "../addresses";
+import BankContractABI from "./contractAbis/Bank.json";
+
+const numberToEthers = (number) => {
+  return ethers.utils.parseEther(number.toString());
+};
 
 const LendState = (props) => {
   //* Declaring all the states
@@ -65,6 +87,8 @@ const LendState = (props) => {
           signer: signer,
           currentAccount: currentAddress,
         });
+
+        console.log("Connected to wallet....");
         fetchUserAssets(provider, currentAddress, networkName);
       } else {
         return failMessage;
@@ -79,10 +103,11 @@ const LendState = (props) => {
       const assets = await Promise.all(
         tokensList.token.map(async (token) => {
           let tok;
+          console.log(token.name + " : " + token.address);
           if (token.name != "ETH") {
             const tokenContract = new ethers.Contract(
               token.address,
-              ERC20ABI,
+              TokenABI,
               provider
             );
 
@@ -104,39 +129,10 @@ const LendState = (props) => {
         })
       );
       setMetamaskAssets(assets);
-      fetchSupplyAssets();
+      fetchLendAssets(account);
     } catch (error) {
       reportError(error);
     }
-  };
-
-  const fetchSupplyAssets = () => {
-    let assets = [
-      {
-        image: ethIcon,
-        name: "ETH",
-        balance: "100",
-        dollarPrice: "300",
-        apy: 3.18,
-        isCollateral: true,
-      },
-      {
-        image: daiIcon,
-        name: "DAI",
-        balance: "120",
-        dollarPrice: "120",
-        apy: "3.18",
-        isCollateral: false,
-      },
-    ];
-
-    let details = {
-      totalBalance: "10.603.20",
-      totalAPY: "43.61",
-      totalCollateral: "10.603.20",
-    };
-
-    setSupplyDetails({ assets: assets, details: details });
   };
 
   const supplyAssetsToPool = async (name, amount) => {
@@ -176,46 +172,171 @@ const LendState = (props) => {
     //   // console.log(contractBalance);
   };
 
+  const getContract = async (address, abi) => {
+    const contract = new ethers.Contract(
+      address,
+      abi.abi,
+      metamaskDetails.provider
+    );
+    return contract;
+  };
+
   const testApprove = async () => {
-    const daiTokenAddress = "0xBa8DCeD3512925e52FE67b1b5329187589072A55";
-    const deFiDappAddress = "0xC8e7Ac007078BD3658A79218b28A8598BcBa97A6";
-    const amount = ethers.utils.parseEther("10000000");
+    // const daiTokenAddress = "0xBa8DCeD3512925e52FE67b1b5329187589072A55";
+    // const deFiDappAddress = "0xC8e7Ac007078BD3658A79218b28A8598BcBa97A6";
+    // const amount = ethers.utils.parseEther("10000000");
+    // try {
+    //   //* Making approve functionality
+    //   const tokenContract = new ethers.Contract(
+    //     daiTokenAddress,
+    //     TokenABI,
+    //     metamaskDetails.provider
+    //   );
+    //   const balanceUser = await tokenContract.balanceOf(
+    //     metamaskDetails.currentAccount
+    //   );
+    //   console.log("balanceUser : " + balanceUser);
+    //   const balanceSC = await tokenContract.balanceOf(deFiDappAddress);
+    //   console.log("balanceSC : " + balanceSC);
+    //   console.log(metamaskDetails.currentAccount);
+    //   await tokenContract
+    //     .connect(metamaskDetails.signer)
+    //     .approve(deFiDappAddress, amount);
+    //   return true;
+    // } catch (error) {
+    //   reportError(error);
+    // }
+  };
+
+  /**************************** APPROVE TOKENS ************************************/
+  const ApproveToContinue = async (tokenAddress, approveAmount) => {
+    const amount = ethers.utils.parseEther(approveAmount);
+    console.log("tokenAddress : " + tokenAddress);
+    console.log("LendingPoolAddress : " + LendingPoolAddress);
+    console.log("approveAmount : " + amount);
 
     try {
-      //* Making approve functionality
-      const tokenContract = new ethers.Contract(
-        daiTokenAddress,
-        ERC20ABI,
-        metamaskDetails.provider
-      );
-
-      const balanceUser = await tokenContract.balanceOf(
-        metamaskDetails.currentAccount
-      );
-      console.log("balanceUser : " + balanceUser);
-
-      const balanceSC = await tokenContract.balanceOf(deFiDappAddress);
-      console.log("balanceSC : " + balanceSC);
-
-      console.log(metamaskDetails.currentAccount);
-
-      await tokenContract
+      const contract = await getContract(tokenAddress, TokenABI);
+      const transaction = await contract
         .connect(metamaskDetails.signer)
-        .approve(deFiDappAddress, amount);
-
-      console.log("Transaction done....");
+        .approve(LendingPoolAddress, amount);
+      await transaction.wait();
+      console.log("Approve Transaction done....");
+      return true;
     } catch (error) {
       reportError(error);
+      return error;
     }
   };
 
-  const ApproveToContinue = async (token, amount) => {
+  /*************************** Lend Functionality ***************************/
+  const LendAsset = async (token, supplyAmount) => {
+    console.log("Lending....");
+    const amount = numberToEthers(supplyAmount);
+    const valueOption = { value: amount };
     console.log("token : " + token);
-    console.log("amount : " + amount);
+    console.log("supplyAmount : " + amount);
+
+    try {
+      const contract = await getContract(LendingPoolAddress, LendingPoolABI);
+      const transaction = await contract
+        .connect(metamaskDetails.signer)
+        .lend(token, amount, valueOption);
+
+      await transaction.wait();
+      console.log("Supply Transaction done....");
+      fetchLendAssets(metamaskDetails.currentAccount);
+      return true;
+    } catch (error) {
+      reportError(error);
+      return error;
+    }
+  };
+
+  // const structuredAssets = (assets) => {
+  //   return assets.map((asset) => ({
+  //     token: asset.token,
+  //     balance: Number(asset.lentQty),
+  //     apy: Number(asset.lentApy),
+  //   }));
+  // };
+
+  /*************************** Component : Your Supplies ***************************/
+  const fetchLendAssets = async (account) => {
+    console.log("Fetching Supply assets");
+    try {
+      const contract = await getContract(LendingPoolAddress, LendingPoolABI);
+      const assets = await contract.getLenderAssets(account);
+
+      const ass = assets.map((asset) => ({
+        token: asset.token,
+        balance: Number(asset.lentQty),
+        apy: Number(asset.lentApy),
+      }));
+
+      console.log(ass);
+
+      console.log("Lender Supply Assets");
+      // console.log(assets);
+      console.log("Supply Transaction done....");
+      // return true;
+    } catch (error) {
+      reportError(error);
+      return error;
+    }
+    let assets = [
+      {
+        image: ethIcon,
+        name: "ETH",
+        balance: "100",
+        dollarPrice: "300",
+        apy: 3.18,
+        isCollateral: true,
+      },
+      {
+        image: daiIcon,
+        name: "DAI",
+        balance: "120",
+        dollarPrice: "120",
+        apy: "3.18",
+        isCollateral: false,
+      },
+    ];
+
+    let details = {
+      totalBalance: "10.603.20",
+      totalAPY: "43.61",
+      totalCollateral: "10.603.20",
+    };
+
+    setSupplyDetails({ assets: assets, details: details });
+  };
+
+  const getAssets = async () => {
+    console.log("Getting assets");
+    try {
+      const contract = await getContract(
+        LendingConfigAddress,
+        LendingConfigABI
+      );
+
+      const assets = await contract.getAssets();
+
+      // const ass = assets.map((asset) => ({
+      //   token: asset.token,
+      //   balance: Number(asset.lentQty),
+      //   apy: Number(asset.lentApy),
+      // }));
+
+      console.log(assets);
+    } catch (error) {
+      reportError(error);
+      return error;
+    }
   };
 
   const reportError = (error) => {
-    console.log(JSON.stringify(error), "red");
+    console.error(JSON.stringify(error));
   };
 
   return (
@@ -228,6 +349,8 @@ const LendState = (props) => {
         supplyAssetsToPool,
         testApprove,
         ApproveToContinue,
+        LendAsset,
+        getAssets,
       }}
     >
       {props.children}
