@@ -336,57 +336,69 @@ describe("LendHub Tests", async () => {
     console.log(result);
   });
 
-  // it("6. Lender1 should be able to withdraw 10 ETH ", async () => {
-  //   const valueOption = { value: numberToEthers(10) };
-  //   const withdrawAmount = numberToEthers(10);
-  //   const asset = ETH_ADDRESS;
-  //   const user = lender1;
+  it("6. Lender1 should be able to withdraw 10 ETH ", async () => {
+    const withdrawAmount = numberToEthers(10);
+    const valueOption = { value: withdrawAmount };
+    const asset = ETH_ADDRESS;
+    const user = lender1;
 
-  //   console.log("************** BEFORE ETH WITHDRAW **************");
-  //   console.log("1. Qty to be withdraw : " + withdrawAmount / 1e18);
+    console.log("************** BEFORE ETH WITHDRAW **************");
+    console.log("1. Qty to be withdraw : " + withdrawAmount / 1e18);
 
-  //   const beforeReserveAmount = await lendingPool.reserves(asset);
-  //   console.log("2. Reserves: " + beforeReserveAmount / 1e18);
+    const beforeReserveAmount = await lendingPool.reserves(asset);
+    console.log("2. Reserves: " + beforeReserveAmount / 1e18);
 
-  //   let beforeLenderAssetAmount = await lendingPool.getLenderAssetQty(
-  //     user.address,
-  //     asset
-  //   );
-  //   console.log("3. Lender lent balance : " + beforeLenderAssetAmount / 1e18);
+    let beforeLenderAssetAmount = await lendingPool.getLenderAssetQty(
+      user.address,
+      asset
+    );
+    console.log("3. Lender lent balance : " + beforeLenderAssetAmount / 1e18);
 
-  //   const beforeContractAmount = await lendingPool.getContractETHBalance();
-  //   console.log("4. Contract ETH Balance : " + beforeContractAmount / 1e18);
-  //   console.log("=====================================================");
+    const beforeLenderBalance = await lendingPool.getBalance(lender1.address);
+    console.log("4. Lender ETH Balance : " + beforeLenderBalance / 1e18);
 
-  //   const tx = await lendingPool
-  //     .connect(user)
-  //     .withdraw(asset, withdrawAmount, valueOption);
-  //   await tx.wait();
+    const beforeContractAmount = await lendingPool.getContractETHBalance();
+    console.log("5. Contract ETH Balance : " + beforeContractAmount / 1e18);
+    console.log("=====================================================");
 
-  //   console.log("************** AFTER ETH WITHDRAW **************");
-  //   await moveTime(30 * SECONDS_IN_A_DAY);
-  //   const afterReserveAmount = await lendingPool.reserves(asset);
-  //   console.log("2. Reserves: " + afterReserveAmount / 1e18);
-  //   // expect(afterReserveAmount).to.be.greaterThan(beforeReserveAmount);
+    const tx = await lendingPool
+      .connect(user)
+      .withdraw(asset, withdrawAmount, valueOption);
+    await tx.wait();
 
-  //   let afterLenderAssetAmount = await lendingPool.getLenderAssetQty(
-  //     user.address,
-  //     asset
-  //   );
-  //   console.log("3. Lender lent balance : " + afterLenderAssetAmount / 1e18);
-  //   // expect(afterLenderAssetAmount).to.be.greaterThan(beforeLenderAssetAmount);
+    console.log(tx);
 
-  //   const afterContractAmount = await lendingPool.getContractETHBalance();
-  //   console.log("4. Contract ETH Balance : " + afterContractAmount / 1e18);
-  //   // expect(afterContractAmount).to.be.greaterThan(beforeContractAmount);
+    console.log("************** AFTER ETH WITHDRAW **************");
+    await moveTime(30 * SECONDS_IN_A_DAY);
+    const afterReserveAmount = await lendingPool.reserves(asset);
+    console.log("2. Reserves: " + afterReserveAmount / 1e18);
+    // expect(afterReserveAmount).to.be.greaterThan(beforeReserveAmount);
 
-  //   let result = await lendingConfig.isTokenInAssets(asset);
-  //   expect(result).to.be.true;
+    let afterLenderAssetAmount = await lendingPool.getLenderAssetQty(
+      user.address,
+      asset
+    );
+    console.log("3. Lender lent balance : " + afterLenderAssetAmount / 1e18);
+    // expect(afterLenderAssetAmount).to.be.greaterThan(beforeLenderAssetAmount);
 
-  //   result = await lendingPool.getLenderAssetQty(user.address, asset);
-  //   // expect(result).to.be.equal(withdrawAmount);
-  //   console.log("#####################################################");
-  // });
+    const afterLenderBalance = await lendingPool.getBalance(lender1.address);
+    console.log("4. Lender ETH Balance : " + beforeLenderBalance / 1e18);
+
+    const afterContractAmount = await lendingPool.getContractETHBalance();
+    console.log("5. Contract ETH Balance : " + afterContractAmount / 1e18);
+    // expect(afterContractAmount).to.be.greaterThan(beforeContractAmount);
+
+    let result = await lendingConfig.isTokenInAssets(asset);
+    expect(result).to.be.true;
+
+    result = await lendingPool.getLenderAssetQty(user.address, asset);
+
+    const _symbol = await addressToTokenMap.getAddress(asset);
+    console.log(_symbol);
+
+    // expect(result).to.be.equal(withdrawAmount);
+    console.log("#####################################################");
+  });
 
   // it("7. Lender1 Should be able to withdraw 100 DAI", async () => {
   //   const amount = numberToEthers(100);

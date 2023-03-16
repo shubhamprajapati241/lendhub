@@ -223,7 +223,7 @@ contract LendingPool is ReentrancyGuard {
     
     function withdraw(address _token, uint256 _amount) external updateEarnedInterest(msg.sender) payable returns(bool) {
         address lender  = msg.sender;
-
+        
         //TODO
         /* 
             1. withdraw amount = lent amount - borrow amount //? IMPLEMENTED
