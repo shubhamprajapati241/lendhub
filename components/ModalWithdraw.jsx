@@ -1,10 +1,8 @@
 import Image from "next/image";
-import React, { useEffect, useState, useContext } from "react";
+import React, { useState, useContext } from "react";
 import { MdLocalGasStation } from "react-icons/md";
 import { BiError } from "react-icons/bi";
-
 import { toast } from "react-toastify";
-
 import lendContext from "../context/lendContext";
 
 const ModalWithdraw = ({
@@ -167,13 +165,13 @@ const ModalWithdraw = ({
         </div>
       </div>
 
-      <div className={!inputValue ? "block" : "hidden"}>
+      <div className={!isInputValidate ? "block" : "hidden"}>
         <button className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold">
           Enter an amount
         </button>
       </div>
 
-      <div className={!inputValue ? "hidden" : "block"}>
+      <div className={!isInputValidate ? "hidden" : "block"}>
         <button
           className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
           onClick={() => {
