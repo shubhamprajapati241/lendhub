@@ -30,7 +30,7 @@ const RowSupplyAssets = ({
           <p className="text-center md:text-[13px] text-[12px] text-gray-600 font-semibold">
             {Number(balance).toFixed(2).toString(2).length < 10
               ? Number(balance).toFixed(2).toString().slice(0, 10)
-              : `${Number(balance).toFixed(2).toString().slice(0, 10)}...`}
+              : `${Number(balanceInUSD).toFixed(2).toString().slice(0, 10)}...`}
           </p>
         </td>
         <td className="md:px-4 align-middle border-b-[1px] border-blueGrey-100 md:whitespace-nowrap md:p-4">

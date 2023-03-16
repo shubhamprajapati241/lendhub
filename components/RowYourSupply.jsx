@@ -4,10 +4,12 @@ import Switch from "react-switch";
 import { ModalBorderLayout, ModalWithdraw } from "../components";
 
 const RowYourSupply = ({
+  address,
   name,
   image,
   apy,
   balance,
+  balanceInUSD,
   dollarPrice,
   isCollateral,
 }) => {
@@ -38,9 +40,9 @@ const RowYourSupply = ({
           <p className="text-center md:text-[11px] text-[9px] text-gray-600 font-medium">
             {" "}
             $
-            {Number(dollarPrice).toFixed(2).toString(2).length < 10
-              ? Number(dollarPrice).toFixed(2).toString().slice(0, 10)
-              : `${Number(dollarPrice).toFixed(2).toString().slice(0, 10)}...`}
+            {Number(balanceInUSD).toFixed(2).toString(2).length < 10
+              ? Number(balanceInUSD).toFixed(2).toString().slice(0, 10)
+              : `${Number(balanceInUSD).toFixed(2).toString().slice(0, 10)}...`}
           </p>
         </td>
         <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4">
@@ -79,6 +81,7 @@ const RowYourSupply = ({
       >
         {" "}
         <ModalWithdraw
+          address={address}
           name={name}
           image={image}
           balance={balance}

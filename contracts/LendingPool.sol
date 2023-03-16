@@ -155,6 +155,7 @@ contract LendingPool is ReentrancyGuard {
             );
         }
 
+        // TODO : replace msg.value with _amount with decimal 
         if(keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked("ETH"))) {
             (bool success, ) = address(this).call{value : msg.value}("");
             require(success, "Deposit failed");
@@ -241,7 +242,7 @@ contract LendingPool is ReentrancyGuard {
         string memory _symbol = addressToTokenMap.getAddress(_token);
 
         if(keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked("ETH"))) {
-            (bool success, ) = payable(lender).call{value: _amount}("");
+            (bool success, ) = payable(lender).call{value:  msg.value}("");
             require (success,"Tranfer to user's wallet not successful");
         }else {
             IERC20(_token).transfer(lender,_amount);

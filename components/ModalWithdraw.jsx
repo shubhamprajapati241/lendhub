@@ -1,15 +1,70 @@
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { MdLocalGasStation } from "react-icons/md";
 import { BiError } from "react-icons/bi";
 
-const ModalWithdraw = ({ name, balance, image, remainingSupply, onClose }) => {
-  const [dollerPrice, setDollerPrice] = useState(0);
+import { toast } from "react-toastify";
 
+import lendContext from "../context/lendContext";
+
+const ModalWithdraw = ({
+  address,
+  name,
+  balance,
+  image,
+  remainingSupply,
+  onClose,
+}) => {
+  const { getAmountInUSD, connectWallet, numberToEthers, WithdrawAsset } =
+    useContext(lendContext);
+  const [dollarPrice, setdollarPrice] = useState(0);
   const [inputValue, setInputValue] = useState();
+  const [isInputValidate, setInputValidate] = useState(false);
 
   const setMax = () => {
     setInputValue(balance);
+    getbalanceInUSD(balance);
+    setInputValidate(true);
+  };
+
+  const getbalanceInUSD = async (amount) => {
+    const amount2 = numberToEthers(amount);
+    const amountInUSD = await getAmountInUSD(address, amount2);
+    setdollarPrice(amountInUSD);
+  };
+
+  const validateInput = (input) => {
+    console.log(input);
+    if (input) {
+      var pattern = new RegExp(/^\d*\.?\d*$/);
+      if (!pattern.test(input)) {
+        setInputValue("");
+        setInputValidate(false);
+      } else {
+        if (Number(input) > Number(balance)) {
+          setInputValue(balance);
+          getbalanceInUSD(balance);
+        } else {
+          setInputValue(input);
+          getbalanceInUSD(input);
+        }
+        setInputValidate(true);
+      }
+    } else {
+      setInputValue("");
+      setdollarPrice(0);
+      setInputValidate(false);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    const isWithdraw = await WithdrawAsset(address, inputValue);
+    console.log(isWithdraw);
+    toast.success(`Withdraw Successful ${inputValue} ${name}`);
+    if (isWithdraw) {
+      onClose();
+      await connectWallet();
+    }
   };
 
   return (
@@ -30,13 +85,7 @@ const ModalWithdraw = ({ name, balance, image, remainingSupply, onClose }) => {
             <input
               type="text"
               value={inputValue}
-              onKeyPress={(event) => {
-                var pattern = new RegExp(/^\d*\.?\d*$/);
-                if (!pattern.test(event.key)) {
-                  event.preventDefault();
-                }
-              }}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={(e) => validateInput(e.target.value)}
               className="bg-transparent outline-none text-xl font-semibold w-1/2"
               placeholder="0.00"
             />
@@ -53,7 +102,15 @@ const ModalWithdraw = ({ name, balance, image, remainingSupply, onClose }) => {
           </div>
 
           <div className="flex flex-row items-center justify-between text-xs text-[#8E92A3]">
-            <p className="w-1/3">$ {dollerPrice}</p>
+            <p className="w-1/3">
+              ${" "}
+              {Number(dollarPrice).toFixed(2).toString(2).length < 10
+                ? Number(dollarPrice).toFixed(2).toString().slice(0, 10)
+                : `${Number(dollarPrice)
+                    .toFixed(2)
+                    .toString()
+                    .slice(0, 10)}...`}{" "}
+            </p>
             <p className="justify-end">
               Wallet Balance{" "}
               {Number(balance).toFixed(2).toString(2).length < 10
@@ -110,8 +167,19 @@ const ModalWithdraw = ({ name, balance, image, remainingSupply, onClose }) => {
         </div>
       </div>
 
-      <div className="">
+      <div className={!inputValue ? "block" : "hidden"}>
         <button className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold">
+          Enter an amount
+        </button>
+      </div>
+
+      <div className={!inputValue ? "hidden" : "block"}>
+        <button
+          className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
+          onClick={() => {
+            handleWithdraw();
+          }}
+        >
           Withdraw {name}
         </button>
       </div>

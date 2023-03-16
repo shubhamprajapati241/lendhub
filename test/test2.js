@@ -331,6 +331,9 @@ describe("LendHub Tests", async () => {
     // checking lender lentQty
     result = await lendingPool.getLenderAssets(user.address);
     expect(result[1].lentQty).to.be.equal(amount);
+
+    result = await lendingPool.getAmountInUSD(asset, amount);
+    console.log(result);
   });
 
   // it("6. Lender1 should be able to withdraw 10 ETH ", async () => {

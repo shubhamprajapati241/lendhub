@@ -17,9 +17,14 @@ const ModalSupply = ({
   isCollateral,
   onClose,
 }) => {
-  const { supplyAssetsToPool, ApproveToContinue, LendAsset, connectWallet } =
-    useContext(lendContext);
-  const [dollerPrice, setDollerPrice] = useState(0);
+  const {
+    getAmountInUSD,
+    ApproveToContinue,
+    LendAsset,
+    connectWallet,
+    numberToEthers,
+  } = useContext(lendContext);
+  const [dollarPrice, setdollarPrice] = useState(0);
 
   const [isInputValidate, setInputValidate] = useState(false);
   const [loadingOnApprove, setLoadingOnApprove] = useState(false);
@@ -28,7 +33,14 @@ const ModalSupply = ({
 
   const setMax = () => {
     setInputValue(balance);
+    getbalanceInUSD(balance);
     setInputValidate(true);
+  };
+
+  const getbalanceInUSD = async (amount) => {
+    const amount2 = numberToEthers(amount);
+    const amountInUSD = await getAmountInUSD(address, amount2);
+    setdollarPrice(amountInUSD);
   };
 
   const validateInput = (input) => {
@@ -41,13 +53,16 @@ const ModalSupply = ({
       } else {
         if (Number(input) > Number(balance)) {
           setInputValue(balance);
+          getbalanceInUSD(balance);
         } else {
           setInputValue(input);
+          getbalanceInUSD(input);
         }
         setInputValidate(true);
       }
     } else {
       setInputValue("");
+      setdollarPrice(0);
       setInputValidate(false);
     }
   };
@@ -123,7 +138,15 @@ const ModalSupply = ({
           </div>
 
           <div className="flex flex-row items-center justify-between text-xs text-[#8E92A3]">
-            <p className="w-1/3">$ {dollerPrice}</p>
+            <p className="w-1/3">
+              ${" "}
+              {Number(dollarPrice).toFixed(2).toString(2).length < 10
+                ? Number(dollarPrice).toFixed(2).toString().slice(0, 10)
+                : `${Number(dollarPrice)
+                    .toFixed(2)
+                    .toString()
+                    .slice(0, 10)}...`}{" "}
+            </p>
             <p className="justify-end">
               Wallet Balance{" "}
               {Number(balance).toFixed(2).toString(2).length < 10
