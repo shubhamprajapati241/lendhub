@@ -18,10 +18,13 @@ export { default as YourSupply } from "./YourSupply";
 export { default as RowYourSupply } from "./RowYourSupply";
 export { default as YourSupplyDetails } from "./YourSupplyDetails";
 export { default as ModalWithdraw } from "./ModalWithdraw";
-export { default as RowAssetsToBorrow } from "./RowAssetsToBorrow";
-export { default as ModalBorrow } from "./ModalBorrow";
-//  your botttow
-export { default as BorrowTab } from "./BorrowTab";
 
 //  assets to borrow
 export { default as BorrowAssets } from "./BorrowAssets";
+export { default as RowAssetsToBorrow } from "./RowAssetsToBorrow";
+export { default as ModalBorrow } from "./ModalBorrow";
+
+//  your borrow
+export { default as YourBorrows } from "./YourBorrows";
+export { default as RowYourBorrows } from "./RowYourBorrows";
+export { default as ModalRepay } from "./ModalRepay";

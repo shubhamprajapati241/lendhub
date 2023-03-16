@@ -1,15 +1,15 @@
 import Image from "next/image";
 import React, { useState } from "react";
-import { ModalBorderLayout, ModalBorrow } from ".";
+import { ModalBorderLayout, ModalRepay } from ".";
 
-const RowAssetsToBorrow = ({
+const RowYourBorrows = ({
   address,
   name,
   image,
   borrowQty,
   borrowApy,
 }) => {
-  const [showModal, setShowModal] = useState(false);
+  const [showRepayModal, setShowRepayModal] = useState(false);
   return (
     <>
       <tr key={name} className="align-middle text-left text-xs">
@@ -39,30 +39,29 @@ const RowAssetsToBorrow = ({
         </td>
         <td className="md:px-4 align-middle border-b-[1px] border-blueGrey-100 md:whitespace-nowrap md:p-4 p-2">
           <button
-            // border-spacing-1 py-[6px] ml-1 rounded-[4px] outline-none text-[13px] text-black bg-slate-50 border border-slate-200 p-2 hover:border-slate-500"
-            className="border-spacing-1 py-[6px] rounded-[4px] outline-none text-[12px] md:text-[13px] text-white bg-[#383D51] hover:bg-[#212430] p-2 "
+            className="border-spacing-1 py-[6px] rounded-[4px] outline-none text-[12px] md:text-[13px] text-white bg-[#2e8240] hover:bg-[#a4b266] p-2 "
 
-            onClick={() => setShowModal(true)}
+            onClick={() => setShowRepayModal(true)}
           >
-            Borrow
+            Repay
           </button>
         </td>
       </tr>
       <ModalBorderLayout
-        isVisible={showModal}
-        onClose={() => setShowModal(false)}
+        isVisible={showRepayModal}
+        onClose={() => setShowRepayModal(false)}
       >
-        <ModalBorrow
+        <ModalRepay
           address={address}
           name={name}
           image={image}
           borrowApy={borrowApy}
-          available={borrowQty}
-          onClose={() => setShowModal(false)}
+          borrowQty={borrowQty}
+          onClose={() => setShowRepayModal(false)}
         />
       </ModalBorderLayout>
     </>
   );
 };
 
-export default RowAssetsToBorrow;
+export default RowYourBorrows;

@@ -43,7 +43,7 @@ const LendState = (props) => {
   const [userAssets, setUserAssets] = useState([]);
   const [supplyAssets, setSupplyAssets] = useState([]);
   const [assetsToBorrow, setAssetsToBorrow] = useState([]);
-  const [borrowedAssets, setBorrowedAssets] = useState([]);
+  const [yourBorrows, setYourBorrows] = useState([]);
 
   //  contract details setting
   const [contract, setContract] = useState({
@@ -283,22 +283,6 @@ const LendState = (props) => {
   };
   /*************************** Withdraw Functionality End ***************************/
 
-  const mergeObjectifiedAssets = (assets) => {
-    console.log("In structuredAssets2....");
-    console.log(assets);
-    var result = tokensList.token
-      .filter((tokenList) => {
-        return assets.some((assetList) => {
-          return tokenList.address == assetList.token;
-        });
-      })
-      .map((itm) => ({
-        ...assets.find((item) => item.token === itm.address && item),
-        ...itm,
-      }));
-    return result;
-  };
-
   const objectifySuppliedAssets = async (assets) => {
     // console.log("In Structured Assets..........");
     const assetsList = [];
@@ -321,34 +305,52 @@ const LendState = (props) => {
     return assetsList;
   };
 
-  const objectifyBorrowedAssets = (assets) => {
-    // console.log("In objectifyBorrowedAssets ***");
-    const borrowList = [];
+  const objectifyBorrowedAssets = async (assets) => {
+    // console.log("*** In objectifyBorrowedAssets ***");
+    const borrowsList = [];
 
+    console.log(assets);
     for (let i = 0; i < assets.length; i++) {
-      const asset = assets[i].asset;
-      const qty = assets[i].qty;
+      const token = assets[i].token;
+      const borrowQty = assets[i].borrowQty;
       const borrowApy = assets[i].borrowApy;
 
-      // const amountInUSD = await getAmountInUSD(asset, qty);
+      const amountInUSD = await getAmountInUSD(token, borrowQty);
 
-      borrowList.push({
-        token: asset,
-        qty: Number(qty),
+      borrowsList.push({
+        token: token,
+        borrowQty: Number(borrowQty),
         borrowApy: Number(borrowApy),
-        // balanceInUSD: amountInUSD,
+        borrowedBalInUSD: amountInUSD,
       });
     }
 
-    console.log(borrowList);
-    return borrowList;
+    console.log(borrowsList);
+    return borrowsList;
+  };
+
+  const mergeObjectifiedAssets = (assets) => {
+    // console.log("*** In mergeObjectifiedAssets....");
+    // console.log(assets);
+    var result = tokensList.token
+      .filter((tokenList) => {
+        return assets.some((assetList) => {
+          return tokenList.address == assetList.token;
+        });
+      })
+      .map((assetObj) => ({
+        ...assets.find((item) => item.token === assetObj.address && item),
+        ...assetObj,
+      }));
+    // console.log(result);
+    return result;
   };
 
   const getAmountInUSD = async (address, amount) => {
-    console.log("Getting amount in USD......");
-    console.log("amount" + amount);
+    // console.log("Getting amount in USD......");
+    // console.log("amount" + amount);
     const AMOUNT = numberToEthers(amount);
-    console.log("AMOUNT" + AMOUNT);
+    // console.log("AMOUNT" + AMOUNT);
 
     try {
       const contract = new ethers.Contract(
@@ -359,7 +361,7 @@ const LendState = (props) => {
       const amountInUSD =
         Number(await contract.getAmountInUSD(address, AMOUNT)) / 1e18;
 
-      console.log("amountInUSD : " + amountInUSD);
+      // console.log("amountInUSD : " + amountInUSD);
       return amountInUSD;
     } catch (error) {
       reportError(error);
@@ -446,15 +448,16 @@ const LendState = (props) => {
       );
 
       // const contract = getContract(LendingPoolAddress, LendingPoolABI);
-      console.log("**** contract **** ");
-      console.log(contract);
       const assetsToBorrow = await contract.getAssetsToBorrow(
         metamaskDetails.currentAccount
       );
-
-      const assetsToBorrowObject = objectifyBorrowedAssets(assetsToBorrow);
+      console.log("*** calling objectifyBorrowedAssets from getAssetsToBorrow");
+      const assetsToBorrowObject = await objectifyBorrowedAssets(
+        assetsToBorrow
+      );
       console.log(JSON.stringify(assetsToBorrowObject));
 
+      console.log("*** calling mergeObjectifiedAssets from getAssetsToBorrow");
       const assetsToBorrowObjectMerged =
         mergeObjectifiedAssets(assetsToBorrowObject);
       console.log(assetsToBorrowObjectMerged);
@@ -466,6 +469,57 @@ const LendState = (props) => {
     }
   };
 
+  /*************************** Borrow Functionality ***************************/
+  const borrowAsset = async (token, borrowAmount) => {
+    const amount = numberToEthers(borrowAmount);
+    console.log("Borrowing token : " + token + "| supplyAmount : " + amount);
+
+    try {
+      const contract = await getContract(LendingPoolAddress, LendingPoolABI);
+      const transaction = await contract
+        .connect(metamaskDetails.signer)
+        .borrow(token, amount);
+
+      await transaction.wait();
+      console.log(
+        "Borrowing token : " +
+          token +
+          "| supplyAmount : " +
+          amount +
+          "Successful.."
+      );
+
+      getYourBorrows(metamaskDetails.currentAccount);
+      return true;
+    } catch (error) {
+      reportError(error);
+      return error;
+    }
+  };
+
+  /*************************** Your Borrows ***************************/
+  const getYourBorrows = async (token, supplyAmount) => {
+    console.log("**** Getting Your Borrows ****");
+
+    try {
+      const contract = await getContract(LendingPoolAddress, LendingPoolABI);
+      const yourBorrows = await contract
+        .connect(metamaskDetails.signer)
+        .getBorrowerAssets(metamaskDetails.currentAccount);
+
+      console.log("*** calling objectifyBorrowedAssets from getYourBorrows");
+      const yourBorrowsObject = await objectifyBorrowedAssets(yourBorrows);
+      console.log(yourBorrowsObject);
+      console.log("*** calling mergeObjectifiedAssets from getYourBorrows");
+      const yourBorrowsObjectMerged = mergeObjectifiedAssets(yourBorrowsObject);
+      console.log(JSON.stringify(yourBorrowsObjectMerged));
+
+      setYourBorrows(yourBorrowsObjectMerged);
+    } catch (error) {
+      reportError(error);
+      return error;
+    }
+  };
   // ------------------
   const reportError = (error) => {
     console.error(JSON.stringify(error));
@@ -491,6 +545,9 @@ const LendState = (props) => {
         WithdrawAsset,
         getAssetsToBorrow,
         assetsToBorrow,
+        borrowAsset,
+        getYourBorrows,
+        yourBorrows,
       }}
     >
       {props.children}

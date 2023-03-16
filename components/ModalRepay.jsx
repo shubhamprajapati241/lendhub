@@ -5,10 +5,10 @@ import { BiError } from "react-icons/bi";
 import lendContext from "../context/lendContext";
 import { toast } from "react-toastify";
 
-const ModalBorrow = ({
+const ModalRepay = ({
   address,
   name,
-  available,
+  debt,
   image,
   borrowApy,
   onClose,
@@ -179,4 +179,4 @@ const ModalBorrow = ({
   );
 };
 
-export default ModalBorrow;
+export default ModalRepay;

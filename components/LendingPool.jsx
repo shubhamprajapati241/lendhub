@@ -4,6 +4,7 @@ import {
   BorrowTab,
   SupplyAssets,
   BorrowAssets,
+  YourBorrows,
 } from "../components";
 
 const LendingPool = () => {
@@ -11,7 +12,7 @@ const LendingPool = () => {
     <div className="px-2 md:px-16 -mt-10">
       <div className="flex flex-wrap md:flex-nowrap gap-3">
         <YourSupply />
-        <BorrowTab />
+        <YourBorrows />
       </div>
 
       <div className="flex flex-wrap md:flex-nowrap gap-3 pt-3">

@@ -44,8 +44,8 @@ contract LendingPool is ReentrancyGuard {
     }
 
     struct BorrowAsset {
-        address asset;
-        uint256 qty;
+        address token;
+        uint256 borrowQty;
         uint256 borrowApy;
     }
 

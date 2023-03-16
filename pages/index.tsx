@@ -16,7 +16,8 @@ const Home: NextPage = () => {
     metamaskDetails, 
     getUserAssets, 
     getYourSupplies, 
-    getAssetsToBorrow
+    getAssetsToBorrow,
+    getYourBorrows
   } = useContext(lendContext);
 
   useEffect(() => {
@@ -27,6 +28,7 @@ const Home: NextPage = () => {
     getUserAssets();
     getYourSupplies();
     getAssetsToBorrow();
+    getYourBorrows();
   }, [metamaskDetails]);
   return (
     <div>

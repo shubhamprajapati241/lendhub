@@ -1,12 +1,12 @@
 import React, { useContext, useEffect } from "react";
 import lendContext from "../context/lendContext";
-import { LoaderSkeleton, RowAssetsToBorrow } from ".";
+import { LoaderSkeleton, RowYourBorrows } from ".";
 
-const BorrowAssets = () => {
-  const { assetsToBorrow } = useContext(lendContext);
+const YourBorrows = () => {
+  const { yourBorrows } = useContext(lendContext);
   return (
     <div className="w-full md:w-1/2 h-30 bg-white rounded-md ">
-      <h1 className="px-6 py-5 font-semibold text-md">Assets to Borrow</h1>
+      <h1 className="px-6 py-5 font-semibold text-md">Your Borrows</h1>
 
       <div className="pt-2 md:pt-3">
         <table className="item-center w-full border-collapse bg-transparent">
@@ -16,7 +16,7 @@ const BorrowAssets = () => {
                 Asset
               </th>
               <th className="font-medium text-[11px] md:text-xs px-3 text-[#62677B] text-center align-middle border-b-[1px] border-blueGrey-100 whitespace-nowrap p-[6px]">
-                Available
+                Debt
               </th>
               <th className="font-medium text-[11px] md:text-xs px-3 text-[#62677B] text-center align-middle border-b-[1px] border-blueGrey-100 whitespace-nowrap p-[6px]">
                 APY
@@ -26,9 +26,9 @@ const BorrowAssets = () => {
           </thead>
 
           <tbody>
-            {assetsToBorrow.length > 0 ? (
-              assetsToBorrow.map((token, index) => (
-                <RowAssetsToBorrow
+            {yourBorrows.length > 0 ? (
+              yourBorrows.map((token, index) => (
+                <RowYourBorrows
                   key={index}
                   address={token.address}
                   name={token.name}
@@ -47,4 +47,4 @@ const BorrowAssets = () => {
   );
 };
 
-export default BorrowAssets;
+export default YourBorrows;

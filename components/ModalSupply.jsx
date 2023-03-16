@@ -24,7 +24,7 @@ const ModalSupply = ({
     connectWallet,
     numberToEthers,
   } = useContext(lendContext);
-  const [dollarPrice, setdollarPrice] = useState(0);
+  const [dollarPrice, setDollarPrice] = useState(0);
 
   const [isInputValidate, setInputValidate] = useState(false);
   const [loadingOnApprove, setLoadingOnApprove] = useState(false);
@@ -33,14 +33,14 @@ const ModalSupply = ({
 
   const setMax = () => {
     setInputValue(balance);
-    getbalanceInUSD(balance);
+    getBalanceInUSD(balance);
     setInputValidate(true);
   };
 
-  const getbalanceInUSD = async (amount) => {
+  const getBalanceInUSD = async (amount) => {
     const amount2 = numberToEthers(amount);
     const amountInUSD = await getAmountInUSD(address, amount2);
-    setdollarPrice(amountInUSD);
+    setDollarPrice(amountInUSD);
   };
 
   const validateInput = (input) => {
@@ -53,25 +53,25 @@ const ModalSupply = ({
       } else {
         if (Number(input) > Number(balance)) {
           setInputValue(balance);
-          getbalanceInUSD(balance);
+          getBalanceInUSD(balance);
         } else {
           setInputValue(input);
-          getbalanceInUSD(input);
+          getBalanceInUSD(input);
         }
         setInputValidate(true);
       }
     } else {
       setInputValue("");
-      setdollarPrice(0);
+      setDollarPrice(0);
       setInputValidate(false);
     }
   };
 
   const handleApprove = async () => {
-    const isTokenapprove = await ApproveToContinue(address, inputValue);
-    console.log(isTokenapprove);
+    const isTokenApproved = await ApproveToContinue(address, inputValue);
+    console.log(isTokenApproved);
     toast.success(`Approved ${inputValue} ${name}`);
-    if (isTokenapprove) setIsApproved(true);
+    if (isTokenApproved) setIsApproved(true);
   };
 
   const handleSupply = async () => {
