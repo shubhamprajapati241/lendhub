@@ -16,7 +16,7 @@ export { default as ModalSupply } from "./ModalSupply";
 //  your supply
 export { default as YourSupply } from "./YourSupply";
 export { default as RowYourSupply } from "./RowYourSupply";
-export { default as YourSupplyDetails } from "./YourSupplyDetails";
+export { default as SummaryTab } from "./SummaryTab";
 export { default as ModalWithdraw } from "./ModalWithdraw";
 
 //  assets to borrow

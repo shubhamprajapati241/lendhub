@@ -67,7 +67,7 @@ const RowYourSupply = ({
         <td className="md:px-4 border-b-[1px] border-blueGrey-100 m:whitespace-nowrap md:p-4 p-2">
           <div className="flex item-center justify-end">
             <button
-              className="border-spacing-1 py-[6px] rounded-[4px] outline-none text-[12px] md:text-[13px] text-white bg-[#383D51] hover:bg-[#212430] p-2 "
+              className="border-spacing-1 py-[6px] rounded-[4px] outline-none text-[12px] md:text-[13px] text-white bg-[#383D51] hover:bg-[#212430] w-20"
               onClick={() => setShowWithdrawModal(true)}
             >
               Withdraw

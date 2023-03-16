@@ -5,26 +5,20 @@ import { BiError } from "react-icons/bi";
 import lendContext from "../context/lendContext";
 import { toast } from "react-toastify";
 
-const ModalRepay = ({
-  address,
-  name,
-  debt,
-  image,
-  borrowApy,
-  onClose,
-}) => {
-  const { getAmountInUSD, borrowAsset, numberToEthers, connectWallet } = useContext(lendContext);
+const ModalRepay = ({ address, name, debt, image, onClose }) => {
+  const { getAmountInUSD, repayAsset, numberToEthers, connectWallet } =
+    useContext(lendContext);
   const [dollarPrice, setDollarPrice] = useState(0);
   const [isInputValidate, setInputValidate] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
   const setMax = () => {
-    setInputValue(available);
-    getAvailableInUSD(available);
+    setInputValue(debt);
+    getdebtInUSD(debt);
     setInputValidate(true);
   };
 
-  const getAvailableInUSD = async (amount) => {
+  const getdebtInUSD = async (amount) => {
     const amount2 = numberToEthers(amount);
     const amountInUSD = await getAmountInUSD(address, amount2);
     setDollarPrice(amountInUSD);
@@ -38,12 +32,12 @@ const ModalRepay = ({
         setInputValue("");
         setInputValidate(false);
       } else {
-        if (Number(input) > Number(available)) {
-          setInputValue(available);
-          getAvailableInUSD(available);
+        if (Number(input) > Number(debt)) {
+          setInputValue(debt);
+          getdebtInUSD(debt);
         } else {
           setInputValue(input);
-          getAvailableInUSD(input);
+          getdebtInUSD(input);
         }
         setInputValidate(true);
       }
@@ -54,12 +48,11 @@ const ModalRepay = ({
     }
   };
 
-  const handleBorrow = async () => {
-    const isBorrowed = await borrowAsset(address, inputValue);
-    console.log(isBorrowed);
-
-    toast.success(`Borrowed ${inputValue} ${name}`);
-    if (isBorrowed) {
+  const handleRepay = async () => {
+    const isRepayed = await repayAsset(address, inputValue);
+    console.log(isRepayed);
+    toast.success(`Repayed ${inputValue} ${name}`);
+    if (isRepayed) {
       onClose();
       await connectWallet();
     }
@@ -68,7 +61,7 @@ const ModalRepay = ({
   return (
     <div>
       <div className="flex justify-between mb-3">
-        <h1 className="text-[18px] font-semibold ">Borrow {name}</h1>
+        <h1 className="text-[18px] font-semibold ">Repay {name}</h1>
         <button className=" text-xl" onClick={() => onClose()}>
           &#10006;
         </button>
@@ -110,13 +103,10 @@ const ModalRepay = ({
                     .slice(0, 10)}...`}{" "}
             </p>
             <p className="justify-end">
-              Wallet available{" "}
-              {Number(available).toFixed(2).toString(2).length < 10
-                ? Number(available).toFixed(2).toString().slice(0, 10)
-                : `${Number(available)
-                    .toFixed(2)
-                    .toString()
-                    .slice(0, 10)}...`}{" "}
+              Wallet debt{" "}
+              {Number(debt).toFixed(2).toString(2).length < 10
+                ? Number(debt).toFixed(2).toString().slice(0, 10)
+                : `${Number(debt).toFixed(2).toString().slice(0, 10)}...`}{" "}
               <button
                 className="font-bold text-[10px] text-[#F1F1F3]"
                 onClick={() => setMax()}
@@ -134,9 +124,9 @@ const ModalRepay = ({
         </h1>
         <div className="border border-[#A5A8B6] border-opacity-20 p-2 rounded  flex flex-col">
           <div className="flex flex-row items-center justify-between text-[13px] text-[#F1F1F3]">
-            <p className="">Borrow APY</p>
+            <p className="">Remaining debt </p>
             <p className="justify-end">
-              {borrowApy} <span className="text-[#A5A8B6]">%</span>
+              {inputValue ? `${debt} → ${debt - inputValue}` : `${debt}`}
             </p>
           </div>
         </div>
@@ -149,16 +139,6 @@ const ModalRepay = ({
         </p>
       </div>
 
-      <div className="flex justify-center items-center text-xs p-2 bg-[#2E0C0A] text-[#FBB4AF] rounded mb-5">
-        <BiError className="text-3xl pr-2 " />
-
-        <div className="flex flex-col">
-          <p className="font-medium text-[10px] tracking-[0.005rem]">
-            Borrowing this amount will increase risk of liquidation.
-          </p>
-        </div>
-      </div>
-
       <div className={!isInputValidate ? "block" : "hidden"}>
         <button className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold">
           Enter an amount
@@ -169,10 +149,10 @@ const ModalRepay = ({
         <button
           className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
           onClick={() => {
-            handleBorrow();
+            handleRepay();
           }}
         >
-          Borrow {name}
+          Repay {name}
         </button>
       </div>
     </div>

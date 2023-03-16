@@ -8,7 +8,7 @@ const ModalBorderLayout = ({ isVisible, onClose, children }) => {
   };
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-[1px] flex justify-center items-center"
+      className="fixed z-auto inset-0 bg-black bg-opacity-30 backdrop-blur-[1px] flex  justify-center items-center"
       id="supplyWrapper"
       onClick={handleClose}
     >

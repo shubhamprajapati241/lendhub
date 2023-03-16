@@ -11,13 +11,14 @@ import {
 } from "../components";
 
 const Home: NextPage = () => {
-  const { 
+  const {
     connectWallet,
-    metamaskDetails, 
-    getUserAssets, 
-    getYourSupplies, 
+    metamaskDetails,
+    getUserAssets,
+    getYourSupplies,
     getAssetsToBorrow,
-    getYourBorrows
+    getYourBorrows,
+    supplySummary,
   } = useContext(lendContext);
 
   useEffect(() => {
@@ -25,11 +26,12 @@ const Home: NextPage = () => {
   }, []);
 
   useEffect(() => {
+    getYourBorrows();
+    getAssetsToBorrow();
     getUserAssets();
     getYourSupplies();
-    getAssetsToBorrow();
-    getYourBorrows();
   }, [metamaskDetails]);
+
   return (
     <div>
       <Head>

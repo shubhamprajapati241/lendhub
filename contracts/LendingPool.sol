@@ -308,6 +308,7 @@ contract LendingPool is ReentrancyGuard {
 
         updateAccruedInterestOnBorrow(borrower);
 
+        //  TODO : manage borrow assets as in lend 
         if(borrowerAssetsLength == 0) {
              UserAsset memory userAsset = UserAsset({
                     user: borrower,
@@ -367,7 +368,11 @@ contract LendingPool is ReentrancyGuard {
         updateAccruedInterestOnBorrow(borrower);
 
         // 1. Transfer token from User to SC
-        bool success = IERC20(_token).transferFrom(borrower, address(this), _amount);
+
+
+        // TODO : token balance reduce from contract => EOA
+        // TODO:  token convert into ETH and add it into user ETH account ??
+        bool success = IERC20(_token).transfer(borrower, _amount);
         require(success, "Transfer to user's wallet not succcessful");
         // 2. Update Token in Reserve
         reserves[_token] += _amount;
