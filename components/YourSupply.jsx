@@ -44,6 +44,7 @@ const YourSupply = () => {
               supplyAssets.map((token, index) => (
                 <RowYourSupply
                   key={index}
+                  address={token.address}
                   name={token.name}
                   balance={token.balance}
                   balanceInUSD={token.balanceInUSD}

@@ -7,7 +7,6 @@ const RowSupplyAssets = ({
   name,
   image,
   balance,
-
   apy,
   isCollateral,
 }) => {

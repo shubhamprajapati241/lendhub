@@ -15,11 +15,8 @@ const AddressToTokenMapABI = require("../artifacts/contracts/AddressToTokenMap.s
 
 const tokensList = require("../token-list-goerli");
 
-import { ethIcon, usdcIcon, usdtIcon, daiIcon, wethIcon } from "../assets";
-
 // Importing Bank contract details
 import {
-  BankContractAddress,
   DAITokenAddress,
   LINKTokenAddress,
   USDCTokenAddress,
@@ -28,7 +25,6 @@ import {
   LendingPoolAddress,
   ETHAddress,
 } from "../addresses";
-import BankContractABI from "./contractAbis/Bank.json";
 
 const numberToEthers = (number) => {
   return ethers.utils.parseEther(number.toString());
@@ -261,6 +257,31 @@ const LendState = (props) => {
     }
   };
 
+  /*************************** Withdraw Functionality Start ***************************/
+  const WithdrawAsset = async (tokenAddress, withdrawAmount) => {
+    const amount = numberToEthers(withdrawAmount);
+    const valueOption = { value: amount };
+
+    console.log("Withdraw Started.....");
+    console.log("tokenAddress : " + tokenAddress);
+    console.log("withdrawAmount : " + amount);
+
+    // TODO : make a connection once
+    try {
+      const contract = await getContract(LendingPoolAddress, LendingPoolABI);
+      const transaction = await contract
+        .connect(metamaskDetails.signer)
+        .withdraw(tokenAddress, amount, valueOption);
+      await transaction.wait();
+      console.log("Withdraw done....");
+      return true;
+    } catch (error) {
+      reportError(error);
+      return error;
+    }
+  };
+  /*************************** Withdraw Functionality End ***************************/
+
   const structuredAssets2 = (assets) => {
     console.log("In structuredAssets2....");
     console.log(assets);
@@ -278,27 +299,15 @@ const LendState = (props) => {
   };
 
   const structuredAssets = async (assets) => {
-    // TODO : getAmountInUSD() => lendUSD => total USD
-    // return assets.map((asset) => ({
-    //   token: asset.token,
-    //   balance: Number(asset.lentQty) / 1e18,
-    //   apy: Number(asset.lentApy),
-    // }));
-
     console.log("In Structured Assets..........");
-
     const assetsList = [];
 
     for (let i = 0; i < assets.length; i++) {
       const token = assets[i].token;
-      const lendQty = numberToEthers(assets[i].lentQty);
-      const contract = new ethers.Contract(
-        LendingPoolAddress,
-        LendingPoolABI.abi,
-        metamaskDetails.provider
-      );
-      const amountInUSD =
-        Number(await contract.getAmountInUSD(token, lendQty)) / 1e18;
+      const lendQty = assets[i].lentQty;
+
+      console.log(lendQty);
+      const amountInUSD = await getAmountInUSD(token, lendQty);
       assetsList.push({
         token: assets[i].token,
         balance: Number(assets[i].lentQty) / 1e18,
@@ -309,6 +318,29 @@ const LendState = (props) => {
 
     console.log(assetsList);
     return assetsList;
+  };
+
+  const getAmountInUSD = async (address, amount) => {
+    console.log("Getting amount in USD......");
+    console.log("amount" + amount);
+    const AMOUNT = numberToEthers(amount);
+    console.log("AMOUNT" + AMOUNT);
+
+    try {
+      const contract = new ethers.Contract(
+        LendingPoolAddress,
+        LendingPoolABI.abi,
+        metamaskDetails.provider
+      );
+      const amountInUSD =
+        Number(await contract.getAmountInUSD(address, AMOUNT)) / 1e18;
+
+      console.log("amountInUSD : " + amountInUSD);
+      return amountInUSD;
+    } catch (error) {
+      reportError(error);
+      return error;
+    }
   };
 
   /*************************** Component : Your Supplies ***************************/
@@ -396,6 +428,9 @@ const LendState = (props) => {
         userAssets,
         getSupplyAssets,
         supplyAssets,
+        getAmountInUSD,
+        numberToEthers,
+        WithdrawAsset,
       }}
     >
       {props.children}

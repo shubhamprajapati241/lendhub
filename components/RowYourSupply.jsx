@@ -4,6 +4,7 @@ import Switch from "react-switch";
 import { ModalBorderLayout, ModalWithdraw } from "../components";
 
 const RowYourSupply = ({
+  address,
   name,
   image,
   apy,
@@ -80,6 +81,7 @@ const RowYourSupply = ({
       >
         {" "}
         <ModalWithdraw
+          address={address}
           name={name}
           image={image}
           balance={balance}
