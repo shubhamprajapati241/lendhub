@@ -46,6 +46,7 @@ const YourSupply = () => {
                   key={index}
                   name={token.name}
                   balance={token.balance}
+                  balanceInUSD={token.balanceInUSD}
                   dollarPrice={token.dollarPrice}
                   image={token.image}
                   apy={token.apy}

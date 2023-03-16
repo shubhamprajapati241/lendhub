@@ -26,6 +26,7 @@ import {
   AddressToTokenMapAddress,
   LendingConfigAddress,
   LendingPoolAddress,
+  ETHAddress,
 } from "../addresses";
 import BankContractABI from "./contractAbis/Bank.json";
 
@@ -261,6 +262,8 @@ const LendState = (props) => {
   };
 
   const structuredAssets2 = (assets) => {
+    console.log("In structuredAssets2....");
+    console.log(assets);
     var result = tokensList.token
       .filter((tokenList) => {
         return assets.some((assetList) => {
@@ -274,13 +277,38 @@ const LendState = (props) => {
     return result;
   };
 
-  const structuredAssets = (assets) => {
+  const structuredAssets = async (assets) => {
     // TODO : getAmountInUSD() => lendUSD => total USD
-    return assets.map((asset) => ({
-      token: asset.token,
-      balance: Number(asset.lentQty) / 1e18,
-      apy: Number(asset.lentApy),
-    }));
+    // return assets.map((asset) => ({
+    //   token: asset.token,
+    //   balance: Number(asset.lentQty) / 1e18,
+    //   apy: Number(asset.lentApy),
+    // }));
+
+    console.log("In Structured Assets..........");
+
+    const assetsList = [];
+
+    for (let i = 0; i < assets.length; i++) {
+      const token = assets[i].token;
+      const lendQty = numberToEthers(assets[i].lentQty);
+      const contract = new ethers.Contract(
+        LendingPoolAddress,
+        LendingPoolABI.abi,
+        metamaskDetails.provider
+      );
+      const amountInUSD =
+        Number(await contract.getAmountInUSD(token, lendQty)) / 1e18;
+      assetsList.push({
+        token: assets[i].token,
+        balance: Number(assets[i].lentQty) / 1e18,
+        apy: Number(assets[i].lentApy),
+        balanceInUSD: amountInUSD,
+      });
+    }
+
+    console.log(assetsList);
+    return assetsList;
   };
 
   /*************************** Component : Your Supplies ***************************/
@@ -293,27 +321,31 @@ const LendState = (props) => {
         LendingPoolABI.abi,
         metamaskDetails.provider
       );
+
+      // const contract = getContract(LendingPoolAddress, LendingPoolABI);
       const assets = await contract.getLenderAssets(
         metamaskDetails.currentAccount
       );
-      // console.log(assets);
-      const supplyAssets = structuredAssets(assets);
+
+      const supplyAssets = await structuredAssets(assets);
 
       console.log(supplyAssets);
       const supplyAsset2 = structuredAssets2(supplyAssets);
       console.log(JSON.stringify(supplyAsset2));
 
       const totalUSDBalance = supplyAssets.reduce((bal, item) => {
-        return bal + item.balance;
+        return bal + item.balanceInUSD;
       }, 0);
 
       const weightedAvgAPY = supplyAssets.reduce((bal, item) => {
         return bal + item.apy;
       }, 0);
 
-      const totalUSDCollateral = supplyAssets.reduce((bal, item) => {
-        return bal + item.balance;
-      }, 0);
+      const totalUSDCollateral = supplyAssets
+        .filter((asset) => asset.token == ETHAddress)
+        .reduce((bal, item) => {
+          return bal + item.balanceInUSD;
+        }, 0);
 
       let summary = {
         totalUSDBalance: totalUSDBalance,
@@ -328,33 +360,6 @@ const LendState = (props) => {
       reportError(error);
       return error;
     }
-
-    // let assets = [
-    //   {
-    //     image: ethIcon,
-    //     name: "ETH",
-    //     balance: "100",
-    //     dollarPrice: "300",
-    //     apy: 3.18,
-    //     isCollateral: true,
-    //   },
-    //   {
-    //     image: daiIcon,
-    //     name: "DAI",
-    //     balance: "120",
-    //     dollarPrice: "120",
-    //     apy: "3.18",
-    //     isCollateral: false,
-    //   },
-    // ];
-
-    // let details = {
-    //   totalBalance: "10.603.20",
-    //   totalAPY: "43.61",
-    //   totalCollateral: "10.603.20",
-    // };
-
-    // setSupplyDetails({ assets: assets, details: details });
   };
 
   const getAssets = async () => {
@@ -364,15 +369,7 @@ const LendState = (props) => {
         LendingConfigAddress,
         LendingConfigABI
       );
-
       const assets = await contract.getAssets();
-
-      // const ass = assets.map((asset) => ({
-      //   token: asset.token,
-      //   balance: Number(asset.lentQty),
-      //   apy: Number(asset.lentApy),
-      // }));
-
       console.log(assets);
     } catch (error) {
       reportError(error);
