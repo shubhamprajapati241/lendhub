@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import LendContext from "./lendContext";
 import { ethers } from "ethers";
+const tokensList = require("../token-list-goerli");
 
 // TODO : use in Goerli
 // const TokenABI = require("./contractAbis/tokenAbi.json");
@@ -12,8 +13,6 @@ const TokenABI = require("../artifacts/contracts/DAIToken.sol/DAIToken.json");
 const LendingPoolABI = require("../artifacts/contracts/LendingPool.sol/LendingPool.json");
 const LendingConfigABI = require("../artifacts/contracts/LendingConfig.sol/LendingConfig.json");
 const AddressToTokenMapABI = require("../artifacts/contracts/AddressToTokenMap.sol/AddressToTokenMap.json");
-
-const tokensList = require("../token-list-goerli");
 
 // Importing Bank contract details
 import {
@@ -43,6 +42,8 @@ const LendState = (props) => {
 
   const [userAssets, setUserAssets] = useState([]);
   const [supplyAssets, setSupplyAssets] = useState([]);
+  const [assetsToBorrow, setAssetsToBorrow] = useState([]);
+  const [borrowedAssets, setBorrowedAssets] = useState([]);
 
   //  contract details setting
   const [contract, setContract] = useState({
@@ -249,7 +250,7 @@ const LendState = (props) => {
 
       await transaction.wait();
       console.log("Supply Transaction done....");
-      getSupplyAssets(metamaskDetails.currentAccount);
+      getYourSupplies(metamaskDetails.currentAccount);
       return true;
     } catch (error) {
       reportError(error);
@@ -282,7 +283,7 @@ const LendState = (props) => {
   };
   /*************************** Withdraw Functionality End ***************************/
 
-  const structuredAssets2 = (assets) => {
+  const mergeObjectifiedAssets = (assets) => {
     console.log("In structuredAssets2....");
     console.log(assets);
     var result = tokensList.token
@@ -298,15 +299,15 @@ const LendState = (props) => {
     return result;
   };
 
-  const structuredAssets = async (assets) => {
-    console.log("In Structured Assets..........");
+  const objectifySuppliedAssets = async (assets) => {
+    // console.log("In Structured Assets..........");
     const assetsList = [];
 
     for (let i = 0; i < assets.length; i++) {
       const token = assets[i].token;
       const lendQty = assets[i].lentQty;
 
-      console.log(lendQty);
+      // console.log(lendQty);
       const amountInUSD = await getAmountInUSD(token, lendQty);
       assetsList.push({
         token: assets[i].token,
@@ -318,6 +319,29 @@ const LendState = (props) => {
 
     console.log(assetsList);
     return assetsList;
+  };
+
+  const objectifyBorrowedAssets = (assets) => {
+    // console.log("In objectifyBorrowedAssets ***");
+    const borrowList = [];
+
+    for (let i = 0; i < assets.length; i++) {
+      const asset = assets[i].asset;
+      const qty = assets[i].qty;
+      const borrowApy = assets[i].borrowApy;
+
+      // const amountInUSD = await getAmountInUSD(asset, qty);
+
+      borrowList.push({
+        token: asset,
+        qty: Number(qty),
+        borrowApy: Number(borrowApy),
+        // balanceInUSD: amountInUSD,
+      });
+    }
+
+    console.log(borrowList);
+    return borrowList;
   };
 
   const getAmountInUSD = async (address, amount) => {
@@ -344,7 +368,7 @@ const LendState = (props) => {
   };
 
   /*************************** Component : Your Supplies ***************************/
-  const getSupplyAssets = async () => {
+  const getYourSupplies = async () => {
     console.warn("Getting Supply assets.......");
 
     try {
@@ -359,10 +383,10 @@ const LendState = (props) => {
         metamaskDetails.currentAccount
       );
 
-      const supplyAssets = await structuredAssets(assets);
+      const supplyAssets = await objectifySuppliedAssets(assets);
 
       console.log(supplyAssets);
-      const supplyAsset2 = structuredAssets2(supplyAssets);
+      const supplyAsset2 = mergeObjectifiedAssets(supplyAssets);
       console.log(JSON.stringify(supplyAsset2));
 
       const totalUSDBalance = supplyAssets.reduce((bal, item) => {
@@ -387,7 +411,8 @@ const LendState = (props) => {
 
       setSupplySummary(summary);
       setSupplyAssets(supplyAsset2);
-      console.log("Got Supply assets.....");
+
+      // console.log("Got Supply assets.....");
     } catch (error) {
       reportError(error);
       return error;
@@ -409,6 +434,39 @@ const LendState = (props) => {
     }
   };
 
+  /************ Function to get Assets to Borrow ***********/
+  const getAssetsToBorrow = async () => {
+    console.log("Getting assets to Borrow...");
+
+    try {
+      const contract = new ethers.Contract(
+        LendingPoolAddress,
+        LendingPoolABI.abi,
+        metamaskDetails.provider
+      );
+
+      // const contract = getContract(LendingPoolAddress, LendingPoolABI);
+      console.log("**** contract **** ");
+      console.log(contract);
+      const assetsToBorrow = await contract.getAssetsToBorrow(
+        metamaskDetails.currentAccount
+      );
+
+      const assetsToBorrowObject = objectifyBorrowedAssets(assetsToBorrow);
+      console.log(JSON.stringify(assetsToBorrowObject));
+
+      const assetsToBorrowObjectMerged =
+        mergeObjectifiedAssets(assetsToBorrowObject);
+      console.log(assetsToBorrowObjectMerged);
+
+      setAssetsToBorrow(assetsToBorrowObjectMerged);
+    } catch (error) {
+      reportError(error);
+      return error;
+    }
+  };
+
+  // ------------------
   const reportError = (error) => {
     console.error(JSON.stringify(error));
   };
@@ -426,11 +484,13 @@ const LendState = (props) => {
         LendAsset,
         getAssets,
         userAssets,
-        getSupplyAssets,
+        getYourSupplies,
         supplyAssets,
         getAmountInUSD,
         numberToEthers,
         WithdrawAsset,
+        getAssetsToBorrow,
+        assetsToBorrow,
       }}
     >
       {props.children}
