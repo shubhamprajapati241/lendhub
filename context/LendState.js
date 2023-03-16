@@ -271,7 +271,7 @@ const LendState = (props) => {
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
       const transaction = await contract
         .connect(metamaskDetails.signer)
-        .withdraw(tokenAddress, amount, valueOption);
+        .withdraw(tokenAddress, amount);
       await transaction.wait();
       console.log("Withdraw done....");
       return true;
