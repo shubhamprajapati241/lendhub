@@ -58,10 +58,10 @@ const ModalWithdraw = ({
   };
 
   const handleWithdraw = async () => {
-    const isWithdraw = await WithdrawAsset(address, inputValue);
-    console.log(isWithdraw);
+    const isWithdrawSuccessful = await WithdrawAsset(address, inputValue);
+    console.log(isWithdrawSuccessful);
     toast.success(`Withdraw Successful ${inputValue} ${name}`);
-    if (isWithdraw) {
+    if (isWithdrawSuccessful) {
       onClose();
       await connectWallet();
     }

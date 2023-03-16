@@ -1,5 +1,14 @@
 const { ethers } = require("hardhat");
-// const { ETHAddress } = require("../addresses");
+const {
+  ETHAddress,
+  DAITokenAddress,
+  USDCTokenAddress,
+  LINKTokenAddress,
+  ETH_USD_PF_ADDRESS,
+  DAI_USD_PF_ADDRESS,
+  USDC_USD_PF_ADDRESS,
+  LINK_USD_PF_ADDRESS,
+} = require("../addresses");
 
 const numberToEthers = (number) => {
   return ethers.utils.parseEther(number.toString());
@@ -14,15 +23,13 @@ async function main() {
   // // console.log("ARGS: ", JSON.stringify(process.argv));
   // console.log("ARGS: ", JSON.stringify(process.argv));
 
-  const ETH_ADDRESS = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
-
+  // const ETH_ADDRESS = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
   // const MATIC_ADDRESS = "0x0000000000000000000000000000000000001010";
-  // const MATIC_ADDRESS = "0x0000000000000000000000000000000000001010";
+  // const ETH_USD_PF_ADDRESS = "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e";
+  // const DAI_USD_PF_ADDRESS = "0x0d79df66BE487753B02D015Fb622DED7f0E9798d";
+  // const USDC_USD_PF_ADDRESS = "0xAb5c49580294Aff77670F839ea425f5b78ab3Ae7";
+  // const LINK_USD_PF_ADDRESS = "0x48731cF7e84dc94C5f84577882c14Be11a5B7456";
 
-  const ETH_USD_PF_ADDRESS = "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e";
-  const DAI_USD_PF_ADDRESS = "0x0d79df66BE487753B02D015Fb622DED7f0E9798d";
-  const USDC_USD_PF_ADDRESS = "0xAb5c49580294Aff77670F839ea425f5b78ab3Ae7";
-  const LINK_USD_PF_ADDRESS = "0x48731cF7e84dc94C5f84577882c14Be11a5B7456";
   /********************** Deploy AddressStorage *************************/
   // const AddressStorage = await ethers.getContractFactory("AddressStorage");
   // const addressStorage = await AddressStorage.deploy();
@@ -138,18 +145,24 @@ async function main() {
   // await linkToken.transfer(account6, numberToEthers(30000));
 
   /****************** Adding Assets ******************/
-  await addressToTokenMap._setAddress(ETH_ADDRESS, "ETH");
-  await addressToTokenMap._setAddress(DAI_ADDRESS, "DAI");
-  await addressToTokenMap._setAddress(USDC_ADDRESS, "USDC");
-  await addressToTokenMap._setAddress(LINK_ADDRESS, "LINK");
+  await addressToTokenMap._setAddress(ETHAddress, "ETH");
+  await addressToTokenMap._setAddress(DAITokenAddress, "DAI");
+  await addressToTokenMap._setAddress(USDCTokenAddress, "USDC");
+  await addressToTokenMap._setAddress(LINKTokenAddress, "LINK");
 
   console.log("Token Address Set");
 
   /****************** Adding PriceFeed ******************/
-  await addressToTokenMap._setPriceFeedMap(DAI_ADDRESS, DAI_USD_PF_ADDRESS);
-  await addressToTokenMap._setPriceFeedMap(USDC_ADDRESS, USDC_USD_PF_ADDRESS);
-  await addressToTokenMap._setPriceFeedMap(LINK_ADDRESS, LINK_USD_PF_ADDRESS);
-  await addressToTokenMap._setPriceFeedMap(ETH_ADDRESS, ETH_USD_PF_ADDRESS);
+  await addressToTokenMap._setPriceFeedMap(DAITokenAddress, DAI_USD_PF_ADDRESS);
+  await addressToTokenMap._setPriceFeedMap(
+    USDCTokenAddress,
+    USDC_USD_PF_ADDRESS
+  );
+  await addressToTokenMap._setPriceFeedMap(
+    LINKTokenAddress,
+    LINK_USD_PF_ADDRESS
+  );
+  await addressToTokenMap._setPriceFeedMap(ETHAddress, ETH_USD_PF_ADDRESS);
 
   console.log("Pricefeed Address Set");
 

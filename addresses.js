@@ -1,25 +1,28 @@
-// Deployed on Mumbai Test Net
-
-export const BankContractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-
-export const ETHAddress = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
-
+/********* TOKEN ADDRESSES ***********/
 // npx hardhat run scripts/deploy.js --network localhost
-export const DAITokenAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-export const LINKTokenAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
-export const USDCTokenAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
-export const AddressToTokenMapAddress =
-  "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-export const LendingConfigAddress =
-  "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
-export const LendingPoolAddress = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
+const ETHAddress = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
+const DAITokenAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const LINKTokenAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+const USDCTokenAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
 
-// shubham account's addresses
+/********* SMART CONTRACT ADDRESSES ***********/
+const BankContractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const AddressToTokenMapAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+const LendingConfigAddress = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
+const LendingPoolAddress = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
+
+/********* PRICE FEED ADDRESSES ***********/
+const ETH_USD_PF_ADDRESS = "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e";
+const DAI_USD_PF_ADDRESS = "0x0d79df66BE487753B02D015Fb622DED7f0E9798d";
+const USDC_USD_PF_ADDRESS = "0xAb5c49580294Aff77670F839ea425f5b78ab3Ae7";
+const LINK_USD_PF_ADDRESS = "0x48731cF7e84dc94C5f84577882c14Be11a5B7456";
+
+// shubham wallet addresses
 // const account1 = "0x4644933680922aE17748753ae20264436ca616cc";
 // const account2 = "0x021edEFA528293eB8ad9A2d9e0d71011f6297601";
 // const account3 = "0xc1f33e8c427fd4126A23A4a9B721BD97Fb11dDe6";
 
-// sasi account addresses
+// sasi wallet addresses
 // const account4 = "0x315F60449DaB3D321aF75821b576E7F436308635";
 // const account5 = "0x4B40f99E93A8814be7fDe5F6AaFA5e9823E13728";
 // const account6 = "0x3f39Ae58Cb1148ec1Ad903648319359Cfdc34a02";
@@ -35,3 +38,18 @@ export const LendingPoolAddress = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
 // export const AddressStorage = "0xc52DD5479516c332e45Ede69cA198d1773585473";
 // export const LendingPoolAddressProvider =
 //   "0x2F1bd3AE5247C8FF898e2995F505aFFCf4F022f6";
+
+module.exports = {
+  BankContractAddress,
+  ETHAddress,
+  DAITokenAddress,
+  LINKTokenAddress,
+  USDCTokenAddress,
+  AddressToTokenMapAddress,
+  LendingConfigAddress,
+  LendingPoolAddress,
+  ETH_USD_PF_ADDRESS,
+  DAI_USD_PF_ADDRESS,
+  USDC_USD_PF_ADDRESS,
+  LINK_USD_PF_ADDRESS,
+};

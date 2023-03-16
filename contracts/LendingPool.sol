@@ -13,6 +13,8 @@ contract LendingPool is ReentrancyGuard {
     AddressToTokenMap addressToTokenMap;
     LendingConfig lendingConfig;
 
+    event TransferAsset(address lender, address _token, uint _amount);
+
     address deployer;
     uint256 public INTEREST_RATE;
     uint256 public BORROW_RATE;
@@ -91,9 +93,9 @@ contract LendingPool is ReentrancyGuard {
     constructor(AddressToTokenMap _addressToTokenMapAddress, LendingConfig _lendingConfigAddress, uint256 _interestRate, uint256 _borrowRate) {
         addressToTokenMap = _addressToTokenMapAddress;
         lendingConfig = _lendingConfigAddress;
-        deployer = msg.sender;
         INTEREST_RATE  = _interestRate;
         BORROW_RATE = _borrowRate;
+        deployer = msg.sender;
     }
 
     function getContractETHBalance() public view returns(uint){
@@ -104,7 +106,6 @@ contract LendingPool is ReentrancyGuard {
         return IERC20(_token).balanceOf(_address);
     }
 
-    // TODO : make internal
     function isLenderTokenOwner(address _token) internal view returns(bool) {
         uint256 lenderAssetCount = lenderAssets[msg.sender].length;
         for (uint i = 0; i < lenderAssetCount; i++) {
@@ -130,16 +131,25 @@ contract LendingPool is ReentrancyGuard {
         return _address.balance;
     }
 
+    function getSymbol(address _token) public view returns(string memory) {
+        return addressToTokenMap.getAddress(_token);
+    }
+
+    function isETH(address _token) public view returns(bool) {
+        if (keccak256(abi.encodePacked(getSymbol(_token))) == keccak256(abi.encodePacked("ETH"))) {
+            return true;
+        }
+        return false;
+    }
+
    /************* Lender functions ************************/
     receive() external payable {}
-    fallback() external payable {}
 
     function lend(address _token, uint256 _amount) public updateEarnedInterest(msg.sender) payable {
         address lender = msg.sender;
-        string memory _symbol = addressToTokenMap.getAddress(_token);
 
-        bool _usageAsCollateralEnabled = (keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked("ETH"))) ? true: false;
-        bool _usageAsBorrowEnabled = (keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked("ETH"))) ? false: true;
+        bool _usageAsCollateralEnabled = isETH(_token) ? true: false;
+        bool _usageAsBorrowEnabled = isETH(_token) ? false: true;
         
         if(!lendingConfig.isTokenInAssets(_token)) {
             lendingConfig.addAsset(
@@ -148,15 +158,14 @@ contract LendingPool is ReentrancyGuard {
                 _usageAsCollateralEnabled,
                 false, 
                 true,
-                _symbol,
+                getSymbol(_token),
                 DECIMALS,
                 BORROW_THRESHOLD,
                 LIQUIDATION_THRESHOLD 
             );
         }
 
-        // TODO : replace msg.value with _amount with decimal 
-        if(keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked("ETH"))) {
+        if(isETH(_token)) {
             (bool success, ) = address(this).call{value : msg.value}("");
             require(success, "Deposit failed");
         }else {
@@ -169,29 +178,21 @@ contract LendingPool is ReentrancyGuard {
             reserveAssets.push(_token);
         }
 
-        
-        // 1. Get the length on userasset array
-        // 2. If no assets => create a asset struct => push
-        // 3. If array not empty => check is token is in array or not 
-        // 4. If token is in array => update values
-        // 5. If token is not in array => create a asset struct => push
-
         uint lenderAssetLength = lenderAssets[lender].length;
-        // token is not owned by lender so push into lender asset
-        if(!isLenderTokenOwner(_token)) { 
-            UserAsset memory userAsset = UserAsset({
-                user: lender,
-                token: _token,
-                lentQty: _amount,
-                borrowQty: 0,
-                lentApy: INTEREST_RATE,
-                borrowApy: 0,
-                lendStartTimeStamp: block.timestamp,
-                borrowStartTimeStamp:0,
-                borrowEndTimeStamp : 0,
-                maturityPeriod : 0
-            });
-            lenderAssets[lender].push(userAsset);
+        if(lenderAssetLength == 0 ) {
+             UserAsset memory userAsset = UserAsset({
+                    user: lender,
+                    token: _token,
+                    lentQty: _amount,
+                    borrowQty: 0,
+                    lentApy: INTEREST_RATE,
+                    borrowApy: 0,
+                    lendStartTimeStamp: block.timestamp,
+                    borrowStartTimeStamp:0,
+                    borrowEndTimeStamp : 0,
+                    maturityPeriod : 0
+                });
+                lenderAssets[lender].push(userAsset);
         }else {
             // If lender already lent the token and is lending again, update interest earned before updating lentQty
             //   updateEarnedInterest(lender);
@@ -201,7 +202,22 @@ contract LendingPool is ReentrancyGuard {
                     lenderAssets[lender][i].lentQty += _amount;
                     lenderAssets[lender][i].lendStartTimeStamp = block.timestamp;
                 }
-              }
+                else {
+                    UserAsset memory userAsset = UserAsset({
+                        user: lender,
+                        token: _token,
+                        lentQty: _amount,
+                        borrowQty: 0,
+                        lentApy: INTEREST_RATE,
+                        borrowApy: 0,
+                        lendStartTimeStamp: block.timestamp,
+                        borrowStartTimeStamp:0,
+                        borrowEndTimeStamp : 0,
+                        maturityPeriod : 0
+                    });
+                    lenderAssets[lender].push(userAsset); 
+                }
+            }
         }
     }
     
@@ -223,7 +239,7 @@ contract LendingPool is ReentrancyGuard {
         // updateEarnedInterest(lender); //100 + 0.00001 eth , 2 // TODO: implement 
 
         // amountAvailableToWithdraw must be set on the front-end (modal) to during withdrawl 
-        // TODO: Use total USD for all lends instead of just ETH and the token
+        // Using total USD for all lends instead of just ETH and the token
         uint amountAvailableToWithdraw = getLenderAssetQty(lender, _token) - getBorrowerAssetQty(lender, _token);
         require(amountAvailableToWithdraw >= _amount,"Cannot withdraw more than balance");
 
@@ -239,13 +255,13 @@ contract LendingPool is ReentrancyGuard {
             }
         }
 
-        string memory _symbol = addressToTokenMap.getAddress(_token);
-
-        if(keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked("ETH"))) {
-            (bool success, ) = payable(lender).call{value:  msg.value}("");
-            require (success,"Tranfer to user's wallet not successful");
+        if(isETH(_token)) {
+            (bool success, ) = payable(lender).call{value: _amount}("");
+            // Instead of using require, use if and Custom error so that above ops can be reversed
+            require (success,"Transfer to Lender wallet not successful");
+            emit TransferAsset(lender, _token, _amount);
         }else {
-            IERC20(_token).transfer(lender,_amount);
+            IERC20(_token).transfer(lender, _amount);
         }
         return true;
     }
