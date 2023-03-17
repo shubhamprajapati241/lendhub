@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.6;
 
+// import "./LendingPoolAddressProvider.sol";
+
 contract LendingConfig {
+
+    // LendingPoolAddressProvider addressesProvider;
 
     address owner;
     enum Freeze { FREEZE, UNFREEZE}
@@ -16,9 +20,24 @@ contract LendingConfig {
         _;
     }
 
+    /**
+    * @dev only lending pools configurator can use functions affected by this modifier
+    **/
+    // modifier onlyLendingPool {
+    //     require(
+    //         addressesProvider.getLendingPool() == msg.sender,
+    //         "The caller must be a lending pool configurator contract"
+    //     );
+    //     _;
+    // }
+
     constructor(){
         owner = msg.sender;
     }
+    // constructor(address _lendingPoolAddressProvider){
+    //     owner = msg.sender;
+    //     addressesProvider = LendingPoolAddressProvider(_lendingPoolAddressProvider);
+    // }
 
     struct Asset {
         address token;

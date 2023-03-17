@@ -467,9 +467,12 @@ const LendState = (props) => {
         mergeObjectifiedAssets(assetsToBorrowObject);
       console.log(assetsToBorrowObjectMerged);
 
-      const totalUSDBalance = assetsToBorrowObjectMerged.reduce((bal, item) => {
-        return bal + item.borrowedBalInUSD * 1e18;
-      }, 0);
+      const totalUSDBalanceBorrowed = assetsToBorrowObjectMerged.reduce(
+        (bal, item) => {
+          return bal + item.borrowedBalInUSD;
+        },
+        0
+      );
 
       const weightedAvgAPY = assetsToBorrowObjectMerged.reduce((bal, item) => {
         return bal + item.apy;
@@ -479,7 +482,7 @@ const LendState = (props) => {
         totalUSDBalance - supplySummary.totalUSDCollateral;
 
       let summary = {
-        totalUSDBalance: totalUSDBalance,
+        totalUSDBalance: totalUSDBalanceBorrowed,
         weightedAvgAPY: weightedAvgAPY / assetsToBorrowObjectMerged.length,
         totalBorrowPowerUsed: totalBorrowPowerUsed,
       };
