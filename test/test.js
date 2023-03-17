@@ -388,6 +388,14 @@ describe("LendHub Tests", async () => {
     console.log("#####################################################");
 
     console.log("********** BEFORE WITHDRAW - ETH **********");
+
+    console.log(
+      "withdrawQty =" +
+        (await lendingPool.getTokensPerUSDAmount(
+          ETH_ADDRESS,
+          await lendingPool.getUserTotalAvailableBalanceInUSD(lender1.address)
+        ))
+    );
     console.log("ETH qty about to be withdrawn:" + amount / decimals);
     // console.log("Token Amount withdrawn :" + amount / decimals);
 
@@ -401,7 +409,6 @@ describe("LendHub Tests", async () => {
 
     const symbol = await lendingPool.getSymbol(asset);
     const isETH = await lendingPool.isETH(asset);
-    console.log("Symbol : " + symbol + " - isETH : " + isETH);
 
     const beforeReserveBalance = await lendingPool.reserves(asset);
     console.log(
@@ -455,7 +462,7 @@ describe("LendHub Tests", async () => {
     expect(result[0].token).to.be.equal(asset);
   });
 
-  it("16. Lender Should be able to withdraw Token assets", async () => {
+  it("16. Lender Should be able to withdraw DAI", async () => {
     const amount = numberToEthers(100);
     const asset = DAI_ADDRESS;
 
