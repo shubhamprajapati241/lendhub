@@ -461,7 +461,7 @@ describe("LendHub Tests", async () => {
 
     console.log("********** BEFORE WITHDRAW - DAI **********");
 
-    await moveTime(30 * SECONDS_IN_A_DAY);
+    // await moveTime(30 * SECONDS_IN_A_DAY);
 
     console.log("DAI Qty to be withdrawn :" + amount / decimals);
     let result = await lendingPool.getTokenBalance(
@@ -541,7 +541,7 @@ describe("LendHub Tests", async () => {
 
     console.log("********** AFTER LEND  - USDC **********");
 
-    await moveTime(30 * SECONDS_IN_A_DAY);
+    // await moveTime(30 * SECONDS_IN_A_DAY);
 
     console.log("USDC  Qty Lent :" + amount / decimals);
     let afterLenderAmount = await lendingPool.getTokenBalance(
@@ -615,7 +615,7 @@ describe("LendHub Tests", async () => {
 
     console.log("********** AFTER LEND - LINK **********");
 
-    await moveTime(30 * SECONDS_IN_A_DAY);
+    // await moveTime(30 * SECONDS_IN_A_DAY);
 
     console.log("LINK Qty Lent :" + amount / decimals);
     let afterLenderAmount = await lendingPool.getTokenBalance(
@@ -728,7 +728,6 @@ describe("LendHub Tests", async () => {
   });
 
   it("21. Borrower 2 Should be able to borrow DAI", async () => {
-    const borrowDuration = 30;
     const borrowAmount = numberToEthers(100);
     const asset = DAI_ADDRESS;
     const user = borrower2;
@@ -737,6 +736,14 @@ describe("LendHub Tests", async () => {
 
     const assets = await lendingPool.getAssetsToBorrow(user.address);
     // console.log("assets : " + JSON.stringify(assets));
+
+    // const lenderAssetArray = await lendingPool.getLenderAssets(user.address);
+    // console.log(lenderAssetArray);
+
+    const beforeUserAssets = await lendingPool.getLenderAssets(user.address);
+    console.log("************** Before Interest Update **************");
+    console.log(beforeUserAssets);
+
     const assetQty = assets.find((el) => el.token == asset);
     console.log("1. Max qty available to Borrow : " + assetQty.borrowQty);
     console.log("2. Qty to be borrowed : " + borrowAmount / decimals);
@@ -770,7 +777,13 @@ describe("LendHub Tests", async () => {
 
     console.log("********** AFTER BORROW - DAI - BORROWER 2 **********");
 
-    await moveTime(30 * SECONDS_IN_A_DAY);
+    // await moveTime(30 * SECONDS_IN_A_DAY);
+
+    const afterassets = await lendingPool.getAssetsToBorrow(user.address);
+    // console.log("assets : " + JSON.stringify(assets));
+    const afterassetQty = afterassets.find((el) => el.token == asset);
+
+    console.log("1. Max qty available to Borrow : " + afterassetQty.borrowQty);
 
     const afterReserveAmount = await lendingPool.reserves(asset);
     console.log("3. Qty in Reserves: " + afterReserveAmount / decimals);
@@ -830,7 +843,6 @@ describe("LendHub Tests", async () => {
   });
 
   it("24. Should be able to borrow again", async () => {
-    const borrowDuration = 30;
     const borrowAmount = numberToEthers(110);
     const asset = DAI_ADDRESS;
 
@@ -838,7 +850,7 @@ describe("LendHub Tests", async () => {
 
     console.log("********** BEFORE BORROW AGAIN - DAI **********");
 
-    await moveTime(30 * SECONDS_IN_A_DAY);
+    // await moveTime(30 * SECONDS_IN_A_DAY);
 
     const assets = await lendingPool.getAssetsToBorrow(lender1.address);
     const assetQty = assets.find((el) => el.token == asset);
@@ -886,7 +898,7 @@ describe("LendHub Tests", async () => {
 
     console.log("********** After BORROW AGAIN **********");
 
-    await moveTime(30 * SECONDS_IN_A_DAY);
+    // await moveTime(30 * SECONDS_IN_A_DAY);
 
     const afterReserveAmount = await lendingPool.reserves(asset);
     console.log("3. What is the reserves: " + afterReserveAmount / decimals);
@@ -953,7 +965,7 @@ describe("LendHub Tests", async () => {
 
     console.log("+++++++++++++++++++++++++++++++++++++++++++++++++");
 
-    await moveTime(30 * SECONDS_IN_A_DAY);
+    // await moveTime(30 * SECONDS_IN_A_DAY);
 
     await daiToken.connect(lender2).approve(lendingPool.address, repayAmount);
     await lendingPool.connect(lender2).repay(asset, repayAmount);
@@ -991,5 +1003,44 @@ describe("LendHub Tests", async () => {
       "6. Borrower 2 Wallet Balance : " + afterBorrowerAmount / decimals
     );
     console.log("#####################################################");
+  });
+
+  it("26. Should be able to update earned interest rates", async () => {
+    const beforeUserAssets = await lendingPool.getLenderAssets(lender1.address);
+
+    console.log("************** Before Interest Update **************");
+    console.log(beforeUserAssets);
+
+    await moveTime(10); // time in seconds
+    const user = lender1;
+
+    const tx = await lendingPool.updateEarnedInterest(lender1.address);
+    await tx.wait();
+
+    console.log("************** After Interest Update **************");
+    const afterUserAssets = await lendingPool.getLenderAssets(lender1.address);
+
+    console.log(afterUserAssets);
+  });
+
+  it("27. Should be able to update accrued interest rates", async () => {
+    const beforeUserAssets = await lendingPool.getBorrowerAssets(
+      lender1.address
+    );
+
+    console.log("************** Before Interest Update **************");
+    console.log(beforeUserAssets);
+
+    await moveTime(10); // time in seconds
+    const user = lender1;
+
+    const tx = await lendingPool.updateAccruedInterestOnBorrow(lender1.address);
+    await tx.wait();
+
+    console.log("************** After Interest Update **************");
+    const afterUserAssets = await lendingPool.getBorrowerAssets(
+      lender1.address
+    );
+    console.log(afterUserAssets);
   });
 });

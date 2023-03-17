@@ -64,11 +64,11 @@ const LendState = (props) => {
   });
 
   const connectWallet = async () => {
-    console.warn("Connecting to wallet...");
+    // console.warn("Connecting to wallet...");
     const { ethereum } = window;
     const failMessage = "Please install Metamask & connect your Metamask";
     try {
-      if (!ethereum) return console.log(failMessage);
+      if (!ethereum) return; // console.log(failMessage);
       const account = await ethereum.request({
         method: "eth_requestAccounts",
       });
@@ -93,7 +93,7 @@ const LendState = (props) => {
           signer: signer,
           currentAccount: currentAddress,
         });
-        console.warn("Connected to wallet....");
+        // console.warn("Connected to wallet....");
       } else {
         return failMessage;
       }
@@ -103,7 +103,7 @@ const LendState = (props) => {
   };
 
   const getUserAssets = async () => {
-    console.warn("Getting user Assets...");
+    // console.warn("Getting user Assets...");
     try {
       const assets = await Promise.all(
         tokensList.token.map(async (token) => {
@@ -147,9 +147,9 @@ const LendState = (props) => {
   };
 
   const supplyAssetsToPool = async (name, amount) => {
-    //   console.log("supplyAssetsToPool starting....");
-    //   console.log("supply name : " + name);
-    //   console.log("supply amount : " + amount);
+    //   // console.log("supplyAssetsToPool starting....");
+    //   // console.log("supply name : " + name);
+    //   // console.log("supply amount : " + amount);
     //   //* connecting with contract
     //   const bankContract = new ethers.Contract(
     //     BankContractAddress,
@@ -166,21 +166,21 @@ const LendState = (props) => {
     //     await metamaskDetails.provider.getFeeData()
     //   ).maxFeePerGas.mul(gasLimit);
     //   totalGas = ethers.utils.formatUnits(totalGas, "ether");
-    //   console.log("Total GAS : " + totalGas);
-    //   // console.log(estimateGas);
+    //   // console.log("Total GAS : " + totalGas);
+    //   // // console.log(estimateGas);
     //   // let gas = parseInt(Number(estimateGas._hex)).toString();
     //   // const gas2 = ethers.utils.parseUnits(gas, "ether");
-    //   // console.log(gas2);
+    //   // // console.log(gas2);
     //   // //* Writing the contract
     //   const transcation = await bankContract.depositAsset(name, {
     //     value: price,
     //   });
     //   await transcation.wait();
-    //   console.log("Transaction done....");
+    //   // console.log("Transaction done....");
     //   // //* Reading the contract
     //   // let contractBalance = await bankContract.getContactBalance();
     //   // contractBalance = contractBalance.toString();
-    //   // console.log(contractBalance);
+    //   // // console.log(contractBalance);
   };
 
   const getContract = async (address, abi) => {
@@ -206,10 +206,10 @@ const LendState = (props) => {
     //   const balanceUser = await tokenContract.balanceOf(
     //     metamaskDetails.currentAccount
     //   );
-    //   console.log("balanceUser : " + balanceUser);
+    //   // console.log("balanceUser : " + balanceUser);
     //   const balanceSC = await tokenContract.balanceOf(deFiDappAddress);
-    //   console.log("balanceSC : " + balanceSC);
-    //   console.log(metamaskDetails.currentAccount);
+    //   // console.log("balanceSC : " + balanceSC);
+    //   // console.log(metamaskDetails.currentAccount);
     //   await tokenContract
     //     .connect(metamaskDetails.signer)
     //     .approve(deFiDappAddress, amount);
@@ -222,9 +222,9 @@ const LendState = (props) => {
   /**************************** APPROVE TOKENS ************************************/
   const ApproveToContinue = async (tokenAddress, approveAmount) => {
     const amount = ethers.utils.parseEther(approveAmount);
-    console.log("tokenAddress : " + tokenAddress);
-    console.log("LendingPoolAddress : " + LendingPoolAddress);
-    console.log("approveAmount : " + amount);
+    // console.log("tokenAddress : " + tokenAddress);
+    // console.log("LendingPoolAddress : " + LendingPoolAddress);
+    // console.log("approveAmount : " + amount);
 
     try {
       const contract = await getContract(tokenAddress, TokenABI);
@@ -232,7 +232,7 @@ const LendState = (props) => {
         .connect(metamaskDetails.signer)
         .approve(LendingPoolAddress, amount);
       await transaction.wait();
-      console.log("Approve Transaction done....");
+      // console.log("Approve Transaction done....");
       return true;
     } catch (error) {
       reportError(error);
@@ -242,11 +242,11 @@ const LendState = (props) => {
 
   /*************************** Lend Functionality ***************************/
   const LendAsset = async (token, supplyAmount) => {
-    console.log("Lending....");
+    // console.log("Lending....");
     const amount = numberToEthers(supplyAmount);
     const valueOption = { value: amount };
-    console.log("token : " + token);
-    console.log("supplyAmount : " + amount);
+    // console.log("token : " + token);
+    // console.log("supplyAmount : " + amount);
 
     try {
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
@@ -255,8 +255,8 @@ const LendState = (props) => {
         .lend(token, amount, valueOption);
 
       await transaction.wait();
-      console.log("Supply Transaction done....");
-      getYourSupplies(metamaskDetails.currentAccount);
+      // console.log("Supply Transaction done....");
+      // getYourSupplies(metamaskDetails.currentAccount);
       return true;
     } catch (error) {
       reportError(error);
@@ -269,9 +269,9 @@ const LendState = (props) => {
     const amount = numberToEthers(withdrawAmount);
     const valueOption = { value: amount };
 
-    console.log("Withdraw Started.....");
-    console.log("tokenAddress : " + tokenAddress);
-    console.log("withdrawAmount : " + amount);
+    // console.log("Withdraw Started.....");
+    // console.log("tokenAddress : " + tokenAddress);
+    // console.log("withdrawAmount : " + amount);
 
     try {
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
@@ -279,7 +279,7 @@ const LendState = (props) => {
         .connect(metamaskDetails.signer)
         .withdraw(tokenAddress, amount);
       await transaction.wait();
-      console.log("Withdraw done....");
+      // console.log("Withdraw done....");
       return true;
     } catch (error) {
       reportError(error);
@@ -288,14 +288,14 @@ const LendState = (props) => {
   };
 
   const objectifySuppliedAssets = async (assets) => {
-    // console.log("In Structured Assets..........");
+    // // console.log("In Structured Assets..........");
     const assetsList = [];
 
     for (let i = 0; i < assets.length; i++) {
       const token = assets[i].token;
       const lendQty = assets[i].lentQty;
 
-      // console.log(lendQty);
+      // // console.log(lendQty);
       const amountInUSD = await getAmountInUSD(token, lendQty);
       assetsList.push({
         token: assets[i].token,
@@ -305,15 +305,16 @@ const LendState = (props) => {
       });
     }
 
-    console.log(assetsList);
+    // console.log(assetsList);
     return assetsList;
   };
 
   const objectifyBorrowedAssets = async (assets) => {
-    // console.log("*** In objectifyBorrowedAssets ***");
+    // // console.log("*** In objectifyBorrowedAssets ***");
     const borrowsList = [];
 
-    console.log(assets);
+    // console.log(assets);
+
     for (let i = 0; i < assets.length; i++) {
       const token = assets[i].token;
       const borrowQty = assets[i].borrowQty;
@@ -329,13 +330,14 @@ const LendState = (props) => {
       });
     }
 
-    console.log(borrowsList);
+    // console.log("**** objectifyBorrowedAssets");
+    // console.log(borrowsList);
     return borrowsList;
   };
 
   const mergeObjectifiedAssets = (assets) => {
-    // console.log("*** In mergeObjectifiedAssets....");
-    // console.log(assets);
+    // // console.log("*** In mergeObjectifiedAssets....");
+    // // console.log(assets);
     var result = tokensList.token
       .filter((tokenList) => {
         return assets.some((assetList) => {
@@ -346,15 +348,15 @@ const LendState = (props) => {
         ...assets.find((item) => item.token === assetObj.address && item),
         ...assetObj,
       }));
-    // console.log(result);
+    // // console.log(result);
     return result;
   };
 
   const getAmountInUSD = async (address, amount) => {
-    // console.log("Getting amount in USD......");
-    // console.log("amount" + amount);
+    // // console.log("Getting amount in USD......");
+    // // console.log("amount" + amount);
     const AMOUNT = numberToEthers(amount);
-    // console.log("AMOUNT" + AMOUNT);
+    // // console.log("AMOUNT" + AMOUNT);
 
     try {
       const contract = new ethers.Contract(
@@ -365,7 +367,7 @@ const LendState = (props) => {
       const amountInUSD =
         Number(await contract.getAmountInUSD(address, AMOUNT)) / 1e18;
 
-      // console.log("amountInUSD : " + amountInUSD);
+      // // console.log("amountInUSD : " + amountInUSD);
       return amountInUSD;
     } catch (error) {
       reportError(error);
@@ -375,7 +377,7 @@ const LendState = (props) => {
 
   /*************************** Component : Your Supplies ***************************/
   const getYourSupplies = async () => {
-    console.warn("Getting Supply assets.......");
+    // console.warn("Getting Supply assets.......");
 
     try {
       const contract = new ethers.Contract(
@@ -391,10 +393,10 @@ const LendState = (props) => {
 
       const supplyAssets = await objectifySuppliedAssets(assets);
 
-      console.log(supplyAssets);
+      // console.log(supplyAssets);
 
       const supplyAsset2 = mergeObjectifiedAssets(supplyAssets);
-      console.log(JSON.stringify(supplyAsset2));
+      // console.log(JSON.stringify(supplyAsset2));
 
       const totalUSDBalance = supplyAssets.reduce((bal, item) => {
         return bal + item.balanceInUSD;
@@ -419,7 +421,9 @@ const LendState = (props) => {
       setSupplySummary(summary);
       setSupplyAssets(supplyAsset2);
 
-      // console.log("Got Supply assets.....");
+      getYourBorrows(totalUSDCollateral);
+
+      // // console.log("Got Supply assets.....");
     } catch (error) {
       reportError(error);
       return error;
@@ -427,14 +431,14 @@ const LendState = (props) => {
   };
 
   const getAssets = async () => {
-    console.log("Getting assets");
+    // console.log("Getting assets");
     try {
       const contract = await getContract(
         LendingConfigAddress,
         LendingConfigABI
       );
       const assets = await contract.getAssets();
-      console.log(assets);
+      // console.log(assets);
     } catch (error) {
       reportError(error);
       return error;
@@ -443,7 +447,7 @@ const LendState = (props) => {
 
   /************ Function to get Assets to Borrow ***********/
   const getAssetsToBorrow = async () => {
-    console.log("Getting assets to Borrow...");
+    // console.log("Getting assets to Borrow...");
 
     try {
       const contract = new ethers.Contract(
@@ -456,42 +460,17 @@ const LendState = (props) => {
       const assetsToBorrow = await contract.getAssetsToBorrow(
         metamaskDetails.currentAccount
       );
-      console.log("*** calling objectifyBorrowedAssets from getAssetsToBorrow");
+
+      // console.log("*** calling objectifyBorrowedAssets from getAssetsToBorrow");
       const assetsToBorrowObject = await objectifyBorrowedAssets(
         assetsToBorrow
       );
-      console.log(JSON.stringify(assetsToBorrowObject));
+      // console.log(JSON.stringify(assetsToBorrowObject));
 
-      console.log("*** calling mergeObjectifiedAssets from getAssetsToBorrow");
+      // console.log("*** calling mergeObjectifiedAssets from getAssetsToBorrow");
       const assetsToBorrowObjectMerged =
         mergeObjectifiedAssets(assetsToBorrowObject);
-      console.log(assetsToBorrowObjectMerged);
-
-      const totalUSDBalanceBorrowed = assetsToBorrowObjectMerged.reduce(
-        (bal, item) => {
-          return bal + item.borrowedBalInUSD;
-        },
-        0
-      );
-
-      const weightedAvgAPY = assetsToBorrowObjectMerged.reduce((bal, item) => {
-        return bal + item.apy;
-      }, 0);
-
-      const totalBorrowPowerUsed =
-        totalUSDBalance - supplySummary.totalUSDCollateral;
-
-      let summary = {
-        totalUSDBalance: totalUSDBalanceBorrowed,
-        weightedAvgAPY: weightedAvgAPY / assetsToBorrowObjectMerged.length,
-        totalBorrowPowerUsed: totalBorrowPowerUsed,
-      };
-
-      console.error("************ summary");
-      console.log(summary);
-      console.log(supplySummary.totalUSDCollateral);
-
-      setBorrowSummary(summary);
+      // console.log(assetsToBorrowObjectMerged);
       setAssetsToBorrow(assetsToBorrowObjectMerged);
     } catch (error) {
       reportError(error);
@@ -502,24 +481,13 @@ const LendState = (props) => {
   /*************************** Borrow Functionality ***************************/
   const borrowAsset = async (token, borrowAmount) => {
     const amount = numberToEthers(borrowAmount);
-    console.log("Borrowing token : " + token + "| supplyAmount : " + amount);
-
+    // console.log("Borrowing token : " + token + "| supplyAmount : " + amount);
     try {
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
       const transaction = await contract
         .connect(metamaskDetails.signer)
         .borrow(token, amount);
-
       await transaction.wait();
-      console.log(
-        "Borrowing token : " +
-          token +
-          "| supplyAmount : " +
-          amount +
-          "Successful.."
-      );
-
-      getYourBorrows(metamaskDetails.currentAccount);
       return true;
     } catch (error) {
       reportError(error);
@@ -528,22 +496,40 @@ const LendState = (props) => {
   };
 
   /*************************** Your Borrows ***************************/
-  const getYourBorrows = async () => {
-    console.log("**** Getting Your Borrows ****");
-
+  const getYourBorrows = async (totalUSDCollateral) => {
+    // console.log("**** Getting Your Borrows ****");
     try {
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
       const yourBorrows = await contract
         .connect(metamaskDetails.signer)
         .getBorrowerAssets(metamaskDetails.currentAccount);
 
-      console.log("*** calling objectifyBorrowedAssets from getYourBorrows");
+      // console.log("*** calling objectifyBorrowedAssets from getYourBorrows");
       const yourBorrowsObject = await objectifyBorrowedAssets(yourBorrows);
-      console.log(yourBorrowsObject);
-      console.log("*** calling mergeObjectifiedAssets from getYourBorrows");
+      // console.log(yourBorrowsObject);
+      // console.log("*** calling mergeObjectifiedAssets from getYourBorrows");
       const yourBorrowsObjectMerged = mergeObjectifiedAssets(yourBorrowsObject);
-      console.log(JSON.stringify(yourBorrowsObjectMerged));
+      // console.log(JSON.stringify(yourBorrowsObjectMerged));
 
+      const totalUSDBalanceBorrowed = yourBorrowsObjectMerged.reduce(
+        (bal, item) => {
+          return bal + item.borrowedBalInUSD;
+        },
+        0
+      );
+      const weightedAvgAPY = yourBorrowsObjectMerged.reduce((bal, item) => {
+        return bal + item.borrowApy;
+      }, 0);
+
+      const totalBorrowPowerUsed = totalUSDCollateral - totalUSDBalanceBorrowed;
+
+      let summary = {
+        totalUSDBalance: totalUSDBalanceBorrowed,
+        weightedAvgAPY: weightedAvgAPY / yourBorrowsObjectMerged.length,
+        totalBorrowPowerUsed: totalBorrowPowerUsed,
+      };
+
+      setBorrowSummary(summary);
       setYourBorrows(yourBorrowsObjectMerged);
     } catch (error) {
       reportError(error);
@@ -555,9 +541,9 @@ const LendState = (props) => {
   const repayAsset = async (tokenAddress, repayAmount) => {
     const amount = numberToEthers(repayAmount);
 
-    console.log("Repay Started.....");
-    console.log("tokenAddress : " + tokenAddress);
-    console.log("repayAmount : " + amount);
+    // console.log("Repay Started.....");
+    // console.log("tokenAddress : " + tokenAddress);
+    // console.log("repayAmount : " + amount);
 
     try {
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
@@ -565,8 +551,36 @@ const LendState = (props) => {
         .connect(metamaskDetails.signer)
         .repay(tokenAddress, amount);
       await transaction.wait();
-      console.log("Repay done....");
+      // console.log("Repay done....");
       return true;
+    } catch (error) {
+      reportError(error);
+      return error;
+    }
+  };
+
+  const updateInterests = async () => {
+    console.error("Updating interests.....");
+    try {
+      const account = metamaskDetails.currentAccount;
+
+      console.log("account : " + account);
+
+      const contract = await getContract(LendingPoolAddress, LendingPoolABI);
+
+      const updateEarnedInterest = await contract
+        .connect(metamaskDetails.signer)
+        .updateEarnedInterest(account);
+
+      await updateEarnedInterest.wait();
+
+      console.log(updateEarnedInterest);
+
+      // const updateAccruedInterestOnBorrow =
+      //   await contract.updateAccruedInterestOnBorrow(account);
+      // await updateAccruedInterestOnBorrow.wait();
+
+      console.log("Updated interests.....");
     } catch (error) {
       reportError(error);
       return error;
@@ -575,7 +589,7 @@ const LendState = (props) => {
 
   // ------------------
   const reportError = (error) => {
-    console.error(JSON.stringify(error));
+    // console.error(JSON.stringify(error));
   };
 
   return (
@@ -603,6 +617,7 @@ const LendState = (props) => {
         yourBorrows,
         repayAsset,
         borrowSummary,
+        updateInterests,
       }}
     >
       {props.children}

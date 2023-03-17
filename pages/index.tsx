@@ -17,8 +17,7 @@ const Home: NextPage = () => {
     getUserAssets,
     getYourSupplies,
     getAssetsToBorrow,
-    getYourBorrows,
-    supplySummary,
+    updateInterests,
   } = useContext(lendContext);
 
   useEffect(() => {
@@ -26,7 +25,8 @@ const Home: NextPage = () => {
   }, []);
 
   useEffect(() => {
-    getYourBorrows();
+    // setInterval(() => updateInterests(), 5000);
+    updateInterests();
     getAssetsToBorrow();
     getUserAssets();
     getYourSupplies();
