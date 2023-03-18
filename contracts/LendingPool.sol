@@ -90,10 +90,8 @@ contract LendingPool is ReentrancyGuard {
         if(reserves[_token] == 0 ) {
             return 0;
         }
-        // return ((block.timestamp - lendStartTimeStamp) * INTEREST_RATE * 1e18 )/(REWARD_RATE_PER_SECS * reserves[_token]);
+        return ((block.timestamp - lendStartTimeStamp) * INTEREST_RATE * 1e18 )/(REWARD_RATE_PER_SECS * reserves[_token]);
 
-
-        return lenderSupply * rewardPerToken() / 1e18
     }
 
     function interestAccrued(address _token, uint borrowStartTimeStamp) public view returns (uint) {
@@ -388,30 +386,30 @@ contract LendingPool is ReentrancyGuard {
         return 0;
     }
 
-    function getLenderAssets2(address _lender) public view returns (UserAsset[] memory) {
-        uint lenderAssetLength = lenderAssets[_lender].length;
-        UserAsset[] memory lenderAssetsList= new UserAsset[](lenderAssetLength);
+    // function getLenderAssets2(address _lender) public view returns (UserAsset[] memory) {
+    //     uint lenderAssetLength = lenderAssets[_lender].length;
+    //     UserAsset[] memory lenderAssetsList= new UserAsset[](lenderAssetLength);
 
-        for (uint i = 0; i < lenderAssetLength; i++) {
+    //     for (uint i = 0; i < lenderAssetLength; i++) {
 
-            uint256 lendQtyWithInterest = lenderAssets[_lender][i].lentQty + interestEarned(lenderAssets[_lender][i].token, lenderAssets[_lender][i].lendStartTimeStamp);
+    //         uint256 lendQtyWithInterest = lenderAssets[_lender][i].lentQty + interestEarned(lenderAssets[_lender][i].token, lenderAssets[_lender][i].lendStartTimeStamp);
 
-            // uint256 lendQtyWithInterest = lenderAssets[_lender][i].lentQty;
+    //         // uint256 lendQtyWithInterest = lenderAssets[_lender][i].lentQty;
 
-            lenderAssetsList[i] = UserAsset({
-                user: _lender,
-                token: lenderAssets[_lender][i].token,
-                lentQty: lendQtyWithInterest,
-                borrowQty: lenderAssets[_lender][i].borrowQty,
-                lentApy: lenderAssets[_lender][i].lentApy,
-                borrowApy: lenderAssets[_lender][i].borrowApy,
-                lendStartTimeStamp: lenderAssets[_lender][i].lendStartTimeStamp,
-                borrowStartTimeStamp: lenderAssets[_lender][i].borrowStartTimeStamp
-            });
-        }
+    //         lenderAssetsList[i] = UserAsset({
+    //             user: _lender,
+    //             token: lenderAssets[_lender][i].token,
+    //             lentQty: lendQtyWithInterest,
+    //             borrowQty: lenderAssets[_lender][i].borrowQty,
+    //             lentApy: lenderAssets[_lender][i].lentApy,
+    //             borrowApy: lenderAssets[_lender][i].borrowApy,
+    //             lendStartTimeStamp: lenderAssets[_lender][i].lendStartTimeStamp,
+    //             borrowStartTimeStamp: lenderAssets[_lender][i].borrowStartTimeStamp
+    //         });
+    //     }
     
-        return lenderAssetsList;
-    }
+    //     return lenderAssetsList;
+    // }
 
     function getLenderAssets(address _lender) public view returns (UserAsset[] memory) {
         return lenderAssets[_lender];

@@ -6,9 +6,8 @@ import { CgSpinner } from "react-icons/ci";
 
 import lendContext from "../context/lendContext";
 import { toast } from "react-toastify";
-import { ReactComponent as Loader } from "../assets/loader.svg";
 
-const LendModal = ({
+const ModalLend = ({
   address,
   name,
   balance,
@@ -251,4 +250,4 @@ const LendModal = ({
   );
 };
 
-export default LendModal;
+export default ModalLend;

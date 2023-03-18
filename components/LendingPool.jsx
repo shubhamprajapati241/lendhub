@@ -1,10 +1,9 @@
 import React from "react";
 import {
   YourSupplies,
-  BorrowTab,
-  SupplyAssets,
-  BorrowAssets,
   YourBorrows,
+  AssetsToSupplies,
+  AssetsToBorrow,
 } from "../components";
 
 const LendingPool = () => {
@@ -16,8 +15,8 @@ const LendingPool = () => {
       </div>
 
       <div className="flex flex-wrap md:flex-nowrap gap-3 pt-3">
-        <SupplyAssets />
-        <BorrowAssets />
+        <AssetsToSupplies />
+        <AssetsToBorrow />
       </div>
 
       <div className="h-32"></div>

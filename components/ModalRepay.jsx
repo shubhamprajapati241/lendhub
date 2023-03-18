@@ -2,33 +2,26 @@ import Image from "next/image";
 import React, { useState, useContext } from "react";
 import { MdLocalGasStation } from "react-icons/md";
 import { BiError } from "react-icons/bi";
-import { toast } from "react-toastify";
 import lendContext from "../context/lendContext";
+import { toast } from "react-toastify";
 
-const WithdrawModal = ({
-  address,
-  name,
-  balance,
-  image,
-  remainingSupply,
-  onClose,
-}) => {
-  const { getAmountInUSD, connectWallet, numberToEthers, WithdrawAsset } =
+const ModalRepay = ({ address, name, debt, image, onClose }) => {
+  const { getAmountInUSD, repayAsset, numberToEthers, connectWallet } =
     useContext(lendContext);
-  const [dollarPrice, setdollarPrice] = useState(0);
-  const [inputValue, setInputValue] = useState();
+  const [dollarPrice, setDollarPrice] = useState(0);
   const [isInputValidate, setInputValidate] = useState(false);
+  const [inputValue, setInputValue] = useState("");
 
   const setMax = () => {
-    setInputValue(balance);
-    getbalanceInUSD(balance);
+    setInputValue(debt);
+    getdebtInUSD(debt);
     setInputValidate(true);
   };
 
-  const getbalanceInUSD = async (amount) => {
+  const getdebtInUSD = async (amount) => {
     const amount2 = numberToEthers(amount);
     const amountInUSD = await getAmountInUSD(address, amount2);
-    setdollarPrice(amountInUSD);
+    setDollarPrice(amountInUSD);
   };
 
   const validateInput = (input) => {
@@ -39,27 +32,27 @@ const WithdrawModal = ({
         setInputValue("");
         setInputValidate(false);
       } else {
-        if (Number(input) > Number(balance)) {
-          setInputValue(balance);
-          getbalanceInUSD(balance);
+        if (Number(input) > Number(debt)) {
+          setInputValue(debt);
+          getdebtInUSD(debt);
         } else {
           setInputValue(input);
-          getbalanceInUSD(input);
+          getdebtInUSD(input);
         }
         setInputValidate(true);
       }
     } else {
       setInputValue("");
-      setdollarPrice(0);
+      setDollarPrice(0);
       setInputValidate(false);
     }
   };
 
-  const handleWithdraw = async () => {
-    const isWithdrawSuccessful = await WithdrawAsset(address, inputValue);
-    console.log(isWithdrawSuccessful);
-    toast.success(`Withdraw Successful ${inputValue} ${name}`);
-    if (isWithdrawSuccessful) {
+  const handleRepay = async () => {
+    const isRepayed = await repayAsset(address, inputValue);
+    console.log(isRepayed);
+    toast.success(`Repayed ${inputValue} ${name}`);
+    if (isRepayed) {
       onClose();
       await connectWallet();
     }
@@ -68,7 +61,7 @@ const WithdrawModal = ({
   return (
     <div>
       <div className="flex justify-between mb-3">
-        <h1 className="text-[18px] font-semibold ">Withdraw {name}</h1>
+        <h1 className="text-[18px] font-semibold ">Repay {name}</h1>
         <button className=" text-xl" onClick={() => onClose()}>
           &#10006;
         </button>
@@ -79,15 +72,15 @@ const WithdrawModal = ({
           Amount
         </h1>
         <div className="border border-[#A5A8B6] border-opacity-20 p-2 rounded  flex flex-col">
-          <div className="flex flex-row justify-between  mb-1">
+          <div className="flex flex-row justify-between mb-1">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => validateInput(e.target.value)}
-              className="bg-transparent outline-none text-xl font-semibold w-1/2"
+              className="bg-transparent outline-none text-xl font-medium w-3/4"
               placeholder="0.00"
             />
-            <div className="font-semibold flex flex-row items-center justify-end w-1/2">
+            <div className="font-semibold flex flex-row items-center justify-end w-1/4">
               <Image
                 src={image}
                 width={22}
@@ -110,13 +103,10 @@ const WithdrawModal = ({
                     .slice(0, 10)}...`}{" "}
             </p>
             <p className="justify-end">
-              Wallet Balance{" "}
-              {Number(balance).toFixed(2).toString(2).length < 10
-                ? Number(balance).toFixed(2).toString().slice(0, 10)
-                : `${Number(balance)
-                    .toFixed(2)
-                    .toString()
-                    .slice(0, 10)}...`}{" "}
+              Wallet debt{" "}
+              {Number(debt).toFixed(2).toString(2).length < 10
+                ? Number(debt).toFixed(2).toString().slice(0, 10)
+                : `${Number(debt).toFixed(2).toString().slice(0, 10)}...`}{" "}
               <button
                 className="font-bold text-[10px] text-[#F1F1F3]"
                 onClick={() => setMax()}
@@ -134,15 +124,9 @@ const WithdrawModal = ({
         </h1>
         <div className="border border-[#A5A8B6] border-opacity-20 p-2 rounded  flex flex-col">
           <div className="flex flex-row items-center justify-between text-[13px] text-[#F1F1F3]">
-            <p className="">Remaining Supply</p>
+            <p className="">Remaining debt </p>
             <p className="justify-end">
-              {Number(remainingSupply).toFixed(2).toString(2).length < 10
-                ? Number(remainingSupply).toFixed(2).toString().slice(0, 10)
-                : `${Number(remainingSupply)
-                    .toFixed(2)
-                    .toString()
-                    .slice(0, 10)}...`}{" "}
-              <span className="text-[#A5A8B6]">{name}</span>
+              {inputValue ? `${debt} → ${debt - inputValue}` : `${debt}`}
             </p>
           </div>
         </div>
@@ -155,16 +139,6 @@ const WithdrawModal = ({
         </p>
       </div>
 
-      <div className="flex justify-center items-center text-xs p-2 bg-[#2E0C0A] text-[#FBB4AF] rounded mb-5">
-        <BiError className="text-3xl pr-2 " />
-
-        <div className="flex flex-col">
-          <p className="font-medium text-[10px] tracking-[0.005rem]">
-            Withdrawing this amount will increase risk of liquidation.
-          </p>
-        </div>
-      </div>
-
       <div className={!isInputValidate ? "block" : "hidden"}>
         <button className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold">
           Enter an amount
@@ -175,14 +149,14 @@ const WithdrawModal = ({
         <button
           className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
           onClick={() => {
-            handleWithdraw();
+            handleRepay();
           }}
         >
-          Withdraw {name}
+          Repay {name}
         </button>
       </div>
     </div>
   );
 };
 
-export default WithdrawModal;
+export default ModalRepay;

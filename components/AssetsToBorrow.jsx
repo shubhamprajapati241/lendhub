@@ -1,9 +1,9 @@
 import React, { useContext, useEffect } from "react";
 import lendContext from "../context/lendContext";
-import { LoaderSkeleton, RowAssetsToBorrow } from ".";
+import { LoaderSkeleton, AssetsToBorrowRow } from ".";
 import { FiAlertCircle } from "react-icons/fi";
 
-const BorrowAssets = () => {
+const AssetsToBorrow = () => {
   const { assetsToBorrow } = useContext(lendContext);
   return (
     <div className="w-full md:w-1/2 h-30 bg-white rounded-md ">
@@ -33,7 +33,7 @@ const BorrowAssets = () => {
             <tbody>
               {assetsToBorrow.length > 0 ? (
                 assetsToBorrow.map((token, index) => (
-                  <RowAssetsToBorrow
+                  <AssetsToBorrowRow
                     key={index}
                     address={token.address}
                     name={token.name}
@@ -62,4 +62,4 @@ const BorrowAssets = () => {
   );
 };
 
-export default BorrowAssets;
+export default AssetsToBorrow;

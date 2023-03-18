@@ -1,8 +1,8 @@
 import Image from "next/image";
 import React, { useState } from "react";
-import { ModalBorderLayout, RepayModal } from ".";
+import { ModalBorderLayout, ModalRepay } from ".";
 
-const RowYourBorrows = ({
+const YourBorrowsRow = ({
   address,
   name,
   image,
@@ -71,7 +71,7 @@ const RowYourBorrows = ({
         isVisible={showRepayModal}
         onClose={() => setShowRepayModal(false)}
       >
-        <RepayModal
+        <ModalRepay
           address={address}
           name={name}
           image={image}
@@ -84,4 +84,4 @@ const RowYourBorrows = ({
   );
 };
 
-export default RowYourBorrows;
+export default YourBorrowsRow;

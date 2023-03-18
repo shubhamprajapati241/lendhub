@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react";
 import lendContext from "../context/lendContext";
-import { LoaderSkeleton, RowYourBorrows, SummaryTab } from "../components";
+import { LoaderSkeleton, YourBorrowsRow, SummaryTab } from "../components";
 
 const YourBorrows = () => {
   const { yourBorrows, borrowSummary } = useContext(lendContext);
@@ -41,7 +41,7 @@ const YourBorrows = () => {
               <tbody>
                 {yourBorrows.length > 0 ? (
                   yourBorrows.map((token, index) => (
-                    <RowYourBorrows
+                    <YourBorrowsRow
                       key={index}
                       address={token.address}
                       name={token.name}

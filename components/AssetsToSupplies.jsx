@@ -1,9 +1,9 @@
 import React, { useContext, useEffect } from "react";
 
 import lendContext from "../context/lendContext";
-import { LoaderSkeleton, RowSupplyAssets } from "../components";
+import { LoaderSkeleton, AssetsToSuppliesRow } from ".";
 
-const SupplyAssets = () => {
+const AssetsToSupplies = () => {
   const { userAssets } = useContext(lendContext);
   return (
     <div className="w-full md:w-1/2 h-30 bg-white rounded-md ">
@@ -32,7 +32,7 @@ const SupplyAssets = () => {
           <tbody>
             {userAssets.length > 0 ? (
               userAssets.map((token, index) => (
-                <RowSupplyAssets
+                <AssetsToSuppliesRow
                   key={index}
                   address={token.address}
                   name={token.name}
@@ -52,4 +52,4 @@ const SupplyAssets = () => {
   );
 };
 
-export default SupplyAssets;
+export default AssetsToSupplies;
