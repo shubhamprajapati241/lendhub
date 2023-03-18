@@ -2,13 +2,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useContext, useEffect } from "react";
 import lendContext from "../context/lendContext";
-import {
-  Header,
-  MainCard,
-  LendingPool,
-  DisconnectedTab,
-  ModalSupply,
-} from "../components";
+import { Header, MainCard, LendingPool, DisconnectedTab } from "../components";
 
 const Home: NextPage = () => {
   const {
@@ -18,6 +12,7 @@ const Home: NextPage = () => {
     getYourSupplies,
     getAssetsToBorrow,
     updateInterests,
+    getYourBorrows,
   } = useContext(lendContext);
 
   useEffect(() => {
@@ -27,6 +22,7 @@ const Home: NextPage = () => {
   useEffect(() => {
     // setInterval(() => updateInterests(), 5000);
     updateInterests();
+    getYourBorrows();
     getAssetsToBorrow();
     getUserAssets();
     getYourSupplies();

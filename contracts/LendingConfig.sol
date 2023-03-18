@@ -59,7 +59,7 @@ contract LendingConfig {
         bool _usageAsCollateralEnabled,
         bool _isfrozen,
         bool _isActive,
-        string memory _symbol, 
+        string calldata _symbol, 
         uint256 _decimals,
         uint256 _borrowThreshold,
         uint256 _liquidationThreshold
@@ -154,7 +154,7 @@ contract LendingConfig {
         revert("Asset not found");
     }
 
-    function isBorrowingEnable(address _token) public view returns(bool) {
+    function isBorrowingEnabled(address _token) public view returns(bool) {
         uint256 assetsLen = assets.length;
         for(uint i=0; i < assetsLen; i++) {
             if(assets[i].token == _token && assets[i].borrowingEnabled) {

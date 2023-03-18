@@ -2,33 +2,33 @@ import Image from "next/image";
 import React, { useState, useContext } from "react";
 import { MdLocalGasStation } from "react-icons/md";
 import { BiError } from "react-icons/bi";
-import { toast } from "react-toastify";
 import lendContext from "../context/lendContext";
+import { toast } from "react-toastify";
 
-const ModalWithdraw = ({
+const BorrowModal = ({
   address,
   name,
-  balance,
+  available,
   image,
-  remainingSupply,
+  borrowApy,
   onClose,
 }) => {
-  const { getAmountInUSD, connectWallet, numberToEthers, WithdrawAsset } =
+  const { getAmountInUSD, borrowAsset, numberToEthers, connectWallet } =
     useContext(lendContext);
-  const [dollarPrice, setdollarPrice] = useState(0);
-  const [inputValue, setInputValue] = useState();
+  const [dollarPrice, setDollarPrice] = useState(0);
   const [isInputValidate, setInputValidate] = useState(false);
+  const [inputValue, setInputValue] = useState("");
 
   const setMax = () => {
-    setInputValue(balance);
-    getbalanceInUSD(balance);
+    setInputValue(available);
+    getAvailableInUSD(available);
     setInputValidate(true);
   };
 
-  const getbalanceInUSD = async (amount) => {
+  const getAvailableInUSD = async (amount) => {
     const amount2 = numberToEthers(amount);
     const amountInUSD = await getAmountInUSD(address, amount2);
-    setdollarPrice(amountInUSD);
+    setDollarPrice(amountInUSD);
   };
 
   const validateInput = (input) => {
@@ -39,27 +39,28 @@ const ModalWithdraw = ({
         setInputValue("");
         setInputValidate(false);
       } else {
-        if (Number(input) > Number(balance)) {
-          setInputValue(balance);
-          getbalanceInUSD(balance);
+        if (Number(input) > Number(available)) {
+          setInputValue(available);
+          getAvailableInUSD(available);
         } else {
           setInputValue(input);
-          getbalanceInUSD(input);
+          getAvailableInUSD(input);
         }
         setInputValidate(true);
       }
     } else {
       setInputValue("");
-      setdollarPrice(0);
+      setDollarPrice(0);
       setInputValidate(false);
     }
   };
 
-  const handleWithdraw = async () => {
-    const isWithdrawSuccessful = await WithdrawAsset(address, inputValue);
-    console.log(isWithdrawSuccessful);
-    toast.success(`Withdraw Successful ${inputValue} ${name}`);
-    if (isWithdrawSuccessful) {
+  const handleBorrow = async () => {
+    const isBorrowed = await borrowAsset(address, inputValue);
+    console.log(isBorrowed);
+
+    toast.success(`Borrowed ${inputValue} ${name}`);
+    if (isBorrowed) {
       onClose();
       await connectWallet();
     }
@@ -68,7 +69,7 @@ const ModalWithdraw = ({
   return (
     <div>
       <div className="flex justify-between mb-3">
-        <h1 className="text-[18px] font-semibold ">Withdraw {name}</h1>
+        <h1 className="text-[18px] font-semibold ">Borrow {name}</h1>
         <button className=" text-xl" onClick={() => onClose()}>
           &#10006;
         </button>
@@ -79,15 +80,15 @@ const ModalWithdraw = ({
           Amount
         </h1>
         <div className="border border-[#A5A8B6] border-opacity-20 p-2 rounded  flex flex-col">
-          <div className="flex flex-row justify-between  mb-1">
+          <div className="flex flex-row justify-between mb-1">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => validateInput(e.target.value)}
-              className="bg-transparent outline-none text-xl font-semibold w-1/2"
+              className="bg-transparent outline-none text-xl font-medium w-3/4"
               placeholder="0.00"
             />
-            <div className="font-semibold flex flex-row items-center justify-end w-1/2">
+            <div className="font-semibold flex flex-row items-center justify-end w-1/4">
               <Image
                 src={image}
                 width={22}
@@ -110,10 +111,10 @@ const ModalWithdraw = ({
                     .slice(0, 10)}...`}{" "}
             </p>
             <p className="justify-end">
-              Wallet Balance{" "}
-              {Number(balance).toFixed(2).toString(2).length < 10
-                ? Number(balance).toFixed(2).toString().slice(0, 10)
-                : `${Number(balance)
+              Wallet available{" "}
+              {Number(available).toFixed(2).toString(2).length < 10
+                ? Number(available).toFixed(2).toString().slice(0, 10)
+                : `${Number(available)
                     .toFixed(2)
                     .toString()
                     .slice(0, 10)}...`}{" "}
@@ -134,15 +135,9 @@ const ModalWithdraw = ({
         </h1>
         <div className="border border-[#A5A8B6] border-opacity-20 p-2 rounded  flex flex-col">
           <div className="flex flex-row items-center justify-between text-[13px] text-[#F1F1F3]">
-            <p className="">Remaining Supply</p>
+            <p className="">Borrow APY</p>
             <p className="justify-end">
-              {Number(remainingSupply).toFixed(2).toString(2).length < 10
-                ? Number(remainingSupply).toFixed(2).toString().slice(0, 10)
-                : `${Number(remainingSupply)
-                    .toFixed(2)
-                    .toString()
-                    .slice(0, 10)}...`}{" "}
-              <span className="text-[#A5A8B6]">{name}</span>
+              {borrowApy} <span className="text-[#A5A8B6]">%</span>
             </p>
           </div>
         </div>
@@ -160,7 +155,7 @@ const ModalWithdraw = ({
 
         <div className="flex flex-col">
           <p className="font-medium text-[10px] tracking-[0.005rem]">
-            Withdrawing this amount will increase risk of liquidation.
+            Borrowing this amount will increase risk of liquidation.
           </p>
         </div>
       </div>
@@ -175,14 +170,14 @@ const ModalWithdraw = ({
         <button
           className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
           onClick={() => {
-            handleWithdraw();
+            handleBorrow();
           }}
         >
-          Withdraw {name}
+          Borrow {name}
         </button>
       </div>
     </div>
   );
 };
 
-export default ModalWithdraw;
+export default BorrowModal;

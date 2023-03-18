@@ -8,7 +8,7 @@ import lendContext from "../context/lendContext";
 import { toast } from "react-toastify";
 import { ReactComponent as Loader } from "../assets/loader.svg";
 
-const ModalSupply = ({
+const LendModal = ({
   address,
   name,
   balance,
@@ -251,4 +251,4 @@ const ModalSupply = ({
   );
 };
 
-export default ModalSupply;
+export default LendModal;

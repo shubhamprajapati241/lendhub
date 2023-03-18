@@ -5,7 +5,7 @@ import { BiError } from "react-icons/bi";
 import lendContext from "../context/lendContext";
 import { toast } from "react-toastify";
 
-const ModalRepay = ({ address, name, debt, image, onClose }) => {
+const RepayModal = ({ address, name, debt, image, onClose }) => {
   const { getAmountInUSD, repayAsset, numberToEthers, connectWallet } =
     useContext(lendContext);
   const [dollarPrice, setDollarPrice] = useState(0);
@@ -159,4 +159,4 @@ const ModalRepay = ({ address, name, debt, image, onClose }) => {
   );
 };
 
-export default ModalRepay;
+export default RepayModal;

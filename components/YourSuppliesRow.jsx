@@ -1,9 +1,9 @@
 import Image from "next/image";
 import React, { useState } from "react";
 import Switch from "react-switch";
-import { ModalBorderLayout, ModalWithdraw } from "../components";
+import { ModalBorderLayout, WithdrawModal } from "../components";
 
-const RowYourSupply = ({
+const YourSuppliesRow = ({
   address,
   name,
   image,
@@ -80,7 +80,7 @@ const RowYourSupply = ({
         onClose={() => setShowWithdrawModal(false)}
       >
         {" "}
-        <ModalWithdraw
+        <WithdrawModal
           address={address}
           name={name}
           image={image}
@@ -93,4 +93,4 @@ const RowYourSupply = ({
   );
 };
 
-export default RowYourSupply;
+export default YourSuppliesRow;

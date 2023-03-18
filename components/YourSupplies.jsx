@@ -1,9 +1,9 @@
 import React, { useContext } from "react";
 
-import { RowYourSupply, SummaryTab, LoaderSkeleton } from "../components";
+import { YourSuppliesRow, SummaryTab, LoaderSkeleton } from "../components";
 import lendContext from "../context/lendContext";
 
-const YourSupply = () => {
+const YourSupplies = () => {
   const { supplySummary, supplyAssets } = useContext(lendContext);
   return (
     <div className="w-full md:w-1/2 h-30 bg-white rounded-md ">
@@ -42,7 +42,7 @@ const YourSupply = () => {
               <tbody>
                 {supplyAssets.length > 0 ? (
                   supplyAssets.map((token, index) => (
-                    <RowYourSupply
+                    <YourSuppliesRow
                       key={index}
                       address={token.address}
                       name={token.name}
@@ -68,4 +68,4 @@ const YourSupply = () => {
   );
 };
 
-export default YourSupply;
+export default YourSupplies;
