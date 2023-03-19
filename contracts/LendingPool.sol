@@ -174,8 +174,10 @@ contract LendingPool is ReentrancyGuard {
     updateEarnedInterestOnLend(msg.sender, _token)
     payable {
         address lender = msg.sender;
-        bool _usageAsCollateralEnabled = isETH(_token) ? true: false;
-        bool _usageAsBorrowEnabled = isETH(_token) ? false: true;
+        // bool _usageAsCollateralEnabled = isETH(_token) ? true: false;
+        // bool _usageAsBorrowEnabled = isETH(_token) ? false: true;
+        bool _usageAsCollateralEnabled = true;
+        bool _usageAsBorrowEnabled = true;
         string memory _symbol = getSymbol(_token);
 
         if(!lendingConfig.isTokenInAssets(_token)) {
@@ -264,6 +266,9 @@ contract LendingPool is ReentrancyGuard {
         }else {
             IERC20(_token).transfer(lender, _amount);
         }
+
+        deleteWithdrawnLends(lender);
+
         return true;
     }
 
@@ -359,16 +364,34 @@ contract LendingPool is ReentrancyGuard {
                 borrowerAssets[borrower][i].borrowQty -= _amount;
                 borrowerAssets[borrower][i].borrowStartTimeStamp = block.timestamp;
             }
+        }
+        deleteRepaidBorrows(borrower);
+    }
 
-            if(borrowerAssets[borrower][i].borrowQty == 0) {
-                delete borrowerAssets[borrower][i];
-                borrowerAssets[borrower][i] = borrowerAssets[borrower][assetsLen - 1];
-                borrowerAssets[borrower].pop();
+    /*************************** HELPER FUNCTIONS ***************************************/
+
+    function deleteRepaidBorrows(address _borrower) internal {
+        uint borrowedAssetsLen = borrowerAssets[_borrower].length;
+        for (uint i = 0; i < borrowedAssetsLen; i++) {
+            if(borrowerAssets[_borrower][i].borrowQty == 0) {
+                delete borrowerAssets[_borrower][i];
+                borrowerAssets[_borrower][i] = borrowerAssets[_borrower][borrowedAssetsLen - 1];
+                borrowerAssets[_borrower].pop();
             }
         }
     }
 
-    /*************************** HELPER FUNCTIONS ***************************************/
+    function deleteWithdrawnLends(address _lender) internal {
+        uint lenderAssetLength = lenderAssets[_lender].length;
+        for (uint i = 0; i < lenderAssetLength; i++) {
+            if(lenderAssets[_lender][i].lentQty == 0) {
+                delete lenderAssets[_lender][i];
+                lenderAssets[_lender][i] = lenderAssets[_lender][lenderAssetLength - 1];
+                lenderAssets[_lender].pop();
+            }
+        }
+    }
+
     function isTokenBorrowed(address _borrower, address _token) public view returns(bool) {
         uint256 assetLen = borrowerAssets[_borrower].length;
 
@@ -420,7 +443,7 @@ contract LendingPool is ReentrancyGuard {
         // return currentPrice;
 
         if(isETH(_tokenAddress)) {
-            return 1467;
+            return 1725;
         }
         else if(keccak256(abi.encodePacked(getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('DAI'))) {
             return 1;

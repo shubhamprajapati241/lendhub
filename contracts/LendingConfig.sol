@@ -157,8 +157,8 @@ contract LendingConfig {
     function isBorrowingEnabled(address _token) public view returns(bool) {
         uint256 assetsLen = assets.length;
         for(uint i=0; i < assetsLen; i++) {
-            if(assets[i].token == _token && assets[i].borrowingEnabled) {
-                return true;
+            if(assets[i].token == _token) {
+                return assets[i].borrowingEnabled;
             }
         }
         return false;
