@@ -4,26 +4,11 @@ import { ethers } from "ethers";
 const tokensList = require("../token-list-goerli");
 
 // TODO : use in Goerli
-// const TokenABI = require("./contractAbis/tokenAbi.json");
-// const LendingPoolABI = require("./contractAbis/lendingPoolAbi.json");
-// const LendingConfigABI = require("./contractAbis/lendingConfigAbi.json");
-// const AddressToTokenMapABI = require("./contractAbis/addressToTokenMapAbi.json");
-
-const TokenABI = require("../artifacts/contracts/DAIToken.sol/DAIToken.json");
-const LendingPoolABI = require("../artifacts/contracts/LendingPool.sol/LendingPool.json");
-const LendingConfigABI = require("../artifacts/contracts/LendingConfig.sol/LendingConfig.json");
-const AddressToTokenMapABI = require("../artifacts/contracts/AddressToTokenMap.sol/AddressToTokenMap.json");
+const TokenABI = require("../abis/DAIToken.json");
+const LendingPoolABI = require("../abis/LendingPool.json");
 
 // Importing Bank contract details
-import {
-  DAITokenAddress,
-  LINKTokenAddress,
-  USDCTokenAddress,
-  AddressToTokenMapAddress,
-  LendingConfigAddress,
-  LendingPoolAddress,
-  ETHAddress,
-} from "../addresses";
+import { ETHAddress, LendingPoolAddress } from "../addresses-sepolia";
 
 const numberToEthers = (number) => {
   return ethers.utils.parseEther(number.toString());

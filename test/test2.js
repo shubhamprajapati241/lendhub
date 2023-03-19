@@ -6,6 +6,8 @@ const numberToEthers = (number) => {
   return ethers.utils.parseEther(number.toString());
 };
 
+const abi = require("../context/contractAbis/Bank.json");
+
 const SECONDS_IN_A_DAY = 86400;
 
 async function moveTime(amount) {
@@ -801,5 +803,6 @@ describe("LendHub Tests", async () => {
     // expect(afterBorrowerAmount).to.be.lessThan(beforeBorrowerAmount);
     console.log("6. Borrower 2 Wallet Balance : " + afterBorrowerAmount / 1e18);
     console.log("#####################################################");
+    console.log(JSON.stringify(abi));
   });
 });

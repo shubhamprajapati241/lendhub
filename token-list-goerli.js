@@ -4,7 +4,7 @@ import {
   DAITokenAddress,
   USDCTokenAddress,
   LINKTokenAddress,
-} from "./addresses";
+} from "./addresses-sepolia";
 
 export const token = [
   {

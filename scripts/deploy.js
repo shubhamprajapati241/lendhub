@@ -15,6 +15,7 @@ const numberToEthers = (number) => {
 };
 
 async function main() {
+  let LendingPoolAddress;
   // const MATIC_ADDRESS = "0x0000000000000000000000000000000000001010";
 
   /********************** Deploy AddressStorage *************************/
@@ -69,6 +70,8 @@ async function main() {
     4
   );
   await lendingPool.deployed();
+
+  LendingPoolAddress = lendingPool.address;
   console.log('const LendingPoolAddress = "' + lendingPool.address + '"');
 
   /******** Setting Signer Addresses ********/
@@ -108,6 +111,13 @@ async function main() {
   await daiToken.transfer(account3.address, numberToEthers(20000));
   await usdcToken.transfer(account3.address, numberToEthers(50000));
   await linkToken.transfer(account3.address, numberToEthers(30000));
+
+  console.log("Transaction initial assets to lendingpool");
+  await daiToken.transfer(LendingPoolAddress, numberToEthers(50000));
+  await usdcToken.transfer(LendingPoolAddress, numberToEthers(50000));
+  await linkToken.transfer(LendingPoolAddress, numberToEthers(50000));
+  // const valueOption = { value: ethers.utils.parseEther((100).toString()) };
+  // await LendingPoolAddress.transfer(valueOption);
 
   console.log(" Transferring assets to account4");
   // await daiToken.transfer(account4, numberToEthers(20000));
