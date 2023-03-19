@@ -801,9 +801,9 @@ describe("LendHub Tests", async () => {
     );
     console.log("5. Lender Wallet Balance : " + afterLenderAmount / decimals);
 
-    console.log("******************* BORROWER ASSETS ******************");
-    let borrowerAssets = await lendingPool.getBorrowerAssets(lender2.address);
-    console.log(borrowerAssets);
+    // console.log("******************* BORROWER ASSETS ******************");
+    // let borrowerAssets = await lendingPool.getBorrowerAssets(lender2.address);
+    // console.log(borrowerAssets);
 
     console.log("#####################################################");
   });

@@ -13,6 +13,8 @@ contract LendingPool is ReentrancyGuard {
     AddressToTokenMap addressToTokenMap;
     LendingConfig lendingConfig;
 
+    enum TxMode { BORROW, WITHDRAW}
+    
     event TransferAsset(address lender, address _token, uint _amount);
 
     address deployer;
@@ -239,7 +241,7 @@ contract LendingPool is ReentrancyGuard {
        
         // amountAvailableToWithdraw must be set on the front-end (modal) to during withdrawl 
         // uint amountAvailableToWithdraw = getLenderAssetQty(lender, _token) - getBorrowerAssetQty(lender, _token);
-        uint maxWithdrawQty = getTokensPerUSDAmount(_token,getUserTotalAvailableBalanceInUSD(lender)) * 1e18;
+        uint maxWithdrawQty = getTokensPerUSDAmount(_token,getUserTotalAvailableBalanceInUSD(lender, TxMode.WITHDRAW)) * 1e18;
         require(maxWithdrawQty >= _amount,"Cannot withdraw more than balance");
 
         // Reserve must have enough withdrawl qty - this must always be true, so not sure why to code it
@@ -267,7 +269,7 @@ contract LendingPool is ReentrancyGuard {
 
     /********************* BORROW FUNCTIONS ******************/
     function getAssetsToBorrow(address _borrower) public view returns(BorrowAsset[] memory) {
-        uint maxAmountToBorrowInUSD = (getUserTotalAvailableBalanceInUSD(_borrower) * BORROW_THRESHOLD)/ 100; 
+        uint maxAmountToBorrowInUSD = (getUserTotalAvailableBalanceInUSD(_borrower, TxMode.BORROW) * BORROW_THRESHOLD)/ 100; 
         
         uint length = reserveAssets.length;
         BorrowAsset[] memory borrowAsset = new BorrowAsset[](length - 1);
@@ -289,24 +291,30 @@ contract LendingPool is ReentrancyGuard {
         return _usdAmount / getCurrentTokenPrice(_token);
     }
 
-    function borrow(address _token, uint256 _amount) public 
+    function borrow(address _token, uint256 _borrowQty) public 
     nonReentrant
     updateAccruedInterestOnBorrow(msg.sender, _token)
-    onlyAmountGreaterThanZero(_amount) 
+    onlyAmountGreaterThanZero(_borrowQty) 
     returns(bool) {
         
         address borrower = msg.sender;
-        uint256 borrowAmountInUSD = getAmountInUSD(_token, _amount);
-        uint256 maxAmountToBorrowInUSD = (getUserTotalAvailableBalanceInUSD(borrower) * BORROW_THRESHOLD)/ 100;
+        uint256 borrowAmountInUSD = getAmountInUSD(_token, _borrowQty);
+        // This returns Total Lent USD * BORROW_THRESHOLD% - Total Borrowed USD by the borrower
+        uint256 maxAmountToBorrowInUSD = getUserTotalAvailableBalanceInUSD(borrower, TxMode.BORROW);
         require(borrowAmountInUSD <= maxAmountToBorrowInUSD, "Not enough balance to borrow");
-        require(_amount <= reserves[_token], "Not enough qty in the reserve pool to borrow");
+        require(_borrowQty <= reserves[_token], "Not enough qty in the reserve pool to borrow");
+        // uint maxBorrowQty = getTokensPerUSDAmount(_token, maxAmountToBorrowInUSD);
+        // _borrowQty = min(maxBorrowQty, _borrowQty);
+        // require(maxBorrowQty > 0, "Borrow limit reached");
+        require (borrower != address(0), "Transfer Not Possible");
+        
         
         if(!isBorrowerTokenOwner(_token)) { 
              UserAsset memory userAsset = UserAsset({
                     user: borrower,
                     token: _token,
                     lentQty: 0,
-                    borrowQty: _amount,
+                    borrowQty: _borrowQty,
                     lentApy: 0,
                     borrowApy: BORROW_RATE,
                     lendStartTimeStamp: 0,
@@ -317,14 +325,14 @@ contract LendingPool is ReentrancyGuard {
             uint256 borrowerAssetsLength =  borrowerAssets[borrower].length;
             for (uint256 i=0 ; i < borrowerAssetsLength; i++) {
                 if(borrowerAssets[borrower][i].token == _token) {
-                    borrowerAssets[borrower][i].borrowQty += _amount;
+                    borrowerAssets[borrower][i].borrowQty += _borrowQty;
                     borrowerAssets[borrower][i].borrowApy = BORROW_RATE;
                     borrowerAssets[borrower][i].borrowStartTimeStamp = block.timestamp;
                 }
             }
         }
-        reserves[_token] -= _amount;
-        bool success = IERC20(_token).transfer(borrower, _amount);
+        reserves[_token] -= _borrowQty;
+        bool success = IERC20(_token).transfer(borrower, _borrowQty);
         require(success, "Tranfer to user's wallet not successful");
         return true;
     } 
@@ -431,7 +439,7 @@ contract LendingPool is ReentrancyGuard {
         return totalAmountInDollars;
     }
 
-    function getUserTotalAvailableBalanceInUSD(address _user) public view returns(uint256) {
+    function getUserTotalAvailableBalanceInUSD(address _user, TxMode _txmode) public view returns(uint256) {
         uint256 userTotalLentUSDBalance;
         uint256 userTotalBorrowAmountInUSD;
 
@@ -445,6 +453,9 @@ contract LendingPool is ReentrancyGuard {
         uint256 borrowerAssetsLength = borrowerAssets[_user].length;
         for(uint256 i =0; i < borrowerAssetsLength; i++) {
             userTotalBorrowAmountInUSD += getAmountInUSD(borrowerAssets[_user][i].token, borrowerAssets[_user][i].borrowQty);
+        }
+        if (_txmode == TxMode.BORROW) {
+            return ((userTotalLentUSDBalance * BORROW_THRESHOLD/100) - userTotalBorrowAmountInUSD);
         }
         return userTotalLentUSDBalance - userTotalBorrowAmountInUSD;
     }
