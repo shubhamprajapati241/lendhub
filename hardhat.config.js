@@ -13,6 +13,11 @@ module.exports = {
       accounts: [process.env.MAIN_ACCOUNT],
       chainId: 5,
     },
+    sepolia: {
+      url: process.env.INFURA_SEPOLIA_API_URL,
+      accounts: [process.env.MAIN_ACCOUNT],
+      chainId: 11155111,
+    },
 
     mumbai: {
       url: process.env.INFURA_MUMBAI_API_URL,

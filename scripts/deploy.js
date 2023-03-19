@@ -15,20 +15,7 @@ const numberToEthers = (number) => {
 };
 
 async function main() {
-  // constant pricefeed address
-
-  // process.argv.forEach(function (val, index, array) {
-  //   console.log(index + ": " + val);
-  // });
-  // // console.log("ARGS: ", JSON.stringify(process.argv));
-  // console.log("ARGS: ", JSON.stringify(process.argv));
-
-  // const ETH_ADDRESS = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
   // const MATIC_ADDRESS = "0x0000000000000000000000000000000000001010";
-  // const ETH_USD_PF_ADDRESS = "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e";
-  // const DAI_USD_PF_ADDRESS = "0x0d79df66BE487753B02D015Fb622DED7f0E9798d";
-  // const USDC_USD_PF_ADDRESS = "0xAb5c49580294Aff77670F839ea425f5b78ab3Ae7";
-  // const LINK_USD_PF_ADDRESS = "0x48731cF7e84dc94C5f84577882c14Be11a5B7456";
 
   /********************** Deploy AddressStorage *************************/
   // const AddressStorage = await ethers.getContractFactory("AddressStorage");
@@ -48,14 +35,14 @@ async function main() {
   const linkToken = await LINKToken.deploy();
   await linkToken.deployed();
   const LINK_ADDRESS = linkToken.address;
-  console.log('export const LINKTokenAddress = "' + LINK_ADDRESS + '"');
+  console.log('const LINKTokenAddress = "' + LINK_ADDRESS + '"');
 
   /********************** Deploy DAIToken *************************/
   const USDCToken = await ethers.getContractFactory("USDCToken");
   const usdcToken = await USDCToken.deploy();
   await usdcToken.deployed();
   const USDC_ADDRESS = usdcToken.address;
-  console.log('export const USDCTokenAddress = "' + USDC_ADDRESS + '"');
+  console.log('const USDCTokenAddress = "' + USDC_ADDRESS + '"');
 
   /********************** Deploy AddressToTokenMap *************************/
   const AddressToTokenMap = await ethers.getContractFactory(
@@ -64,18 +51,14 @@ async function main() {
   const addressToTokenMap = await AddressToTokenMap.deploy();
   await addressToTokenMap.deployed();
   console.log(
-    'export const AddressToTokenMapAddress = "' +
-      addressToTokenMap.address +
-      '"'
+    'const AddressToTokenMapAddress = "' + addressToTokenMap.address + '"'
   );
 
   /********************** Deploy LendingConfig *************************/
   const LendingConfig = await ethers.getContractFactory("LendingConfig");
   const lendingConfig = await LendingConfig.deploy();
   await lendingConfig.deployed();
-  console.log(
-    'export const LendingConfigAddress = "' + lendingConfig.address + '"'
-  );
+  console.log('const LendingConfigAddress = "' + lendingConfig.address + '"');
 
   /********************** Deploy LendingPoolV2 *************************/
   const LendingPool = await ethers.getContractFactory("LendingPool");
@@ -86,9 +69,7 @@ async function main() {
     4
   );
   await lendingPool.deployed();
-  console.log(
-    'export const LendingPoolAddress = "' + lendingPool.address + '"'
-  );
+  console.log('const LendingPoolAddress = "' + lendingPool.address + '"');
 
   /******** Setting Signer Addresses ********/
   const accounts = await ethers.getSigners();
@@ -112,23 +93,23 @@ async function main() {
 
   // transfering assets into account1
 
-  console.log(" Transfering assets to account1");
+  console.log(" Transferring assets to account1");
   await daiToken.transfer(account1.address, numberToEthers(20000));
   // console.log(JSON.stringify(tx));
   await usdcToken.transfer(account1.address, numberToEthers(50000));
   await linkToken.transfer(account1.address, numberToEthers(30000));
 
-  console.log("Transfering assets to account2");
+  console.log("Transferring assets to account2");
   await daiToken.transfer(account2.address, numberToEthers(20000));
   await usdcToken.transfer(account2.address, numberToEthers(50000));
   await linkToken.transfer(account2.address, numberToEthers(30000));
 
-  console.log("Transfering assets to account3");
+  console.log("Transferring assets to account3");
   await daiToken.transfer(account3.address, numberToEthers(20000));
   await usdcToken.transfer(account3.address, numberToEthers(50000));
   await linkToken.transfer(account3.address, numberToEthers(30000));
 
-  console.log(" Transfering assets to account4");
+  console.log(" Transferring assets to account4");
   // await daiToken.transfer(account4, numberToEthers(20000));
   //  console.log(JSON.stringify(tx));
   // await usdcToken.transfer(account4, numberToEthers(50000));
