@@ -1,8 +1,8 @@
 import Image from "next/image";
 import React, { useState } from "react";
-import { ModalBorderLayout, LendModal } from "../components";
+import { ModalBorderLayout, ModalLend } from "../components";
 
-const RowSupplyAssets = ({
+const AssetsToSuppliesRow = ({
   address,
   name,
   image,
@@ -66,7 +66,7 @@ const RowSupplyAssets = ({
         isVisible={showModal}
         onClose={() => setShowModal(false)}
       >
-        <LendModal
+        <ModalLend
           address={address}
           name={name}
           balance={balance}
@@ -80,4 +80,4 @@ const RowSupplyAssets = ({
   );
 };
 
-export default RowSupplyAssets;
+export default AssetsToSuppliesRow;

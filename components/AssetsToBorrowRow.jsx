@@ -1,8 +1,8 @@
 import Image from "next/image";
 import React, { useState } from "react";
-import { ModalBorderLayout, BorrowModal } from ".";
+import { ModalBorderLayout, ModalBorrow } from ".";
 
-const RowAssetsToBorrow = ({ address, name, image, borrowQty, borrowApy }) => {
+const AssetsToBorrowRow = ({ address, name, image, borrowQty, borrowApy }) => {
   const [showModal, setShowModal] = useState(false);
   return (
     <>
@@ -64,7 +64,7 @@ const RowAssetsToBorrow = ({ address, name, image, borrowQty, borrowApy }) => {
         isVisible={showModal}
         onClose={() => setShowModal(false)}
       >
-        <BorrowModal
+        <ModalBorrow
           address={address}
           name={name}
           image={image}
@@ -77,4 +77,4 @@ const RowAssetsToBorrow = ({ address, name, image, borrowQty, borrowApy }) => {
   );
 };
 
-export default RowAssetsToBorrow;
+export default AssetsToBorrowRow;

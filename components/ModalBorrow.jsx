@@ -5,7 +5,7 @@ import { BiError } from "react-icons/bi";
 import lendContext from "../context/lendContext";
 import { toast } from "react-toastify";
 
-const BorrowModal = ({
+const ModalBorrow = ({
   address,
   name,
   available,
@@ -180,4 +180,4 @@ const BorrowModal = ({
   );
 };
 
-export default BorrowModal;
+export default ModalBorrow;

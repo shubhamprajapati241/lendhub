@@ -392,36 +392,6 @@ contract LendingPool is ReentrancyGuard {
         return 0;
     }
 
-    // function getLenderAssets2(address _lender) public view returns (UserAsset[] memory) {
-    //     uint lenderAssetLength = lenderAssets[_lender].length;
-    //     UserAsset[] memory lenderAssetsList= new UserAsset[](lenderAssetLength);
-
-    //     for (uint i = 0; i < lenderAssetLength; i++) {
-
-    //         uint256 lendQtyWithInterest = lenderAssets[_lender][i].lentQty + 
-    //             interestEarned(
-    //                 _lender, 
-    //                 lenderAssets[_lender][i].token, 
-    //                 lenderAssets[_lender][i].lendStartTimeStamp
-    //                 );
-
-    //         // uint256 lendQtyWithInterest = lenderAssets[_lender][i].lentQty;
-
-    //         lenderAssetsList[i] = UserAsset({
-    //             user: _lender,
-    //             token: lenderAssets[_lender][i].token,
-    //             lentQty: lendQtyWithInterest,
-    //             borrowQty: lenderAssets[_lender][i].borrowQty,
-    //             lentApy: lenderAssets[_lender][i].lentApy,
-    //             borrowApy: lenderAssets[_lender][i].borrowApy,
-    //             lendStartTimeStamp: lenderAssets[_lender][i].lendStartTimeStamp,
-    //             borrowStartTimeStamp: lenderAssets[_lender][i].borrowStartTimeStamp
-    //         });
-    //     }
-    
-    //     return lenderAssetsList;
-    // }
-
     function getLenderAssets(address _lender) public view returns (UserAsset[] memory) {
         return lenderAssets[_lender];
     }
