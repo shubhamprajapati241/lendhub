@@ -1065,8 +1065,14 @@ describe("LendHub Tests", async () => {
     await moveTime(365 * SECONDS_IN_A_DAY);
     // result = await lendingPool.getLenderAssets2(lender3.address);
     // console.log(result);
-    result = await lendingPool.interestEarned(DAI_ADDRESS, 1679105693);
-    console.log(result);
+    reward = await lendingPool.rewardPerToken(ETH_ADDRESS, 1679105693);
+    console.log("reward : " + reward);
+    result = await lendingPool.interestEarned(
+      lender3.address,
+      ETH_ADDRESS,
+      1679105693
+    );
+    console.log("result : " + result);
     // 1679105693 = Mar 18 2023 => 1980
     // 1671100453 = Dec 15 2022 => 2854
     // 1601100453 = Sep 26 2020 => 10496

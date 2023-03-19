@@ -57,7 +57,7 @@ contract LendingPool is ReentrancyGuard {
     modifier updateEarnedInterestOnLend(address _lender, address _token){
         uint lenderAssetLength = lenderAssets[_lender].length;
         for (uint i = 0; i < lenderAssetLength; i++) {
-            lenderAssets[_lender][i].lentQty += interestEarned(_token, lenderAssets[_lender][i].lendStartTimeStamp);
+            lenderAssets[_lender][i].lentQty += interestEarned(_lender, _token, lenderAssets[_lender][i].lendStartTimeStamp);
             lenderAssets[_lender][i].lendStartTimeStamp = block.timestamp;
         }
         _;
@@ -67,7 +67,7 @@ contract LendingPool is ReentrancyGuard {
     modifier updateAccruedInterestOnBorrow(address _borrower, address _token) {
         uint borrowerAssetLength = borrowerAssets[_borrower].length;
         for (uint i = 0; i < borrowerAssetLength; i++) {
-            borrowerAssets[_borrower][i].borrowQty += interestAccrued(_token, borrowerAssets[_borrower][i].borrowStartTimeStamp);
+            borrowerAssets[_borrower][i].borrowQty += interestAccrued(_borrower, _token, borrowerAssets[_borrower][i].borrowStartTimeStamp);
             borrowerAssets[_borrower][i].borrowStartTimeStamp = block.timestamp;
         }
         _;
@@ -82,25 +82,29 @@ contract LendingPool is ReentrancyGuard {
         deployer = msg.sender;
     }
 
+    /* 
+    * @dev : spits out min of tow integers
+    * @params : integer 1, integer 2
+    * @returns
+    */
     function _min(uint x, uint y) private pure returns (uint) {
         return x <= y ? x : y;
     }
 
-    function interestEarned(address _token, uint lendStartTimeStamp) public view returns (uint) {
+    function rewardPerToken(address _token, uint lendStartTimeStamp, uint totalTokenSupply) public view returns (uint) {
         if(reserves[_token] == 0 ) {
             return 0;
         }
-        // return ((block.timestamp - lendStartTimeStamp) * INTEREST_RATE * 1e18 )/(REWARD_RATE_PER_SECS * reserves[_token]);
-
-
-        return lenderSupply * rewardPerToken() / 1e18
+        // TODO : verify from third party that this logic is right!s
+        return ((block.timestamp - lendStartTimeStamp) * INTEREST_RATE * 1e18 )/ totalTokenSupply;
     }
 
-    function interestAccrued(address _token, uint borrowStartTimeStamp) public view returns (uint) {
-        if(reserves[_token] == 0 ) {
-            return 0;
-        }
-        return ((block.timestamp - borrowStartTimeStamp) * BORROW_RATE * 1e18 )/(REWARD_RATE_PER_SECS * reserves[_token]);
+    function interestEarned(address _lender, address _token, uint lendStartTimeStamp) public view returns (uint) {
+        return getLenderAssetQty(_lender,_token) * rewardPerToken(_token, lendStartTimeStamp, reserves[_token]) / 1e18;
+    }
+
+    function interestAccrued(address _borrower, address _token, uint borrowStartTimeStamp) public view returns (uint) {
+        return getBorrowerAssetQty(_borrower,_token) * rewardPerToken(_token, borrowStartTimeStamp, reserves[_token]) / 1e18;
     }
 
     function getContractETHBalance() public view returns(uint){
@@ -388,30 +392,35 @@ contract LendingPool is ReentrancyGuard {
         return 0;
     }
 
-    function getLenderAssets2(address _lender) public view returns (UserAsset[] memory) {
-        uint lenderAssetLength = lenderAssets[_lender].length;
-        UserAsset[] memory lenderAssetsList= new UserAsset[](lenderAssetLength);
+    // function getLenderAssets2(address _lender) public view returns (UserAsset[] memory) {
+    //     uint lenderAssetLength = lenderAssets[_lender].length;
+    //     UserAsset[] memory lenderAssetsList= new UserAsset[](lenderAssetLength);
 
-        for (uint i = 0; i < lenderAssetLength; i++) {
+    //     for (uint i = 0; i < lenderAssetLength; i++) {
 
-            uint256 lendQtyWithInterest = lenderAssets[_lender][i].lentQty + interestEarned(lenderAssets[_lender][i].token, lenderAssets[_lender][i].lendStartTimeStamp);
+    //         uint256 lendQtyWithInterest = lenderAssets[_lender][i].lentQty + 
+    //             interestEarned(
+    //                 _lender, 
+    //                 lenderAssets[_lender][i].token, 
+    //                 lenderAssets[_lender][i].lendStartTimeStamp
+    //                 );
 
-            // uint256 lendQtyWithInterest = lenderAssets[_lender][i].lentQty;
+    //         // uint256 lendQtyWithInterest = lenderAssets[_lender][i].lentQty;
 
-            lenderAssetsList[i] = UserAsset({
-                user: _lender,
-                token: lenderAssets[_lender][i].token,
-                lentQty: lendQtyWithInterest,
-                borrowQty: lenderAssets[_lender][i].borrowQty,
-                lentApy: lenderAssets[_lender][i].lentApy,
-                borrowApy: lenderAssets[_lender][i].borrowApy,
-                lendStartTimeStamp: lenderAssets[_lender][i].lendStartTimeStamp,
-                borrowStartTimeStamp: lenderAssets[_lender][i].borrowStartTimeStamp
-            });
-        }
+    //         lenderAssetsList[i] = UserAsset({
+    //             user: _lender,
+    //             token: lenderAssets[_lender][i].token,
+    //             lentQty: lendQtyWithInterest,
+    //             borrowQty: lenderAssets[_lender][i].borrowQty,
+    //             lentApy: lenderAssets[_lender][i].lentApy,
+    //             borrowApy: lenderAssets[_lender][i].borrowApy,
+    //             lendStartTimeStamp: lenderAssets[_lender][i].lendStartTimeStamp,
+    //             borrowStartTimeStamp: lenderAssets[_lender][i].borrowStartTimeStamp
+    //         });
+    //     }
     
-        return lenderAssetsList;
-    }
+    //     return lenderAssetsList;
+    // }
 
     function getLenderAssets(address _lender) public view returns (UserAsset[] memory) {
         return lenderAssets[_lender];
