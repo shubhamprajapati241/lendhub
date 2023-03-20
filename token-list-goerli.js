@@ -1,10 +1,12 @@
 import { ethIcon, usdcIcon, daiIcon, linkIcon } from "./assets";
+
+// For localhost
 import {
   ETHAddress,
   DAITokenAddress,
   USDCTokenAddress,
   LINKTokenAddress,
-} from "./addresses-sepolia";
+} from "./addresses";
 
 export const token = [
   {

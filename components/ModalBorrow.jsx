@@ -32,7 +32,6 @@ const ModalBorrow = ({
   };
 
   const validateInput = (input) => {
-    console.log(input);
     if (input) {
       var pattern = new RegExp(/^\d*\.?\d*$/);
       if (!pattern.test(input)) {
@@ -57,7 +56,7 @@ const ModalBorrow = ({
 
   const handleBorrow = async () => {
     const isBorrowed = await borrowAsset(address, inputValue);
-    console.log(isBorrowed);
+    // console.log(isBorrowed);
 
     toast.success(`Borrowed ${inputValue} ${name}`);
     if (isBorrowed) {

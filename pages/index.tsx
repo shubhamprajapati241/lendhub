@@ -20,12 +20,13 @@ const Home: NextPage = () => {
   }, []);
 
   useEffect(() => {
-    // setInterval(() => updateInterests(), 5000);
-    updateInterests();
-    getYourBorrows();
-    getAssetsToBorrow();
+    // setInterval(() => connectWallet(), 5000);
+    // updateInterests();
+
     getUserAssets();
     getYourSupplies();
+    getAssetsToBorrow();
+    getYourBorrows();
   }, [metamaskDetails]);
 
   return (

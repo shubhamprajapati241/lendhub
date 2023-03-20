@@ -3,12 +3,14 @@ import LendContext from "./lendContext";
 import { ethers } from "ethers";
 const tokensList = require("../token-list-goerli");
 
-// TODO : use in Goerli
-const TokenABI = require("../abis/DAIToken.json");
-const LendingPoolABI = require("../abis/LendingPool.json");
+// TODO : use in sepolia
+// const TokenABI = require("../abis/DAIToken.json");
+// const LendingPoolABI = require("../abis/LendingPool.json");
 
-// Importing Bank contract details
-import { ETHAddress, LendingPoolAddress } from "../addresses-sepolia";
+const TokenABI = require("../artifacts/contracts/DAIToken.sol/DAIToken.json");
+const LendingPoolABI = require("../artifacts/contracts/LendingPool.sol/LendingPool.json");
+
+import { ETHAddress, LendingPoolAddress } from "../addresses";
 
 const numberToEthers = (number) => {
   return ethers.utils.parseEther(number.toString());
@@ -31,9 +33,6 @@ const LendState = (props) => {
   const [yourBorrows, setYourBorrows] = useState([]);
 
   //  contract details setting
-  const [contract, setContract] = useState({
-    bankContract: null,
-  });
 
   // for storing user supply assets in the lending pool
   const [supplySummary, setSupplySummary] = useState({
@@ -49,7 +48,7 @@ const LendState = (props) => {
   });
 
   const connectWallet = async () => {
-    // console.warn("Connecting to wallet...");
+    console.log("1. Connecting to wallet...");
     const { ethereum } = window;
     const failMessage = "Please install Metamask & connect your Metamask";
     try {
@@ -70,6 +69,13 @@ const LendState = (props) => {
       const networkName = network.name;
       const signer = provider.getSigner();
 
+      if (networkName != "sepolia") {
+        alert("Please switch your network to Sepolia");
+        return;
+      }
+
+      // console.log(networkName);
+
       if (account.length) {
         let currentAddress = account[0];
         setMetamaskDetails({
@@ -78,9 +84,10 @@ const LendState = (props) => {
           signer: signer,
           currentAccount: currentAddress,
         });
-        // console.warn("Connected to wallet....");
+        console.log("Connected to wallet....");
       } else {
-        return failMessage;
+        alert(failMessage);
+        return;
       }
     } catch (error) {
       reportError(error);
@@ -88,7 +95,11 @@ const LendState = (props) => {
   };
 
   const getUserAssets = async () => {
-    // console.warn("Getting user Assets...");
+<<<<<<< Updated upstream
+    console.warn("Getting user Assets...");
+=======
+    console.log("2. Getting Assets to supply...");
+>>>>>>> Stashed changes
     try {
       const assets = await Promise.all(
         tokensList.token.map(async (token) => {
@@ -119,12 +130,20 @@ const LendState = (props) => {
             balance: tok,
           };
 
+          console.log(asset);
+
           return asset;
         })
       );
 
       setUserAssets(assets);
+<<<<<<< Updated upstream
+      console.log(assets);
 
+=======
+      console.log("Got Assets to supply...");
+      console.log(JSON.stringify(assets));
+>>>>>>> Stashed changes
       return assets;
     } catch (error) {
       reportError(error);
@@ -180,9 +199,13 @@ const LendState = (props) => {
   /**************************** APPROVE TOKENS ************************************/
   const ApproveToContinue = async (tokenAddress, approveAmount) => {
     const amount = ethers.utils.parseEther(approveAmount);
-    console.log("tokenAddress : " + tokenAddress);
-    console.log("LendingPoolAddress : " + LendingPoolAddress);
-    console.log("approveAmount : " + amount);
+
+    console.log(
+      "****Approving token : " +
+        tokenAddress +
+        "| supplyAmount : " +
+        approveAmount
+    );
 
     try {
       const contract = await getContract(tokenAddress, TokenABI);
@@ -190,7 +213,7 @@ const LendState = (props) => {
         .connect(metamaskDetails.signer)
         .approve(LendingPoolAddress, amount);
       await transaction.wait();
-      console.log("Approve Transaction done....");
+      console.log("Token Approved....");
       return true;
     } catch (error) {
       reportError(error);
@@ -200,11 +223,12 @@ const LendState = (props) => {
 
   /*************************** Lend Functionality ***************************/
   const LendAsset = async (token, supplyAmount) => {
-    // console.log("Lending....");
     const amount = numberToEthers(supplyAmount);
     const valueOption = { value: amount };
-    // console.log("token : " + token);
-    // console.log("supplyAmount : " + amount);
+
+    console.warn(
+      "***Lending token : " + token + "| supplyAmount : " + supplyAmount
+    );
 
     try {
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
@@ -220,7 +244,7 @@ const LendState = (props) => {
       }
 
       await transaction.wait();
-      // console.log("Supply Transaction done....");
+      console.log("Token Lend....");
       return true;
     } catch (error) {
       reportError(error);
@@ -231,16 +255,20 @@ const LendState = (props) => {
   /*************************** Withdraw Functionality ***************************/
   const WithdrawAsset = async (tokenAddress, withdrawAmount) => {
     const amount = numberToEthers(withdrawAmount);
-    // console.log("Withdraw Started.....");
-    // console.log("tokenAddress : " + tokenAddress);
-    // console.log("withdrawAmount : " + amount);
+
+    console.log(
+      "***Withdrawing token : " +
+        tokenAddress +
+        "| withdrawAmount : " +
+        withdrawAmount
+    );
     try {
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
       const transaction = await contract
         .connect(metamaskDetails.signer)
         .withdraw(tokenAddress, amount);
       await transaction.wait();
-      // console.log("Withdraw done....");
+      console.log("Token Withdrawn....");
       return true;
     } catch (error) {
       reportError(error);
@@ -331,7 +359,8 @@ const LendState = (props) => {
 
   /*************************** Component : Your Supplies ***************************/
   const getYourSupplies = async () => {
-    // console.warn("Getting Supply assets.......");
+    console.log("3. Getting your Supplies...");
+
     try {
       const contract = new ethers.Contract(
         LendingPoolAddress,
@@ -371,6 +400,8 @@ const LendState = (props) => {
         totalUSDCollateral: totalUSDCollateral,
       };
 
+      console.log("Got your supplies...");
+      console.log(JSON.stringify(supplyAsset2));
       setSupplySummary(summary);
       setSupplyAssets(supplyAsset2);
       // // console.log("Got Supply assets.....");
@@ -382,7 +413,11 @@ const LendState = (props) => {
 
   /************ Function to get Assets to Borrow ***********/
   const getAssetsToBorrow = async () => {
-    // console.log("Getting assets to Borrow...");
+<<<<<<< Updated upstream
+    console.log("Getting assets to Borrow...");
+=======
+    console.log("4. Getting assets to Borrow...");
+>>>>>>> Stashed changes
 
     try {
       const contract = new ethers.Contract(
@@ -405,7 +440,15 @@ const LendState = (props) => {
       // console.log("*** calling mergeObjectifiedAssets from getAssetsToBorrow");
       const assetsToBorrowObjectMerged =
         mergeObjectifiedAssets(assetsToBorrowObject);
-      // console.log(assetsToBorrowObjectMerged);
+
+<<<<<<< Updated upstream
+      console.log("Got assets to borrow...");
+      console.log(assetsToBorrowObjectMerged);
+
+=======
+      console.log("Got assets to borow...");
+      console.log(JSON.stringify(assetsToBorrowObjectMerged));
+>>>>>>> Stashed changes
       setAssetsToBorrow(assetsToBorrowObjectMerged);
     } catch (error) {
       reportError(error);
@@ -416,13 +459,17 @@ const LendState = (props) => {
   /*************************** Borrow Functionality ***************************/
   const borrowAsset = async (token, borrowAmount) => {
     const amount = numberToEthers(borrowAmount);
-    // console.log("Borrowing token : " + token + "| supplyAmount : " + amount);
+    console.log(
+      "***Borrowing token : " + token + "| borrowAmount : " + borrowAmount
+    );
     try {
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
       const transaction = await contract
         .connect(metamaskDetails.signer)
         .borrow(token, amount);
       await transaction.wait();
+
+      console.log("Token Borrowed...");
       return true;
     } catch (error) {
       reportError(error);
@@ -432,7 +479,7 @@ const LendState = (props) => {
 
   /*************************** Your Borrows ***************************/
   const getYourBorrows = async () => {
-    console.log("**** Getting Your Borrows ****");
+    console.log("4. Getting Your Borrows");
     try {
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
       const yourBorrows = await contract
@@ -467,7 +514,8 @@ const LendState = (props) => {
       setBorrowSummary(summary);
       setYourBorrows(yourBorrowsObjectMerged);
 
-      console.log("Got your borrows");
+      console.log("***Got your borrows");
+      console.log(JSON.stringify(yourBorrowsObjectMerged));
     } catch (error) {
       reportError(error);
       return error;
@@ -478,9 +526,12 @@ const LendState = (props) => {
   const repayAsset = async (tokenAddress, repayAmount) => {
     const amount = numberToEthers(repayAmount);
 
-    // console.log("Repay Started.....");
-    // console.log("tokenAddress : " + tokenAddress);
-    // console.log("repayAmount : " + amount);
+    console.log(
+      "****Repaying token : " +
+        tokenAddress +
+        "| repayAmount : " +
+        amounrepayAmountt
+    );
 
     try {
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
@@ -488,7 +539,7 @@ const LendState = (props) => {
         .connect(metamaskDetails.signer)
         .repay(tokenAddress, amount);
       await transaction.wait();
-      // console.log("Repay done....");
+      console.log("Token repayed....");
       return true;
     } catch (error) {
       reportError(error);
@@ -524,7 +575,7 @@ const LendState = (props) => {
 
   // ------------------
   const reportError = (error) => {
-    // console.error(JSON.stringify(error));
+    console.error(JSON.stringify(error));
   };
 
   return (

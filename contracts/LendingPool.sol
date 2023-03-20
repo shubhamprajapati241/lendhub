@@ -175,9 +175,9 @@ contract LendingPool is ReentrancyGuard {
     payable {
         address lender = msg.sender;
         // bool _usageAsCollateralEnabled = isETH(_token) ? true: false;
-        // bool _usageAsBorrowEnabled = isETH(_token) ? false: true;
+        bool _usageAsBorrowEnabled = isETH(_token) ? false: true;
         bool _usageAsCollateralEnabled = true;
-        bool _usageAsBorrowEnabled = true;
+        // bool _usageAsBorrowEnabled = true;
         string memory _symbol = getSymbol(_token);
 
         if(!lendingConfig.isTokenInAssets(_token)) {
@@ -236,7 +236,7 @@ contract LendingPool is ReentrancyGuard {
     nonReentrant
     updateEarnedInterestOnLend(msg.sender, _token)
     onlyAmountGreaterThanZero(_amount)
-    payable returns(bool) {
+    payable  returns(bool) {   
         address lender  = msg.sender;
     
         require(isLenderTokenOwner(_token), "Not token owner");
@@ -244,10 +244,12 @@ contract LendingPool is ReentrancyGuard {
         // amountAvailableToWithdraw must be set on the front-end (modal) to during withdrawl 
         // uint amountAvailableToWithdraw = getLenderAssetQty(lender, _token) - getBorrowerAssetQty(lender, _token);
         uint maxWithdrawQty = getTokensPerUSDAmount(_token,getUserTotalAvailableBalanceInUSD(lender, TxMode.WITHDRAW)) * 1e18;
+
         require(maxWithdrawQty >= _amount,"Cannot withdraw more than balance");
 
         // Reserve must have enough withdrawl qty - this must always be true, so not sure why to code it
         require (reserves[_token] >= _amount, "Not enough qty in reserve pool to withdraw");
+
         reserves[_token] -= _amount;
        
         uint lenderAssetLength = lenderAssets[lender].length;
@@ -255,6 +257,13 @@ contract LendingPool is ReentrancyGuard {
             if(lenderAssets[lender][i].token == _token) {
                 lenderAssets[lender][i].lentQty -= _amount;
                 lenderAssets[lender][i].lendStartTimeStamp = block.timestamp;
+            }
+
+            if(lenderAssets[lender][i].lentQty == 0) {
+                delete lenderAssets[lender][i];
+                lenderAssets[lender][i] = lenderAssets[lender][lenderAssetLength - 1];
+                lenderAssets[lender].pop();
+                lenderAssetLength -= 1; 
             }
         }
 
@@ -266,21 +275,25 @@ contract LendingPool is ReentrancyGuard {
         }else {
             IERC20(_token).transfer(lender, _amount);
         }
-
-        deleteWithdrawnLends(lender);
-
         return true;
     }
 
     /********************* BORROW FUNCTIONS ******************/
-    function getAssetsToBorrow(address _borrower) public view returns(BorrowAsset[] memory) {
-        uint maxAmountToBorrowInUSD = (getUserTotalAvailableBalanceInUSD(_borrower, TxMode.BORROW) * BORROW_THRESHOLD)/ 100; 
+    function getAssetsToBorrow(address _borrower, TxMode _txMode) public view returns(BorrowAsset[] memory) {
+
+//  function getAssetsToBorrow(address _borrower,  TxMode _txMode) public view returns(address[] memory) {
+        uint maxAmountToBorrowInUSD = getUserTotalAvailableBalanceInUSD(_borrower, _txMode);
         
         uint length = reserveAssets.length;
+
+        address[] memory arr = new address[](length);
+
         BorrowAsset[] memory borrowAsset = new BorrowAsset[](length - 1);
         uint borrowAssetsCount = 0;
         for(uint i = 0; i < length; i++) { 
+
             address token = reserveAssets[i];
+
             if(lendingConfig.isBorrowingEnabled(token)) {
                 // uint borrowQty = getTokenQtyForUSDAmount(token, maxAmountToBorrowInUSD);
                 // borrow qty is either tokens per max borrowbale USD amount or the ones in reserves of that token
@@ -365,32 +378,22 @@ contract LendingPool is ReentrancyGuard {
                 borrowerAssets[borrower][i].borrowStartTimeStamp = block.timestamp;
             }
         }
-        deleteRepaidBorrows(borrower);
+        // deleteRepaidBorrows(borrower);
     }
 
     /*************************** HELPER FUNCTIONS ***************************************/
 
-    function deleteRepaidBorrows(address _borrower) internal {
-        uint borrowedAssetsLen = borrowerAssets[_borrower].length;
-        for (uint i = 0; i < borrowedAssetsLen; i++) {
-            if(borrowerAssets[_borrower][i].borrowQty == 0) {
-                delete borrowerAssets[_borrower][i];
-                borrowerAssets[_borrower][i] = borrowerAssets[_borrower][borrowedAssetsLen - 1];
-                borrowerAssets[_borrower].pop();
-            }
-        }
-    }
+    // function deleteRepaidBorrows(address _borrower) internal {
+    //     uint borrowedAssetsLen = borrowerAssets[_borrower].length;
+    //     for (uint i = 0; i < borrowedAssetsLen; i++) {
+    //         if(borrowerAssets[_borrower][i].borrowQty == 0) {
+    //             delete borrowerAssets[_borrower][i];
+    //             borrowerAssets[_borrower][i] = borrowerAssets[_borrower][borrowedAssetsLen - 1];
+    //         }
+    //     }
+    //     borrowerAssets[_borrower].pop();
+    // }
 
-    function deleteWithdrawnLends(address _lender) internal {
-        uint lenderAssetLength = lenderAssets[_lender].length;
-        for (uint i = 0; i < lenderAssetLength; i++) {
-            if(lenderAssets[_lender][i].lentQty == 0) {
-                delete lenderAssets[_lender][i];
-                lenderAssets[_lender][i] = lenderAssets[_lender][lenderAssetLength - 1];
-                lenderAssets[_lender].pop();
-            }
-        }
-    }
 
     function isTokenBorrowed(address _borrower, address _token) public view returns(bool) {
         uint256 assetLen = borrowerAssets[_borrower].length;
@@ -423,6 +426,7 @@ contract LendingPool is ReentrancyGuard {
         return 0;
     }
 
+    //  TOOD : uncomment
     function getLenderAssets(address _lender) public view returns (UserAsset[] memory) {
         return lenderAssets[_lender];
     }

@@ -43,7 +43,6 @@ const ModalLend = ({
   };
 
   const validateInput = (input) => {
-    console.log(input);
     if (input) {
       var pattern = new RegExp(/^\d*\.?\d*$/);
       if (!pattern.test(input)) {
@@ -68,14 +67,14 @@ const ModalLend = ({
 
   const handleApprove = async () => {
     const isTokenApproved = await ApproveToContinue(address, inputValue);
-    console.log(isTokenApproved);
+    // console.log(isTokenApproved);
     toast.success(`Approved ${inputValue} ${name}`);
     if (isTokenApproved) setIsApproved(true);
   };
 
   const handleSupply = async () => {
     const isSupplied = await LendAsset(address, inputValue);
-    console.log(isSupplied);
+    // console.log(isSupplied);
 
     toast.success(`Supplied ${inputValue} ${name}`);
     if (isSupplied) {

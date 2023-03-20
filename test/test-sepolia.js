@@ -20,12 +20,12 @@ const {
   AddressToTokenMapAddress,
   LendingConfigAddress,
   LendingPoolAddress,
-  ACCOUNT_1,
-  ACCOUNT_2,
-  ACCOUNT_3,
-  ACCOUNT_4,
-  ACCOUNT_5,
-  ACCOUNT_6,
+  account1,
+  account2,
+  account3,
+  account4,
+  account5,
+  account6,
 } = require("../addresses-sepolia");
 
 // converting number into ETHERS
@@ -110,12 +110,12 @@ describe("LendHub Tests", async () => {
     signer = new ethers.Wallet(process.env.MAIN_ACCOUNT, provider);
 
     /******** Setting Signer Addresses ********/
-    lender1 = ACCOUNT_1;
-    lender2 = ACCOUNT_2;
-    lender3 = ACCOUNT_3;
-    lender4 = ACCOUNT_4;
-    borrower1 = ACCOUNT_5;
-    borrower2 = ACCOUNT_6;
+    lender1 = account1;
+    lender2 = account2;
+    lender3 = account3;
+    lender4 = account4;
+    borrower1 = account5;
+    borrower2 = account6;
     // transferring assets into accounts
     //   await daiToken.connect(signer).transfer(lender1, numberToEthers(20000));
     // await usdcToken.connect(signer).transfer(lender2, numberToEthers(50000));

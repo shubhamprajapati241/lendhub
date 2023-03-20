@@ -29,7 +29,7 @@ async function main() {
   const daiToken = await DAIToken.deploy();
   await daiToken.deployed();
   const DAI_ADDRESS = daiToken.address;
-  console.log('export const DAITokenAddress = "' + DAI_ADDRESS + '"');
+  console.log('const DAITokenAddress = "' + DAI_ADDRESS + '"');
 
   /********************** Deploy DAIToken *************************/
   const LINKToken = await ethers.getContractFactory("LinkToken");
