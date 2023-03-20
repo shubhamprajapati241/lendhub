@@ -10,6 +10,7 @@ const ModalWithdraw = ({
   name,
   balance,
   image,
+  maxSupply,
   remainingSupply,
   onClose,
 }) => {
@@ -20,8 +21,8 @@ const ModalWithdraw = ({
   const [isInputValidate, setInputValidate] = useState(false);
 
   const setMax = () => {
-    setInputValue(balance);
-    getbalanceInUSD(balance);
+    setInputValue(maxSupply);
+    getbalanceInUSD(maxSupply);
     setInputValidate(true);
   };
 
@@ -38,9 +39,9 @@ const ModalWithdraw = ({
         setInputValue("");
         setInputValidate(false);
       } else {
-        if (Number(input) > Number(balance)) {
-          setInputValue(balance);
-          getbalanceInUSD(balance);
+        if (Number(input) > Number(maxSupply)) {
+          setInputValue(maxSupply);
+          getbalanceInUSD(maxSupply);
         } else {
           setInputValue(input);
           getbalanceInUSD(input);
@@ -109,10 +110,10 @@ const ModalWithdraw = ({
                     .slice(0, 10)}...`}{" "}
             </p>
             <p className="justify-end">
-              Wallet Balance{" "}
-              {Number(balance).toFixed(2).toString(2).length < 10
-                ? Number(balance).toFixed(2).toString().slice(0, 10)
-                : `${Number(balance)
+              Supply balance{" "}
+              {Number(maxSupply).toFixed(2).toString(2).length < 10
+                ? Number(maxSupply).toFixed(2).toString().slice(0, 10)
+                : `${Number(maxSupply)
                     .toFixed(2)
                     .toString()
                     .slice(0, 10)}...`}{" "}

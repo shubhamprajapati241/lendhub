@@ -9,8 +9,8 @@ const YourSuppliesRow = ({
   image,
   apy,
   balance,
+  maxSupply,
   balanceInUSD,
-  dollarPrice,
   isCollateral,
 }) => {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -85,6 +85,7 @@ const YourSuppliesRow = ({
           name={name}
           image={image}
           balance={balance}
+          maxSupply={maxSupply}
           remainingSupply={balance}
           onClose={() => setShowWithdrawModal(false)}
         />

@@ -48,7 +48,7 @@ const YourSupplies = () => {
                       name={token.name}
                       balance={token.balance}
                       balanceInUSD={token.balanceInUSD}
-                      dollarPrice={token.dollarPrice}
+                      maxSupply={token.maxSupply}
                       image={token.image}
                       apy={token.apy}
                       isCollateral={token.isCollateral}

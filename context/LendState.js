@@ -275,13 +275,22 @@ const LendState = (props) => {
     for (let i = 0; i < assets.length; i++) {
       const token = assets[i].token;
       const lendQty = assets[i].lentQty;
-
       const amountInUSD = await getAmountInUSD(token, lendQty);
+
+      const maxSupplyAmount = await getUserTotalAvailableBalance();
+
+      console.log("maxSupplyAmount" + maxSupplyAmount);
+
+      const maxQty = await getTokensPerUSDAmount(token, maxSupplyAmount);
+
+      console.log("maxQty" + maxQty);
+
       assetsList.push({
         token: assets[i].token,
         balance: Number(assets[i].lentQty) / 1e18,
         apy: Number(assets[i].lentApy),
         balanceInUSD: amountInUSD,
+        maxSupply: maxQty,
       });
     }
     return assetsList;
@@ -351,6 +360,45 @@ const LendState = (props) => {
     }
   };
 
+  const getUserTotalAvailableBalance = async () => {
+    try {
+      const contract = new ethers.Contract(
+        LendingPoolAddress,
+        LendingPoolABI.abi,
+        metamaskDetails.provider
+      );
+      const maxAmount = Number(
+        await contract.getUserTotalAvailableBalanceInUSD(
+          metamaskDetails.currentAccount,
+          1
+        )
+      );
+
+      return maxAmount;
+    } catch (error) {
+      reportError(error);
+      return error;
+    }
+  };
+
+  const getTokensPerUSDAmount = async (token, amount) => {
+    try {
+      const contract = new ethers.Contract(
+        LendingPoolAddress,
+        LendingPoolABI.abi,
+        metamaskDetails.provider
+      );
+      const maxQty = Number(
+        await contract.getTokensPerUSDAmount(token, amount)
+      );
+
+      return maxQty;
+    } catch (error) {
+      reportError(error);
+      return error;
+    }
+  };
+
   /*************************** Component : Your Supplies ***************************/
   const getYourSupplies = async () => {
     console.log("3. Getting your Supplies...");
@@ -369,7 +417,7 @@ const LendState = (props) => {
 
       const supplyAssets = await objectifySuppliedAssets(assets);
 
-      // console.log(supplyAssets);
+      console.log(supplyAssets);
 
       const supplyAsset2 = mergeObjectifiedAssets(supplyAssets);
       // console.log(JSON.stringify(supplyAsset2));
@@ -511,10 +559,7 @@ const LendState = (props) => {
     const amount = numberToEthers(repayAmount);
 
     console.log(
-      "****Repaying token : " +
-        tokenAddress +
-        "| repayAmount : " +
-        amounrepayAmountt
+      "****Repaying token : " + tokenAddress + "| repayAmount : " + repayAmount
     );
 
     try {

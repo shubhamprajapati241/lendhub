@@ -110,7 +110,7 @@ const ModalBorrow = ({
                     .slice(0, 10)}...`}{" "}
             </p>
             <p className="justify-end">
-              Wallet available{" "}
+              Available{" "}
               {Number(available).toFixed(2).toString(2).length < 10
                 ? Number(available).toFixed(2).toString().slice(0, 10)
                 : `${Number(available)
