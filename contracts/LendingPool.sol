@@ -278,12 +278,7 @@ contract LendingPool is ReentrancyGuard {
 
     /********************* BORROW FUNCTIONS ******************/
     function getAssetsToBorrow(address _borrower) public view returns(BorrowAsset[] memory) {
-<<<<<<< Updated upstream
         uint maxAmountToBorrowInUSD = getUserTotalAvailableBalanceInUSD(_borrower, TxMode.BORROW); 
-=======
-        uint maxAmountToBorrowInUSD = (getUserTotalAvailableBalanceInUSD(_borrower, TxMode.BORROW) * BORROW_THRESHOLD)/ 100; 
->>>>>>> Stashed changes
-        
         uint length = reserveAssets.length;
         require(length > 0, "Not enough assets to borrow");
         BorrowAsset[] memory borrowAsset = new BorrowAsset[](length);
