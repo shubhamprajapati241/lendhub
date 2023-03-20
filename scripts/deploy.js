@@ -82,16 +82,6 @@ async function main() {
   const account2 = accounts[2];
   const account3 = accounts[3];
 
-  // shubham account's addresses
-  // const account1 = "0x4644933680922aE17748753ae20264436ca616cc";
-  // const account2 = "0x021edEFA528293eB8ad9A2d9e0d71011f6297601";
-  // const account3 = "0xc1f33e8c427fd4126A23A4a9B721BD97Fb11dDe6";
-
-  // // sasi account addresses
-  // const account4 = "0x315F60449DaB3D321aF75821b576E7F436308635";
-  // const account5 = "0x4B40f99E93A8814be7fDe5F6AaFA5e9823E13728";
-  // const account6 = "0x3f39Ae58Cb1148ec1Ad903648319359Cfdc34a02";
-
   console.log("deployerAddress : " + deployerAddress.address);
 
   // transfering assets into account1

@@ -3,11 +3,11 @@ import LendContext from "./lendContext";
 import { ethers } from "ethers";
 const tokensList = require("../token-list-goerli");
 
-// For sepolia
+// TODO : uncomment for sepolia
 // const TokenABI = require("../abis/DAIToken.json");
 // const LendingPoolABI = require("../abis/LendingPool.json");
 
-// For localhost
+// TODO : uncomment for localhost
 const TokenABI = require("../artifacts/contracts/DAIToken.sol/DAIToken.json");
 const LendingPoolABI = require("../artifacts/contracts/LendingPool.sol/LendingPool.json");
 
@@ -74,9 +74,6 @@ const LendState = (props) => {
       const networkName = network.name;
       const signer = provider.getSigner();
 
-      console.log(networkName);
-
-      // TODO : uncomment for sepolia
       // if (networkName != "sepolia") {
       //   alert("Please switch your network to Sepolia");
       //   return;
@@ -394,7 +391,7 @@ const LendState = (props) => {
       let summary = {
         totalUSDBalance: totalUSDBalance,
         weightedAvgAPY: weightedAvgAPY / supplyAssets.length,
-        totalUSDCollateral: totalUSDBalance,
+        totalUSDCollateral: totalUSDCollateral,
       };
 
       console.log("Got your supplies...");
@@ -514,7 +511,10 @@ const LendState = (props) => {
     const amount = numberToEthers(repayAmount);
 
     console.log(
-      "****Repaying token : " + tokenAddress + "| repayAmount : " + repayAmount
+      "****Repaying token : " +
+        tokenAddress +
+        "| repayAmount : " +
+        amounrepayAmountt
     );
 
     try {
