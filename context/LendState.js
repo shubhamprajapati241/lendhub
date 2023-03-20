@@ -568,7 +568,7 @@ const LendState = (props) => {
         .connect(metamaskDetails.signer)
         .repay(tokenAddress, amount);
       await transaction.wait();
-      console.log("Token repayed....");
+      console.log("Token Repaid....");
       return true;
     } catch (error) {
       reportError(error);

@@ -5,12 +5,26 @@ import { BiError } from "react-icons/bi";
 import lendContext from "../context/lendContext";
 import { toast } from "react-toastify";
 
-const ModalRepay = ({ address, name, debt, image, onClose }) => {
-  const { getAmountInUSD, repayAsset, numberToEthers, connectWallet } =
+const ModalRepay = ({ 
+  address, 
+  name, 
+  debt, 
+  image, 
+  onClose 
+}) => {
+  const { 
+    getAmountInUSD, 
+    repayAsset, 
+    numberToEthers, 
+    connectWallet,
+    ApproveToContinue 
+  } =
     useContext(lendContext);
   const [dollarPrice, setDollarPrice] = useState(0);
   const [isInputValidate, setInputValidate] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [isApproved, setIsApproved] = useState(false);
+  const [loadingOnApprove, setLoadingOnApprove] = useState(false);
 
   const setMax = () => {
     setInputValue(debt);
@@ -45,6 +59,13 @@ const ModalRepay = ({ address, name, debt, image, onClose }) => {
       setDollarPrice(0);
       setInputValidate(false);
     }
+  };
+
+  const handleApprove = async () => {
+    const isTokenApproved = await ApproveToContinue(address, inputValue);
+    // console.log(isTokenApproved);
+    toast.success(`Approved ${inputValue} ${name}`);
+    if (isTokenApproved) setIsApproved(true);
   };
 
   const handleRepay = async () => {
@@ -143,19 +164,55 @@ const ModalRepay = ({ address, name, debt, image, onClose }) => {
           Enter an amount
         </button>
       </div>
+{/* insert here */}
 
-      <div className={!isInputValidate ? "hidden" : "block"}>
-        <button
-          className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
-          onClick={() => {
-            handleRepay();
-          }}
-        >
-          Repay {name}
-        </button>
+<div className={!inputValue ? "hidden" : "block"}>
+        {name == "ETH" ? (
+          <button
+            className={
+              "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
+            }
+            onClick={() => {
+              if (isInputValidate) handleRepay();
+            }}
+          >
+            Repay {name}
+          </button>
+        ) : (
+          <div>
+            {" "}
+            <button
+              className={
+                isApproved
+                  ? "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2"
+                  : "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
+              }
+              onClick={() => {
+                if (isInputValidate) {
+                  setLoadingOnApprove(true);
+                  handleApprove();
+                }
+              }}
+            >
+              {!isApproved ? "Aprrove to continue" : "Approved Confirmed !"}
+            </button>
+            <button
+              className={
+                isApproved
+                  ? "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
+                  : "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2"
+              }
+              onClick={() => {
+                if (!isApproved) return;
+                else handleRepay();
+              }}
+            >
+              Repay {name}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 };
-
 export default ModalRepay;

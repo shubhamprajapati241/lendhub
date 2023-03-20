@@ -674,7 +674,11 @@ describe("LendHub Tests", async () => {
     for (let i = 0; i < reserveAssets.length; i++) {
       const token = reserveAssets[i];
       const symbol = await addressToTokenMap.getAddress(token);
+<<<<<<< Updated upstream
       const amount = await lendingPool.getTotalSupplyOfToken(token);
+=======
+      const amount = (await lendingPool.getTotalSupplyOfToken(token)) / 1e18;
+>>>>>>> Stashed changes
       array.push({
         token: token,
         symbol: symbol,
@@ -702,8 +706,11 @@ describe("LendHub Tests", async () => {
     const assets = await lendingPool.getAssetsToBorrow(user.address);
     console.log(assets); //  36320;
 
+<<<<<<< Updated upstream
     result = await lendingPool._min(45800);
     console.log(result);
+=======
+>>>>>>> Stashed changes
     // user supply = 45800
   });
 
