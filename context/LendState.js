@@ -331,7 +331,7 @@ const LendState = (props) => {
 
   /*************************** Component : Your Supplies ***************************/
   const getYourSupplies = async () => {
-    // console.warn("Getting Supply assets.......");
+    console.log("Getting Supply assets.......");
     try {
       const contract = new ethers.Contract(
         LendingPoolAddress,
@@ -346,10 +346,10 @@ const LendState = (props) => {
 
       const supplyAssets = await objectifySuppliedAssets(assets);
 
-      // console.log(supplyAssets);
+      console.log(supplyAssets);
 
       const supplyAsset2 = mergeObjectifiedAssets(supplyAssets);
-      // console.log(JSON.stringify(supplyAsset2));
+      console.log(JSON.stringify(supplyAsset2));
 
       const totalUSDBalance = supplyAssets.reduce((bal, item) => {
         return bal + item.balanceInUSD;
