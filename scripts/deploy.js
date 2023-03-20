@@ -113,9 +113,9 @@ async function main() {
   await linkToken.transfer(account3.address, numberToEthers(30000));
 
   console.log("Transaction initial assets to lendingpool");
-  await daiToken.transfer(LendingPoolAddress, numberToEthers(50000));
-  await usdcToken.transfer(LendingPoolAddress, numberToEthers(50000));
-  await linkToken.transfer(LendingPoolAddress, numberToEthers(50000));
+  // await daiToken.transfer(LendingPoolAddress, numberToEthers(50000));
+  // await usdcToken.transfer(LendingPoolAddress, numberToEthers(50000));
+  // await linkToken.transfer(LendingPoolAddress, numberToEthers(50000));
   // const valueOption = { value: ethers.utils.parseEther((100).toString()) };
   // await LendingPoolAddress.transfer(valueOption);
 

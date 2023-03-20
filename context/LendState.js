@@ -3,13 +3,15 @@ import LendContext from "./lendContext";
 import { ethers } from "ethers";
 const tokensList = require("../token-list-goerli");
 
-// TODO : use in sepolia
+// For sepolia
 // const TokenABI = require("../abis/DAIToken.json");
 // const LendingPoolABI = require("../abis/LendingPool.json");
 
+// For localhost
 const TokenABI = require("../artifacts/contracts/DAIToken.sol/DAIToken.json");
 const LendingPoolABI = require("../artifacts/contracts/LendingPool.sol/LendingPool.json");
 
+// Importing Bank contract details
 import { ETHAddress, LendingPoolAddress } from "../addresses";
 
 const numberToEthers = (number) => {
@@ -33,6 +35,9 @@ const LendState = (props) => {
   const [yourBorrows, setYourBorrows] = useState([]);
 
   //  contract details setting
+  const [contract, setContract] = useState({
+    bankContract: null,
+  });
 
   // for storing user supply assets in the lending pool
   const [supplySummary, setSupplySummary] = useState({
@@ -69,10 +74,13 @@ const LendState = (props) => {
       const networkName = network.name;
       const signer = provider.getSigner();
 
-      if (networkName != "sepolia") {
-        alert("Please switch your network to Sepolia");
-        return;
-      }
+      console.log(networkName);
+
+      // TODO : uncomment for sepolia
+      // if (networkName != "sepolia") {
+      //   alert("Please switch your network to Sepolia");
+      //   return;
+      // }
 
       // console.log(networkName);
 
@@ -95,11 +103,7 @@ const LendState = (props) => {
   };
 
   const getUserAssets = async () => {
-<<<<<<< Updated upstream
-    console.warn("Getting user Assets...");
-=======
     console.log("2. Getting Assets to supply...");
->>>>>>> Stashed changes
     try {
       const assets = await Promise.all(
         tokensList.token.map(async (token) => {
@@ -130,20 +134,13 @@ const LendState = (props) => {
             balance: tok,
           };
 
-          console.log(asset);
-
           return asset;
         })
       );
 
       setUserAssets(assets);
-<<<<<<< Updated upstream
-      console.log(assets);
-
-=======
       console.log("Got Assets to supply...");
       console.log(JSON.stringify(assets));
->>>>>>> Stashed changes
       return assets;
     } catch (error) {
       reportError(error);
@@ -397,7 +394,7 @@ const LendState = (props) => {
       let summary = {
         totalUSDBalance: totalUSDBalance,
         weightedAvgAPY: weightedAvgAPY / supplyAssets.length,
-        totalUSDCollateral: totalUSDCollateral,
+        totalUSDCollateral: totalUSDBalance,
       };
 
       console.log("Got your supplies...");
@@ -413,11 +410,7 @@ const LendState = (props) => {
 
   /************ Function to get Assets to Borrow ***********/
   const getAssetsToBorrow = async () => {
-<<<<<<< Updated upstream
-    console.log("Getting assets to Borrow...");
-=======
     console.log("4. Getting assets to Borrow...");
->>>>>>> Stashed changes
 
     try {
       const contract = new ethers.Contract(
@@ -441,14 +434,8 @@ const LendState = (props) => {
       const assetsToBorrowObjectMerged =
         mergeObjectifiedAssets(assetsToBorrowObject);
 
-<<<<<<< Updated upstream
-      console.log("Got assets to borrow...");
-      console.log(assetsToBorrowObjectMerged);
-
-=======
       console.log("Got assets to borow...");
       console.log(JSON.stringify(assetsToBorrowObjectMerged));
->>>>>>> Stashed changes
       setAssetsToBorrow(assetsToBorrowObjectMerged);
     } catch (error) {
       reportError(error);
@@ -527,10 +514,7 @@ const LendState = (props) => {
     const amount = numberToEthers(repayAmount);
 
     console.log(
-      "****Repaying token : " +
-        tokenAddress +
-        "| repayAmount : " +
-        amounrepayAmountt
+      "****Repaying token : " + tokenAddress + "| repayAmount : " + repayAmount
     );
 
     try {
