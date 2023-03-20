@@ -285,6 +285,7 @@ contract LendingPool is ReentrancyGuard {
 
     /********************* BORROW FUNCTIONS ******************/
     function getAssetsToBorrow(address _borrower) public view returns(BorrowAsset[] memory) {
+        
         uint maxAmountToBorrowInUSD = getUserTotalAvailableBalanceInUSD(_borrower, TxMode.BORROW); 
         uint length = reserveAssets.length;
         
