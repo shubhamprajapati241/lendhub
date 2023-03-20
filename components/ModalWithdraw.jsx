@@ -32,7 +32,6 @@ const ModalWithdraw = ({
   };
 
   const validateInput = (input) => {
-    console.log(input);
     if (input) {
       var pattern = new RegExp(/^\d*\.?\d*$/);
       if (!pattern.test(input)) {
@@ -57,7 +56,7 @@ const ModalWithdraw = ({
 
   const handleWithdraw = async () => {
     const isWithdrawSuccessful = await WithdrawAsset(address, inputValue);
-    console.log(isWithdrawSuccessful);
+    // console.log(isWithdrawSuccessful);
     toast.success(`Withdraw Successful ${inputValue} ${name}`);
     if (isWithdrawSuccessful) {
       onClose();

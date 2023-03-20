@@ -25,12 +25,12 @@ module.exports = {
       chainIds: 80001, // mumbai testnet
     },
   },
-  gasReporter: {
-    enabled: true,
-    currency: "USD",
-    coinmarketcap: process.env.COINMARKETCAP,
-    token: "matic",
-    outputFile: "gasReports.txt",
-    noColors: true,
-  },
+  // gasReporter: {
+  //   enabled: true,
+  //   currency: "USD",
+  //   coinmarketcap: process.env.COINMARKETCAP,
+  //   token: "matic",
+  //   outputFile: "gasReports.txt",
+  //   noColors: true,
+  // },
 };

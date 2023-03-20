@@ -176,12 +176,13 @@ contract LendingPool is ReentrancyGuard {
     nonReentrant
     onlyAmountGreaterThanZero(_amount)
     updateEarnedInterestOnLend(msg.sender, _token)
+
     payable {
         address lender = msg.sender;
-        // bool _usageAsCollateralEnabled = isETH(_token) ? true: false;
-        // bool _usageAsBorrowEnabled = isETH(_token) ? false: true;
-        bool _usageAsCollateralEnabled = true;
-        bool _usageAsBorrowEnabled = true;
+        bool _usageAsCollateralEnabled = isETH(_token) ? true: false;
+        bool _usageAsBorrowEnabled = isETH(_token) ? false: true;
+        // bool _usageAsCollateralEnabled = true;
+        // bool _usageAsBorrowEnabled = true;
         string memory _symbol = getSymbol(_token);
 
         if(!lendingConfig.isTokenInAssets(_token)) {
@@ -260,6 +261,14 @@ contract LendingPool is ReentrancyGuard {
                 lenderAssets[lender][i].lentQty -= _amount;
                 lenderAssets[lender][i].lendStartTimeStamp = block.timestamp;
             }
+
+             // TODO : commented because of the file size issue
+            //  if(lenderAssets[lender][i].lentQty == 0) {
+            //     delete lenderAssets[lender][i];
+            //     lenderAssets[lender][i] = lenderAssets[lender][lenderAssetLength - 1];
+            //     lenderAssets[lender].pop();
+            //     lenderAssetLength -= 1;
+            // }
         }
 
         if(isETH(_token)) {
@@ -271,8 +280,6 @@ contract LendingPool is ReentrancyGuard {
             IERC20(_token).transfer(lender, _amount);
         }
 
-        deleteWithdrawnLends(lender);
-
         return true;
     }
 
@@ -280,7 +287,9 @@ contract LendingPool is ReentrancyGuard {
     function getAssetsToBorrow(address _borrower) public view returns(BorrowAsset[] memory) {
         uint maxAmountToBorrowInUSD = getUserTotalAvailableBalanceInUSD(_borrower, TxMode.BORROW); 
         uint length = reserveAssets.length;
-        require(length > 0, "Not enough assets to borrow");
+        // TODO : is we really need ??
+        // require(length > 0, "Not enough assets to borrow");
+
         BorrowAsset[] memory borrowAsset = new BorrowAsset[](length);
         uint borrowAssetsCount = 0;
         for(uint i = 0; i < length; i++) { 
@@ -302,6 +311,7 @@ contract LendingPool is ReentrancyGuard {
 
     function borrow(address _token, uint256 _borrowQty) public 
     nonReentrant
+    updateEarnedInterestOnLend(msg.sender, _token)
     updateAccruedInterestOnBorrow(msg.sender, _token)
     onlyAmountGreaterThanZero(_borrowQty) 
     returns(bool) {
@@ -349,6 +359,7 @@ contract LendingPool is ReentrancyGuard {
     function repay(address _token, uint256 _amount) public 
     nonReentrant 
     onlyAmountGreaterThanZero(_amount)
+    updateEarnedInterestOnLend(msg.sender, _token)
     updateAccruedInterestOnBorrow(msg.sender, _token)
     {
         address borrower = msg.sender;
@@ -368,34 +379,19 @@ contract LendingPool is ReentrancyGuard {
                 borrowerAssets[borrower][i].borrowQty -= _amount;
                 borrowerAssets[borrower][i].borrowStartTimeStamp = block.timestamp;
             }
+
+            // TODO : commented because of the file size issue
+            //  if(borrowerAssets[borrower][i].borrowQty == 0) {
+            //     delete borrowerAssets[borrower][i];
+            //     borrowerAssets[borrower][i] = borrowerAssets[borrower][assetsLen - 1];
+            //     borrowerAssets[borrower].pop();
+            //     assetsLen -= 1;
+            // }
         }
-        // deleteRepaidBorrows(borrower);
+       
     }
 
     /*************************** HELPER FUNCTIONS ***************************************/
-
-    // function deleteRepaidBorrows(address _borrower) internal {
-    //     uint borrowedAssetsLen = borrowerAssets[_borrower].length;
-    //     for (uint i = 0; i < borrowedAssetsLen; i++) {
-    //         if(borrowerAssets[_borrower][i].borrowQty == 0) {
-    //             delete borrowerAssets[_borrower][i];
-    //             borrowerAssets[_borrower][i] = borrowerAssets[_borrower][borrowedAssetsLen - 1];
-    //             borrowerAssets[_borrower].pop();
-    //         }
-    //     }
-    // }
-
-    function deleteWithdrawnLends(address _lender) internal {
-        uint lenderAssetLength = lenderAssets[_lender].length;
-        for (uint i = 0; i < lenderAssetLength; i++) {
-            if(lenderAssets[_lender][i].lentQty == 0) {
-                delete lenderAssets[_lender][i];
-                lenderAssets[_lender][i] = lenderAssets[_lender][lenderAssetLength - 1];
-                lenderAssets[_lender].pop();
-                lenderAssetLength -= 1;
-            }
-        }
-    }
 
     function isTokenBorrowed(address _borrower, address _token) public view returns(bool) {
         uint256 assetLen = borrowerAssets[_borrower].length;
@@ -471,13 +467,12 @@ contract LendingPool is ReentrancyGuard {
         uint256 userTotalLentUSDBalance;
         uint256 userTotalBorrowAmountInUSD;
 
-        // TODO : call with sasi and discuss ETH is collateral => 17/03
         uint256 lenderAssetLength = lenderAssets[_user].length;
         for(uint256 i =0; i < lenderAssetLength; i++) {
             // userTotalLentUSDBalance - USD Balance for all tokens lent by the user
             userTotalLentUSDBalance += getAmountInUSD(lenderAssets[_user][i].token, lenderAssets[_user][i].lentQty);
         }
-        // userTotalETHLendAmoutInUSD = getAmountInUSD(ethAddress, totalLendETH);
+        
         uint256 borrowerAssetsLength = borrowerAssets[_user].length;
         for(uint256 i =0; i < borrowerAssetsLength; i++) {
             userTotalBorrowAmountInUSD += getAmountInUSD(borrowerAssets[_user][i].token, borrowerAssets[_user][i].borrowQty);

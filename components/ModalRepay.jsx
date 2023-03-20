@@ -25,7 +25,6 @@ const ModalRepay = ({ address, name, debt, image, onClose }) => {
   };
 
   const validateInput = (input) => {
-    console.log(input);
     if (input) {
       var pattern = new RegExp(/^\d*\.?\d*$/);
       if (!pattern.test(input)) {
@@ -50,7 +49,7 @@ const ModalRepay = ({ address, name, debt, image, onClose }) => {
 
   const handleRepay = async () => {
     const isRepayed = await repayAsset(address, inputValue);
-    console.log(isRepayed);
+    // console.log(isRepayed);
     toast.success(`Repayed ${inputValue} ${name}`);
     if (isRepayed) {
       onClose();
