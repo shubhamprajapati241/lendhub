@@ -165,6 +165,10 @@ contract LendingPool is ReentrancyGuard {
         return false;
     }
 
+    function getTotalSupplyOfToken(address _token) public view returns (uint){
+        return reserves[_token];
+    }
+
    /************* Lender functions ************************/
     receive() external payable {}
 
@@ -274,10 +278,11 @@ contract LendingPool is ReentrancyGuard {
 
     /********************* BORROW FUNCTIONS ******************/
     function getAssetsToBorrow(address _borrower) public view returns(BorrowAsset[] memory) {
-        uint maxAmountToBorrowInUSD = (getUserTotalAvailableBalanceInUSD(_borrower, TxMode.BORROW) * BORROW_THRESHOLD)/ 100; 
+        uint maxAmountToBorrowInUSD = getUserTotalAvailableBalanceInUSD(_borrower, TxMode.BORROW); 
         
         uint length = reserveAssets.length;
-        BorrowAsset[] memory borrowAsset = new BorrowAsset[](length - 1);
+        require(length > 0, "Not enough assets to borrow");
+        BorrowAsset[] memory borrowAsset = new BorrowAsset[](length);
         uint borrowAssetsCount = 0;
         for(uint i = 0; i < length; i++) { 
             address token = reserveAssets[i];
@@ -365,21 +370,21 @@ contract LendingPool is ReentrancyGuard {
                 borrowerAssets[borrower][i].borrowStartTimeStamp = block.timestamp;
             }
         }
-        deleteRepaidBorrows(borrower);
+        // deleteRepaidBorrows(borrower);
     }
 
     /*************************** HELPER FUNCTIONS ***************************************/
 
-    function deleteRepaidBorrows(address _borrower) internal {
-        uint borrowedAssetsLen = borrowerAssets[_borrower].length;
-        for (uint i = 0; i < borrowedAssetsLen; i++) {
-            if(borrowerAssets[_borrower][i].borrowQty == 0) {
-                delete borrowerAssets[_borrower][i];
-                borrowerAssets[_borrower][i] = borrowerAssets[_borrower][borrowedAssetsLen - 1];
-                borrowerAssets[_borrower].pop();
-            }
-        }
-    }
+    // function deleteRepaidBorrows(address _borrower) internal {
+    //     uint borrowedAssetsLen = borrowerAssets[_borrower].length;
+    //     for (uint i = 0; i < borrowedAssetsLen; i++) {
+    //         if(borrowerAssets[_borrower][i].borrowQty == 0) {
+    //             delete borrowerAssets[_borrower][i];
+    //             borrowerAssets[_borrower][i] = borrowerAssets[_borrower][borrowedAssetsLen - 1];
+    //             borrowerAssets[_borrower].pop();
+    //         }
+    //     }
+    // }
 
     function deleteWithdrawnLends(address _lender) internal {
         uint lenderAssetLength = lenderAssets[_lender].length;
@@ -388,6 +393,7 @@ contract LendingPool is ReentrancyGuard {
                 delete lenderAssets[_lender][i];
                 lenderAssets[_lender][i] = lenderAssets[_lender][lenderAssetLength - 1];
                 lenderAssets[_lender].pop();
+                lenderAssetLength -= 1;
             }
         }
     }

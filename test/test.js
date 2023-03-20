@@ -383,7 +383,7 @@ describe("LendHub Tests", async () => {
 
   it("15. Lender Should be able to withdraw ETH assets", async () => {
     const amount = numberToEthers(10);
-    const valueOption = { value: amount };
+    // const valueOption = { value: amount };
     const asset = ETH_ADDRESS;
     console.log("#####################################################");
 
@@ -393,7 +393,10 @@ describe("LendHub Tests", async () => {
       "withdrawQty =" +
         (await lendingPool.getTokensPerUSDAmount(
           ETH_ADDRESS,
-          await lendingPool.getUserTotalAvailableBalanceInUSD(lender1.address)
+          await lendingPool.getUserTotalAvailableBalanceInUSD(
+            lender1.address,
+            1
+          )
         ))
     );
     console.log("ETH qty about to be withdrawn:" + amount / decimals);
@@ -409,6 +412,7 @@ describe("LendHub Tests", async () => {
 
     const symbol = await lendingPool.getSymbol(asset);
     const isETH = await lendingPool.isETH(asset);
+    console.log("symbol =" + symbol, "isETH =" + isETH);
 
     const beforeReserveBalance = await lendingPool.reserves(asset);
     console.log(
@@ -742,7 +746,8 @@ describe("LendHub Tests", async () => {
     console.log("********** BEFORE BORROW - DAI - BORROWER 2  **********");
 
     const assets = await lendingPool.getAssetsToBorrow(user.address);
-    // console.log("assets : " + JSON.stringify(assets));
+    console.log("assets : " + assets);
+
     const assetQty = assets.find((el) => el.token == asset);
     console.log("1. Max qty available to Borrow : " + assetQty.borrowQty);
     console.log("2. Qty to be borrowed : " + borrowAmount / decimals);
@@ -1058,21 +1063,24 @@ describe("LendHub Tests", async () => {
   });
 
   it("27. Should return the lenderAssets with updated lendQty", async () => {
-    console.log("+++++++++++++++++++++++++++++++++++++++++++++++++");
     let result = await lendingPool.getLenderAssets(lender3.address);
-    console.log(result);
+    // console.log(result);
 
     await moveTime(365 * SECONDS_IN_A_DAY);
     // result = await lendingPool.getLenderAssets2(lender3.address);
     // console.log(result);
-    reward = await lendingPool.rewardPerToken(ETH_ADDRESS, 1679105693);
-    console.log("reward : " + reward);
+    reward = await lendingPool.rewardPerToken(
+      ETH_ADDRESS,
+      1679105693,
+      await lendingPool.getTotalSupplyOfToken(ETH_ADDRESS)
+    );
+    // console.log("reward : " + reward);
     result = await lendingPool.interestEarned(
       lender3.address,
       ETH_ADDRESS,
       1679105693
     );
-    console.log("result : " + result);
+    // console.log("result : " + result);
     // 1679105693 = Mar 18 2023 => 1980
     // 1671100453 = Dec 15 2022 => 2854
     // 1601100453 = Sep 26 2020 => 10496
