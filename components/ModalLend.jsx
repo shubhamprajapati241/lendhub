@@ -2,8 +2,8 @@ import Image from "next/image";
 import React, { useState, useContext } from "react";
 import { MdLocalGasStation } from "react-icons/md";
 import { FiAlertCircle } from "react-icons/fi";
-import { CgSpinner } from "react-icons/ci";
-
+import { BiError } from "react-icons/bi";
+import { ImSpinner8 } from "react-icons/im";
 import lendContext from "../context/lendContext";
 import { toast } from "react-toastify";
 
@@ -26,7 +26,8 @@ const ModalLend = ({
   const [dollarPrice, setDollarPrice] = useState(0);
 
   const [isInputValidate, setInputValidate] = useState(false);
-  const [loadingOnApprove, setLoadingOnApprove] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isSuppliying, setIsSupplying] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
@@ -66,20 +67,29 @@ const ModalLend = ({
   };
 
   const handleApprove = async () => {
-    const isTokenApproved = await ApproveToContinue(address, inputValue);
-    // console.log(isTokenApproved);
-    toast.success(`Approved ${inputValue} ${name}`);
-    if (isTokenApproved) setIsApproved(true);
+    setIsApproving(true);
+    let transaction = await ApproveToContinue(address, inputValue);
+    console.log(transaction);
+    if (transaction.status == 200) {
+      setIsApproving(false);
+      setIsApproved(true);
+    } else {
+      toast.error(`Approved Failed...`);
+      setIsApproving(false);
+    }
   };
 
   const handleSupply = async () => {
-    const isSupplied = await LendAsset(address, inputValue);
-    // console.log(isSupplied);
-
-    toast.success(`Supplied ${inputValue} ${name}`);
-    if (isSupplied) {
+    setIsSupplying(true);
+    let transaction = await LendAsset(address, inputValue);
+    if (transaction.status == 200) {
+      toast.success(`Supplied ${inputValue} ${name}`);
+      setIsSupplying(false);
       onClose();
       await connectWallet();
+    } else {
+      toast.error(`Supply Failed...`);
+      setIsSupplying(false);
     }
   };
 
@@ -203,45 +213,58 @@ const ModalLend = ({
         {name == "ETH" ? (
           <button
             className={
-              "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
+              "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2 flex justify-center items-center"
             }
             onClick={() => {
               if (isInputValidate) handleSupply();
             }}
           >
-            Supply {name}
+            {!isSuppliying && <span>Supply {name}</span>}
+            {isSuppliying && (
+              <ImSpinner8 icon="spinner" className="spinner mr-2" />
+            )}
+            {isSuppliying && <span>Supplying {name}</span>}
           </button>
         ) : (
           <div>
-            {" "}
-            <button
-              className={
-                isApproved
-                  ? "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2"
-                  : "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
-              }
-              onClick={() => {
-                if (isInputValidate) {
-                  setLoadingOnApprove(true);
-                  handleApprove();
-                }
-              }}
-            >
-              {!isApproved ? "Aprrove to continue" : "Approved Confirmed !"}
-            </button>
-            <button
-              className={
-                isApproved
-                  ? "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
-                  : "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2"
-              }
-              onClick={() => {
-                if (!isApproved) return;
-                else handleSupply();
-              }}
-            >
-              Supply {name}
-            </button>
+            {!isApproved ? (
+              <button
+                className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2 flex justify-center items-center"
+                onClick={() => {
+                  if (isInputValidate) handleApprove();
+                }}
+              >
+                {!isApproving && <span>Aprrove {name} to continue</span>}
+                {isApproving && (
+                  <ImSpinner8 icon="spinner" className="spinner mr-2" />
+                )}
+                {isApproving && <span>Approving {name}... </span>}
+              </button>
+            ) : (
+              <div className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2 flex justify-center items-center">
+                Approved Confirmed &#10004;
+              </div>
+            )}
+
+            {isApproved ? (
+              <button
+                className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2 flex justify-center items-center"
+                onClick={() => {
+                  if (!isApproved) return;
+                  else handleSupply();
+                }}
+              >
+                {!isSuppliying && <span>Supply {name}</span>}
+                {isSuppliying && (
+                  <ImSpinner8 icon="spinner" className="spinner mr-2" />
+                )}
+                {isSuppliying && <span>Supplying {name}... </span>}
+              </button>
+            ) : (
+              <button className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2">
+                Supply {name}
+              </button>
+            )}
           </div>
         )}
       </div>

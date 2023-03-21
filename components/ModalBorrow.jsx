@@ -4,6 +4,7 @@ import { MdLocalGasStation } from "react-icons/md";
 import { BiError } from "react-icons/bi";
 import lendContext from "../context/lendContext";
 import { toast } from "react-toastify";
+import { ImSpinner8 } from "react-icons/im";
 
 const ModalBorrow = ({
   address,
@@ -18,6 +19,7 @@ const ModalBorrow = ({
   const [dollarPrice, setDollarPrice] = useState(0);
   const [isInputValidate, setInputValidate] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [isBorrowing, setIsBorrowing] = useState(false);
 
   const setMax = () => {
     setInputValue(available);
@@ -55,11 +57,13 @@ const ModalBorrow = ({
   };
 
   const handleBorrow = async () => {
+    setIsBorrowing(true);
     const isBorrowed = await borrowAsset(address, inputValue);
     // console.log(isBorrowed);
 
     toast.success(`Borrowed ${inputValue} ${name}`);
     if (isBorrowed) {
+      setIsBorrowing(false);
       onClose();
       await connectWallet();
     }
@@ -167,12 +171,16 @@ const ModalBorrow = ({
 
       <div className={!isInputValidate ? "hidden" : "block"}>
         <button
-          className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
+          className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2 flex justify-center items-center"
           onClick={() => {
             handleBorrow();
           }}
         >
-          Borrow {name}
+          {!isBorrowing && <span>Borrow {name}</span>}
+          {isBorrowing && (
+            <ImSpinner8 icon="spinner" className="spinner ml-2" />
+          )}
+          {isBorrowing && <span>Borrowing {name} ...</span>}
         </button>
       </div>
     </div>

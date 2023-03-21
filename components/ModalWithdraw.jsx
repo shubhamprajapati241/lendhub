@@ -4,6 +4,7 @@ import { MdLocalGasStation } from "react-icons/md";
 import { BiError } from "react-icons/bi";
 import { toast } from "react-toastify";
 import lendContext from "../context/lendContext";
+import { ImSpinner8 } from "react-icons/im";
 
 const ModalWithdraw = ({
   address,
@@ -19,6 +20,7 @@ const ModalWithdraw = ({
   const [dollarPrice, setdollarPrice] = useState(0);
   const [inputValue, setInputValue] = useState();
   const [isInputValidate, setInputValidate] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   const setMax = () => {
     setInputValue(maxSupply);
@@ -56,12 +58,17 @@ const ModalWithdraw = ({
   };
 
   const handleWithdraw = async () => {
-    const isWithdrawSuccessful = await WithdrawAsset(address, inputValue);
-    // console.log(isWithdrawSuccessful);
-    toast.success(`Withdraw Successful ${inputValue} ${name}`);
-    if (isWithdrawSuccessful) {
+    setIsWithdrawing(true);
+    let transaction = await WithdrawAsset(address, inputValue);
+
+    if (transaction.status == 200) {
+      toast.success(`Withdraw Successful ${inputValue} ${name}`);
+      setIsWithdrawing(false);
       onClose();
       await connectWallet();
+    } else {
+      toast.error(`Withdraw Failed...`);
+      setIsWithdrawing(false);
     }
   };
 
@@ -173,12 +180,16 @@ const ModalWithdraw = ({
 
       <div className={!isInputValidate ? "hidden" : "block"}>
         <button
-          className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
+          className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2 flex justify-center items-center"
           onClick={() => {
             handleWithdraw();
           }}
         >
-          Withdraw {name}
+          {!isWithdrawing && <span>Withdraw {name}</span>}
+          {isWithdrawing && (
+            <ImSpinner8 icon="spinner" className="spinner mr-2" />
+          )}
+          {isWithdrawing && <span>Withdrawing </span>}
         </button>
       </div>
     </div>

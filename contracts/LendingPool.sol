@@ -14,6 +14,7 @@ contract LendingPool is ReentrancyGuard {
     LendingConfig lendingConfig;
 
     enum TxMode { BORROW, WITHDRAW}
+    
     event TransferAsset(address lender, address _token, uint _amount);
 
     address deployer;
@@ -23,10 +24,9 @@ contract LendingPool is ReentrancyGuard {
     uint256 public constant DECIMALS = 18;
     uint256 public constant BORROW_THRESHOLD = 80;
     uint256 public constant LIQUIDATION_THRESHOLD = 120;
-    // uint32 public constant BORROW_DURATION_30 = 30 days;
-    // uint32 public constant BORROW_DURATION_60 = 60 days;
-    // uint32 public constant BORROW_DURATION_90 = 90 days;
-    uint256 SECONDS_IN_A_DAY=86400;
+    uint32 public constant BORROW_DURATION_30 = 30 days;
+    uint32 public constant BORROW_DURATION_60 = 60 days;
+    uint32 public constant BORROW_DURATION_90 = 90 days;
 
     mapping (address => uint) public reserves;
     address[] public reserveAssets; 
@@ -97,6 +97,7 @@ contract LendingPool is ReentrancyGuard {
         if(reserves[_token] == 0 ) {
             return 0;
         }
+        // TODO : verify from third party that this logic is right!s
         return ((block.timestamp - lendStartTimeStamp) * INTEREST_RATE * 1e18 )/ totalTokenSupply;
     }
 
@@ -202,8 +203,7 @@ contract LendingPool is ReentrancyGuard {
             (bool success, ) = address(this).call{value : msg.value}("");
             require(success, "Deposit failed");
         }else {
-            bool success = IERC20(_token).transferFrom(lender,address(this),_amount);
-            require(success, "Transfer from user wallet not succcessful");
+            IERC20(_token).transferFrom(lender,address(this),_amount);
         }
 
         reserves[_token] += _amount;
@@ -250,9 +250,6 @@ contract LendingPool is ReentrancyGuard {
         // uint amountAvailableToWithdraw = getLenderAssetQty(lender, _token) - getBorrowerAssetQty(lender, _token);
         uint maxWithdrawQty = getTokensPerUSDAmount(_token,getUserTotalAvailableBalanceInUSD(lender, TxMode.WITHDRAW)) * 1e18;
         require(maxWithdrawQty >= _amount,"Cannot withdraw more than balance");
-        
-        // Reserve must have enough withdrawl qty - this must always be true, so not sure why to code it
-        require (reserves[_token] >= _amount, "Not enough qty in reserve pool to withdraw");
 
         // Reserve must have enough withdrawl qty - this must always be true, so not sure why to code it
         require (reserves[_token] >= _amount, "Not enough qty in reserve pool to withdraw");
@@ -291,14 +288,15 @@ contract LendingPool is ReentrancyGuard {
         
         uint maxAmountToBorrowInUSD = getUserTotalAvailableBalanceInUSD(_borrower, TxMode.BORROW); 
         uint length = reserveAssets.length;
+        
         BorrowAsset[] memory borrowAsset = new BorrowAsset[](length);
-        uint borrowAssetsCount;
+        uint borrowAssetsCount = 0;
         for(uint i = 0; i < length; i++) { 
             address token = reserveAssets[i];
             if(lendingConfig.isBorrowingEnabled(token)) {
                 // uint borrowQty = getTokenQtyForUSDAmount(token, maxAmountToBorrowInUSD);
                 // borrow qty is either tokens per max borrowbale USD amount or the ones in reserves of that token
-                uint borrowQty = _min(getTokensPerUSDAmount(token,maxAmountToBorrowInUSD), reserves[token]/1e18);
+                uint borrowQty = _min(getTokensPerUSDAmount(token,maxAmountToBorrowInUSD), reserves[token]);
                 borrowAsset[borrowAssetsCount] = BorrowAsset(token, borrowQty, BORROW_RATE);
                 borrowAssetsCount++;
             }
@@ -368,9 +366,8 @@ contract LendingPool is ReentrancyGuard {
         require(isTokenBorrowed(borrower, _token), "Token was not borrowed, Can't Repay");
         require(_amount <= getBorrowerAssetQty(borrower, _token), "Repay Amount should less than borrowed amount");
 
-        // bool success = IERC20(_token).transfer(address(this), _amount);
-        bool success = IERC20(_token).transferFrom(borrower, address(this), _amount);
-        require(success, "Transfer from user wallet not succcessful");
+        bool success = IERC20(_token).transfer(borrower, _amount);
+        require(success, "Transfer to user's wallet not succcessful");
         // 2. Update Token in Reserve
         reserves[_token] += _amount;
 

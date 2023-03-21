@@ -7,7 +7,9 @@ module.exports = {
   networks: {
     hardhat: {
       chainId: 1337,
+      // allowUnlimitedContractSize: true,
     },
+
     goerli: {
       url: process.env.INFURA_GOERLI_API_URL,
       accounts: [process.env.MAIN_ACCOUNT],
@@ -23,6 +25,13 @@ module.exports = {
       url: process.env.INFURA_MUMBAI_API_URL,
       accounts: [process.env.MAIN_ACCOUNT],
       chainIds: 80001, // mumbai testnet
+    },
+  },
+
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 20,
     },
   },
   // gasReporter: {

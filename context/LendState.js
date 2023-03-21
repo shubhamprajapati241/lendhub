@@ -208,10 +208,10 @@ const LendState = (props) => {
         .approve(LendingPoolAddress, amount);
       await transaction.wait();
       console.log("Token Approved....");
-      return true;
+      return { status: 200, message: "Transaction Successful..." };
     } catch (error) {
       reportError(error);
-      return error;
+      return { status: 500, message: error.reason };
     }
   };
 
@@ -236,20 +236,17 @@ const LendState = (props) => {
           .connect(metamaskDetails.signer)
           .lend(token, amount);
       }
-
       await transaction.wait();
-      console.log("Token Lend....");
-      return true;
+      return { status: 200, message: "Transaction Successful.." };
     } catch (error) {
       reportError(error);
-      return error;
+      return { status: 500, message: error.reason };
     }
   };
 
   /*************************** Withdraw Functionality ***************************/
   const WithdrawAsset = async (tokenAddress, withdrawAmount) => {
     const amount = numberToEthers(withdrawAmount);
-
     console.log(
       "***Withdrawing token : " +
         tokenAddress +
@@ -263,10 +260,10 @@ const LendState = (props) => {
         .withdraw(tokenAddress, amount);
       await transaction.wait();
       console.log("Token Withdrawn....");
-      return true;
+      return { status: 200, message: "Transaction Successful.." };
     } catch (error) {
       reportError(error);
-      return error;
+      return { status: 500, message: error.reason };
     }
   };
 
@@ -572,7 +569,7 @@ const LendState = (props) => {
       return true;
     } catch (error) {
       reportError(error);
-      return error;
+      return false;
     }
   };
 
