@@ -17,7 +17,8 @@ It is deployed on the **Ethereum Sepolia Testnet.**
 - Etherjs
 
 ### Instructions Steps for the Sepolia Testnet
-1.  Add the Infura / Alchemy API key and your metmask accounts private key into .env file
+1. Create a new .env file into root directory
+2. Add the Infura / Alchemy API key and your metmask accounts private key into .env file
 
 ![env](https://user-images.githubusercontent.com/61042463/226642196-965329ef-6c17-43ab-9268-a243f9f04728.png)
 
