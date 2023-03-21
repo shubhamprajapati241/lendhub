@@ -62,7 +62,7 @@ async function main() {
     lendingConfig.address
   );
   await lendingHelper.deployed();
-  console.log('const lendingHelperAddress = "' + lendingHelper.address + '"');
+  console.log('const LendingHelperAddress = "' + lendingHelper.address + '"');
 
   /********************** Deploy LendingPoolV2 *************************/
   const LendingPool = await ethers.getContractFactory("LendingPool");

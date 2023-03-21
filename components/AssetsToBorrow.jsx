@@ -53,7 +53,7 @@ const AssetsToBorrow = () => {
           <FiAlertCircle className="text-2xl pr-2 text-[#0062D2]" />
           <div className="flex flex-col">
             <p className="text-[12px] tracking-[0.005rem] p-1">
-              To borrow you need to supply ETH asset to be used as collateral
+              You must supply ETH or Tokens as collateral to Borrow
             </p>
           </div>
         </div>
