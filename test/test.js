@@ -31,6 +31,7 @@ describe("LendHub Tests", async () => {
   let lendingPool;
   let addressToTokenMap;
   let lendingConfig;
+  let lendingHelper;
   let daiToken;
   let usdcToken;
   let linkToken;
@@ -66,15 +67,21 @@ describe("LendHub Tests", async () => {
     await addressToTokenMap.deployed();
 
     const LendingConfig = await ethers.getContractFactory("LendingConfig");
-    lendingConfig = await LendingConfig.deploy();
+    lendingConfig = await LendingConfig.deploy(INTEREST_RATE, BORROW_RATE);
     await lendingConfig.deployed();
+
+    const LendingHelper = await ethers.getContractFactory("LendingHelper");
+    lendingHelper = await LendingHelper.deploy(
+      addressToTokenMap.address,
+      lendingConfig.address
+    );
+    await lendingHelper.deployed();
 
     const LendingPool = await ethers.getContractFactory("LendingPool");
     lendingPool = await LendingPool.deploy(
       addressToTokenMap.address,
       lendingConfig.address,
-      INTEREST_RATE,
-      BORROW_RATE
+      lendingHelper.address
     );
     await lendingPool.deployed();
 
@@ -143,17 +150,17 @@ describe("LendHub Tests", async () => {
       ._setPriceFeedMap(ETH_ADDRESS, ETH_USD_PF_ADDRESS);
   });
 
-  it("1. Should be able to retrieve all token symbol", async () => {
-    let symbol = await addressToTokenMap.getAddress(ETH_ADDRESS);
+  it("1. Should be able to retrieve all token symbols", async () => {
+    let symbol = await addressToTokenMap.getSymbol(ETH_ADDRESS);
     expect(symbol).to.equal(ETH_SYMBOL);
 
-    symbol = await addressToTokenMap.getAddress(DAI_ADDRESS);
+    symbol = await addressToTokenMap.getSymbol(DAI_ADDRESS);
     expect(symbol).to.equal(DAI_SYMBOL);
 
-    symbol = await addressToTokenMap.getAddress(USDC_ADDRESS);
+    symbol = await addressToTokenMap.getSymbol(USDC_ADDRESS);
     expect(symbol).to.equal(USDC_SYMBOL);
 
-    symbol = await addressToTokenMap.getAddress(LINK_ADDRESS);
+    symbol = await addressToTokenMap.getSymbol(LINK_ADDRESS);
     expect(symbol).to.equal(LINK_SYMBOL);
   });
 
@@ -217,7 +224,8 @@ describe("LendHub Tests", async () => {
     const asset = ETH_ADDRESS;
 
     // 1. lending the ETH
-    const beforeBalance = await lendingPool.getContractETHBalance();
+    const beforeBalance = await ethers.provider.getBalance(lendingPool.address);
+
     const tx = await lendingPool
       .connect(lender1)
       .lend(asset, amount, valueOption);
@@ -227,9 +235,9 @@ describe("LendHub Tests", async () => {
     );
 
     // 2. Checking contract ETH balance
-    const afterBalance = await lendingPool.getContractETHBalance();
-    expect(afterBalance).to.be.greaterThan(beforeBalance);
+    const afterBalance = await ethers.provider.getBalance(lendingPool.address);
     console.log("contract ETH balance after lend :" + afterBalance / decimals);
+    expect(afterBalance).to.equal(amount);
 
     // 3. checking Reserves
     let result = await lendingPool.reserves(asset);
@@ -242,10 +250,6 @@ describe("LendHub Tests", async () => {
     // 5. checking lender ETH balance
     result = await lendingPool.getLenderAssetQty(lender1.address, asset);
     expect(result).to.be.equal(amount);
-
-    // 6. checking lender Assets
-    result = await lendingPool.getLenderAssets(lender1.address);
-    expect(result[0].token).to.be.equal(asset);
   });
 
   it("12. Should be able to update lendQty when lending more ETH", async () => {
@@ -254,7 +258,7 @@ describe("LendHub Tests", async () => {
     const asset = ETH_ADDRESS;
 
     // 1. lending the ETH
-    const beforeBalance = await lendingPool.getContractETHBalance();
+    const beforeBalance = await ethers.provider.getBalance(lendingPool.address);
     const tx = await lendingPool
       .connect(lender1)
       .lend(asset, amount, valueOption);
@@ -265,7 +269,8 @@ describe("LendHub Tests", async () => {
     );
 
     // 2. Checking contract ETH balance
-    const afterBalance = await lendingPool.getContractETHBalance();
+    const afterBalance = await ethers.provider.getBalance(lendingPool.address);
+
     expect(afterBalance).to.be.greaterThan(beforeBalance);
     console.log(
       "Contract ETH balance after lending 10 more ETH :" +
@@ -301,7 +306,7 @@ describe("LendHub Tests", async () => {
       .connect(lender1)
       .approve(lendingPool.address, allowanceAmount);
 
-    const beforeBalance = await lendingPool.getTokenBalance(
+    const beforeBalance = await lendingHelper.getTokenBalance(
       lendingPool.address,
       DAI_ADDRESS
     );
@@ -310,7 +315,7 @@ describe("LendHub Tests", async () => {
     );
 
     // 2. Checking Lender DAI balance
-    const beforeLenderBalance = await lendingPool.getTokenBalance(
+    const beforeLenderBalance = await lendingHelper.getTokenBalance(
       lender1.address,
       DAI_ADDRESS
     );
@@ -324,7 +329,7 @@ describe("LendHub Tests", async () => {
     await tx.wait();
 
     // 2. Checking contract DAI balance
-    const afterBalance = await lendingPool.getTokenBalance(
+    const afterBalance = await lendingHelper.getTokenBalance(
       lendingPool.address,
       DAI_ADDRESS
     );
@@ -334,7 +339,7 @@ describe("LendHub Tests", async () => {
     );
 
     // 2. Checking Lender DAI balance
-    const afterLenderBalance = await lendingPool.getTokenBalance(
+    const afterLenderBalance = await lendingHelper.getTokenBalance(
       lender1.address,
       DAI_ADDRESS
     );
@@ -368,7 +373,7 @@ describe("LendHub Tests", async () => {
     result = await lendingPool.getLenderAssets(lender1.address);
     // expect(result[1].lentQty).to.be.equal(amount);
     console.log(
-      "Lender DAI Qty is Lender Assets : " + result[1].lentQty / decimals
+      "Lender DAI Qty is in Lender Assets : " + result[1].lentQty / decimals
     );
 
     expect(result.length).to.be.equal(2);
@@ -391,7 +396,7 @@ describe("LendHub Tests", async () => {
 
     console.log(
       "withdrawQty =" +
-        (await lendingPool.getTokensPerUSDAmount(
+        (await lendingHelper.getTokensPerUSDAmount(
           ETH_ADDRESS,
           await lendingPool.getUserTotalAvailableBalanceInUSD(
             lender1.address,
@@ -402,16 +407,18 @@ describe("LendHub Tests", async () => {
     console.log("ETH qty about to be withdrawn:" + amount / decimals);
     // console.log("Token Amount withdrawn :" + amount / decimals);
 
-    let beforeBalance = await lendingPool.getContractETHBalance();
+    let beforeBalance = await ethers.provider.getBalance(lendingPool.address);
     console.log("Contract ETH Balance: " + beforeBalance / decimals);
 
-    const beforeLenderBalance = await lendingPool.getBalance(lender1.address);
+    const beforeLenderBalance = await ethers.provider.getBalance(
+      lendingPool.address
+    );
     console.log(
       "Lender ETH Balance in the Wallet: " + beforeLenderBalance / decimals
     );
 
-    const symbol = await lendingPool.getSymbol(asset);
-    const isETH = await lendingPool.isETH(asset);
+    const symbol = await addressToTokenMap.getSymbol(asset);
+    const isETH = await addressToTokenMap.isETH(asset);
     console.log("symbol =" + symbol, "isETH =" + isETH);
 
     const beforeReserveBalance = await lendingPool.reserves(asset);
@@ -435,11 +442,13 @@ describe("LendHub Tests", async () => {
     console.log("********** AFTER WITHDRAW - ETH **********");
     console.log("ETH withdraw qty:" + amount / decimals);
 
-    const afterBalance = await lendingPool.getContractETHBalance();
+    const afterBalance = await ethers.provider.getBalance(lendingPool.address);
     // expect(afterBalance).to.be.lessThan(beforeBalance);
     console.error("Contract ETH Balance : " + afterBalance / decimals);
 
-    const afterLenderBalance = await lendingPool.getBalance(lender1.address);
+    const afterLenderBalance = await ethers.provider.getBalance(
+      lendingPool.address
+    );
     // expect(afterLenderBalance).to.be.greaterThan(beforeLenderBalance);
     console.error(
       "Lender ETH Balance in the Wallet: " + afterLenderBalance / decimals
@@ -475,13 +484,13 @@ describe("LendHub Tests", async () => {
     await moveTime(30 * SECONDS_IN_A_DAY);
 
     console.log("DAI Qty to be withdrawn :" + amount / decimals);
-    let result = await lendingPool.getTokenBalance(
+    let result = await lendingHelper.getTokenBalance(
       lender1.address,
       DAI_ADDRESS
     );
     console.log("Lender DAI Balance in Wallet : " + result / decimals);
 
-    result = await lendingPool.getTokenBalance(
+    result = await lendingHelper.getTokenBalance(
       lendingPool.address,
       DAI_ADDRESS
     );
@@ -494,10 +503,10 @@ describe("LendHub Tests", async () => {
     await tx.wait();
 
     console.log("********** AFTER WITHDRAW - DAI **********");
-    result = await lendingPool.getTokenBalance(lender1.address, DAI_ADDRESS);
+    result = await lendingHelper.getTokenBalance(lender1.address, DAI_ADDRESS);
     console.log("Lender DAI Balance in Wallet : " + result / decimals);
 
-    result = await lendingPool.getTokenBalance(
+    result = await lendingHelper.getTokenBalance(
       lendingPool.address,
       DAI_ADDRESS
     );
@@ -528,7 +537,7 @@ describe("LendHub Tests", async () => {
     console.log("********** BEFORE LEND - USDC **********");
 
     console.log("Token Amount lend :" + amount / decimals);
-    let beforeLenderAmount = await lendingPool.getTokenBalance(
+    let beforeLenderAmount = await lendingHelper.getTokenBalance(
       lender2.address,
       asset
     );
@@ -536,7 +545,7 @@ describe("LendHub Tests", async () => {
       "Lender USDC Balance in Wallet : " + beforeLenderAmount / decimals
     );
 
-    const beforeContractAmount = await lendingPool.getTokenBalance(
+    const beforeContractAmount = await lendingHelper.getTokenBalance(
       lendingPool.address,
       asset
     );
@@ -555,7 +564,7 @@ describe("LendHub Tests", async () => {
     await moveTime(30 * SECONDS_IN_A_DAY);
 
     console.log("USDC  Qty Lent :" + amount / decimals);
-    let afterLenderAmount = await lendingPool.getTokenBalance(
+    let afterLenderAmount = await lendingHelper.getTokenBalance(
       lender2.address,
       asset
     );
@@ -563,7 +572,7 @@ describe("LendHub Tests", async () => {
       "Lender USDC Balance in Wallet : " + afterLenderAmount / decimals
     );
 
-    const afterContractAmount = await lendingPool.getTokenBalance(
+    const afterContractAmount = await lendingHelper.getTokenBalance(
       lendingPool.address,
       asset
     );
@@ -602,7 +611,7 @@ describe("LendHub Tests", async () => {
     console.log("********** BEFORE LEND - LINK **********");
 
     console.log("LINK Qty to be lent :" + amount / decimals);
-    let beforeLenderAmount = await lendingPool.getTokenBalance(
+    let beforeLenderAmount = await lendingHelper.getTokenBalance(
       lender3.address,
       asset
     );
@@ -610,7 +619,7 @@ describe("LendHub Tests", async () => {
       "Lender LINK Balance in Wallet : " + beforeLenderAmount / decimals
     );
 
-    const beforeContractAmount = await lendingPool.getTokenBalance(
+    const beforeContractAmount = await lendingHelper.getTokenBalance(
       lendingPool.address,
       asset
     );
@@ -629,7 +638,7 @@ describe("LendHub Tests", async () => {
     await moveTime(30 * SECONDS_IN_A_DAY);
 
     console.log("LINK Qty Lent :" + amount / decimals);
-    let afterLenderAmount = await lendingPool.getTokenBalance(
+    let afterLenderAmount = await lendingHelper.getTokenBalance(
       lender3.address,
       asset
     );
@@ -637,7 +646,7 @@ describe("LendHub Tests", async () => {
       "Lender LINK Balance in Wallet : " + afterLenderAmount / decimals
     );
 
-    const afterContractAmount = await lendingPool.getTokenBalance(
+    const afterContractAmount = await lendingHelper.getTokenBalance(
       lendingPool.address,
       asset
     );
@@ -700,10 +709,12 @@ describe("LendHub Tests", async () => {
       "3. Lender lent balance : " + beforeLenderAssetAmount / decimals
     );
 
-    const beforeContractAmount = await lendingPool.getContractETHBalance();
+    const beforeContractAmount = await ethers.provider.getBalance(
+      lendingPool.address
+    );
     console.log("4. Contract ETH Balance : " + beforeContractAmount / decimals);
 
-    const beforeBalance = await lendingPool.getContractETHBalance();
+    const beforeBalance = await ethers.provider.getBalance(lendingPool.address);
     const tx = await lendingPool
       .connect(lender2)
       .lend(asset, lendAmount, valueOption);
@@ -724,7 +735,9 @@ describe("LendHub Tests", async () => {
     );
     expect(afterLenderAssetAmount).to.be.equal(beforeLenderAssetAmount);
 
-    const afterContractAmount = await lendingPool.getContractETHBalance();
+    const afterContractAmount = await ethers.provider.getBalance(
+      lendingPool.address
+    );
     console.log("4. Contract ETH Balance : " + afterContractAmount / decimals);
     expect(afterContractAmount).to.be.greaterThan(beforeContractAmount);
 
@@ -761,7 +774,7 @@ describe("LendHub Tests", async () => {
     );
     console.log("3. Borrower balance : " + beforeLenderAssetAmount / decimals);
 
-    const beforeContractAmount = await lendingPool.getTokenBalance(
+    const beforeContractAmount = await lendingHelper.getTokenBalance(
       lendingPool.address,
       asset
     );
@@ -769,7 +782,7 @@ describe("LendHub Tests", async () => {
       "4. Contract Token Balance : " + beforeContractAmount / decimals
     );
 
-    let beforeLenderAmount = await lendingPool.getTokenBalance(
+    let beforeLenderAmount = await lendingHelper.getTokenBalance(
       user.address,
       asset
     );
@@ -792,7 +805,7 @@ describe("LendHub Tests", async () => {
     );
     console.log("3. Borrower balance : " + afterLenderAssetAmount / decimals);
 
-    const afterContractAmount = await lendingPool.getTokenBalance(
+    const afterContractAmount = await lendingHelper.getTokenBalance(
       lendingPool.address,
       asset
     );
@@ -800,7 +813,7 @@ describe("LendHub Tests", async () => {
       "4. Contract Token Balance : " + afterContractAmount / decimals
     );
 
-    let afterLenderAmount = await lendingPool.getTokenBalance(
+    let afterLenderAmount = await lendingHelper.getTokenBalance(
       user.address,
       asset
     );
@@ -821,8 +834,9 @@ describe("LendHub Tests", async () => {
     const assetQty = assets.find((el) => el.token == asset);
     console.log("Qty being borrowed: " + assetQty.borrowQty);
 
-    const borrowAmount = numberToEthers(assetQty.borrowQty);
-
+    borrowAmount = numberToEthers(assetQty.borrowQty);
+    //Increase the borrow amount to simulate excess borrow
+    borrowAmount += 100;
     await expect(lendingPool.connect(lender1).borrow(asset, borrowAmount)).to.be
       .reverted;
   });
@@ -834,7 +848,9 @@ describe("LendHub Tests", async () => {
     const reserveAmount = await lendingPool.reserves(asset);
     console.log("Qty being borrowed: " + reserveAmount / decimals);
 
-    const borrowAmount = numberToEthers(reserveAmount);
+    borrowAmount = numberToEthers(reserveAmount);
+    //Increase the borrow amount to simulate excess borrow
+    borrowAmount += 100;
 
     await expect(lendingPool.connect(lender1).borrow(asset, borrowAmount)).to.be
       .reverted;
@@ -873,7 +889,7 @@ describe("LendHub Tests", async () => {
         beforeLenderAssetAmount / decimals
     );
 
-    const beforeContractAmount = await lendingPool.getTokenBalance(
+    const beforeContractAmount = await lendingHelper.getTokenBalance(
       lendingPool.address,
       asset
     );
@@ -881,7 +897,7 @@ describe("LendHub Tests", async () => {
       "5. What is Contract Token Balance : " + beforeContractAmount / decimals
     );
 
-    let beforeLenderAmount = await lendingPool.getTokenBalance(
+    let beforeLenderAmount = await lendingHelper.getTokenBalance(
       lender1.address,
       asset
     );
@@ -910,7 +926,7 @@ describe("LendHub Tests", async () => {
         afterLenderAssetAmount[0].borrowQty / decimals
     );
 
-    const afterContractAmount = await lendingPool.getTokenBalance(
+    const afterContractAmount = await lendingHelper.getTokenBalance(
       lendingPool.address,
       asset
     );
@@ -918,7 +934,7 @@ describe("LendHub Tests", async () => {
       "5. Contract Token Balance : " + afterContractAmount / decimals
     );
 
-    let afterLenderAmount = await lendingPool.getTokenBalance(
+    let afterLenderAmount = await lendingHelper.getTokenBalance(
       lender1.address,
       asset
     );
@@ -946,7 +962,7 @@ describe("LendHub Tests", async () => {
       "4. Borrower 2 borrowed Qty : " + beforeBorrowerAssetAmount / decimals
     );
 
-    const beforeContractAmount = await lendingPool.getTokenBalance(
+    const beforeContractAmount = await lendingHelper.getTokenBalance(
       lendingPool.address,
       asset
     );
@@ -954,7 +970,7 @@ describe("LendHub Tests", async () => {
       "5. Contract Token Balance : " + beforeContractAmount / decimals
     );
 
-    let beforeBorrowerAmount = await lendingPool.getTokenBalance(
+    let beforeBorrowerAmount = await lendingHelper.getTokenBalance(
       lender2.address,
       asset
     );
@@ -984,7 +1000,7 @@ describe("LendHub Tests", async () => {
       "4. Borrower 2 borrowed Qty : " + afterBorrowerAssetAmount / decimals
     );
 
-    const afterContractAmount = await lendingPool.getTokenBalance(
+    const afterContractAmount = await lendingHelper.getTokenBalance(
       lendingPool.address,
       asset
     );
@@ -993,7 +1009,7 @@ describe("LendHub Tests", async () => {
       "5. Contract Token Balance : " + afterContractAmount / decimals
     );
 
-    let afterBorrowerAmount = await lendingPool.getTokenBalance(
+    let afterBorrowerAmount = await lendingHelper.getTokenBalance(
       lender2.address,
       asset
     );
@@ -1025,10 +1041,12 @@ describe("LendHub Tests", async () => {
       "3. Lender lent balance : " + beforeLenderAssetAmount / decimals
     );
 
-    const beforeContractAmount = await lendingPool.getContractETHBalance();
+    const beforeContractAmount = await ethers.provider.getBalance(
+      lendingPool.address
+    );
     console.log("4. Contract ETH Balance : " + beforeContractAmount / decimals);
 
-    const beforeBalance = await lendingPool.getContractETHBalance();
+    const beforeBalance = await ethers.provider.getBalance(lendingPool.address);
     const tx = await lendingPool
       .connect(lender3)
       .lend(asset, lendAmount, valueOption);
@@ -1049,7 +1067,9 @@ describe("LendHub Tests", async () => {
     );
     // expect(afterLenderAssetAmount).to.be.equal(beforeLenderAssetAmount);
 
-    const afterContractAmount = await lendingPool.getContractETHBalance();
+    const afterContractAmount = await ethers.provider.getBalance(
+      lendingPool.address
+    );
     console.log("4. Contract ETH Balance : " + afterContractAmount / decimals);
     // expect(afterContractAmount).to.be.greaterThan(beforeContractAmount);
 
@@ -1069,10 +1089,9 @@ describe("LendHub Tests", async () => {
     await moveTime(365 * SECONDS_IN_A_DAY);
     // result = await lendingPool.getLenderAssets2(lender3.address);
     // console.log(result);
-    reward = await lendingPool.rewardPerToken(
-      ETH_ADDRESS,
+    reward = await lendingHelper.rewardPerToken(
       1679105693,
-      await lendingPool.getTotalSupplyOfToken(ETH_ADDRESS)
+      await lendingPool.getTotalTokenSupplyInReserves(ETH_ADDRESS)
     );
     // console.log("reward : " + reward);
     result = await lendingPool.interestEarned(

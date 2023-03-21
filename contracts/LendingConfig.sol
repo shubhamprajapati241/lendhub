@@ -6,10 +6,20 @@ pragma solidity ^0.8.6;
 contract LendingConfig {
 
     // LendingPoolAddressProvider addressesProvider;
-
     address owner;
     enum Freeze { FREEZE, UNFREEZE}
     enum AssetStatus { ACTIVE, INACTIVE }
+
+    uint256 public INTEREST_RATE;
+    uint256 public BORROW_RATE;
+    uint256 public constant REWARD_RATE_PER_SECS=12;
+    uint256 public constant DECIMALS = 18;
+    uint256 public constant BORROW_THRESHOLD = 80;
+    uint256 public constant LIQUIDATION_THRESHOLD = 120;
+    // uint32 public constant BORROW_DURATION_30 = 30 days;
+    // uint32 public constant BORROW_DURATION_60 = 60 days;
+    // uint32 public constant BORROW_DURATION_90 = 90 days;
+    uint256 public constant SECONDS_IN_A_DAY=86400;
 
     event AddAsset(address token, string symbol, uint borrowThreshold, uint liquidationThreshold);
     event UpdateAssetStatus(address token, AssetStatus isActive);
@@ -31,13 +41,23 @@ contract LendingConfig {
     //     _;
     // }
 
-    constructor(){
+    constructor(uint256 _interestRate, uint256 _borrowRate){
         owner = msg.sender;
+        INTEREST_RATE  = _interestRate;
+        BORROW_RATE = _borrowRate;
     }
     // constructor(address _lendingPoolAddressProvider){
     //     owner = msg.sender;
     //     addressesProvider = LendingPoolAddressProvider(_lendingPoolAddressProvider);
     // }
+
+    function updateInterestRate(uint256 _interestRate) public{
+        INTEREST_RATE = _interestRate;
+    }
+
+    function updateBorrowRate(uint256 _borrowRate) public{
+        BORROW_RATE = _borrowRate;
+    }
 
     struct Asset {
         address token;

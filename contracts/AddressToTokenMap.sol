@@ -13,7 +13,7 @@ contract AddressToTokenMap {
     // tokenAddress => tokenToUSD pair PriceFeed Address
     mapping(address => address) private priceFeedMap;
 
-    function getAddress(address _key) public view returns (string memory) {
+    function getSymbol(address _key) public view returns (string memory) {
         return addresses[_key];
     }
 
@@ -30,4 +30,12 @@ contract AddressToTokenMap {
         require(msg.sender == deployer, "Not owner");
         priceFeedMap[_tokenAddress] = _pairAddress;
    }
+
+   function isETH(address _token) public view returns(bool) {
+        if (keccak256(abi.encodePacked(getSymbol(_token))) == keccak256(abi.encodePacked("ETH"))) {
+            return true;
+        }
+        return false;
+    }
+
 }
