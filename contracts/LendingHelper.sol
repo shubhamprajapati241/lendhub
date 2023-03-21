@@ -38,28 +38,28 @@ contract LendingHelper {
 
     function getCurrentTokenPrice(address _tokenAddress) public view returns(uint)  {
 
-        // This does not work for Hardhat, chainlink Price Feed is only on Goerli Network
-        // AggregatorV3Interface priceFeed;
-        // address priceFeedAddress = getPriceFeedMap(_tokenAddress);
-        // priceFeed = AggregatorV3Interface(priceFeedAddress);
-        // (,int price,,,) = priceFeed.latestRoundData();
-        // uint256 decimal = priceFeed.decimals();
-        // uint currentPrice = uint(price) / (10 ** decimal);
-        // return currentPrice;
+        // This does not work for Hardhat, chainlink Price Feed is only on Testnets and Mainnets
+        AggregatorV3Interface priceFeed;
+        address priceFeedAddress = addressToTokenMap.getPriceFeedMap(_tokenAddress);
+        priceFeed = AggregatorV3Interface(priceFeedAddress);
+        (,int price,,,) = priceFeed.latestRoundData();
+        uint256 decimal = priceFeed.decimals();
+        uint currentPrice = uint(price) / (10 ** decimal);
+        return currentPrice;
 
-        if(addressToTokenMap.isETH(_tokenAddress)) {
-            return 1725;
-        }
-        else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('DAI'))) {
-            return 1;
-        }
-        else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('USDC'))) {
-            return  1;
-        }
-        else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('LINK'))) {
-            return 6;
-        }
-        return 1;
+        // if(addressToTokenMap.isETH(_tokenAddress)) {
+        //     return 1725;
+        // }
+        // else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('DAI'))) {
+        //     return 1;
+        // }
+        // else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('USDC'))) {
+        //     return  1;
+        // }
+        // else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('LINK'))) {
+        //     return 6;
+        // }
+        // return 1;
     }
 
     function getAmountInUSD(address _token, uint256 _amount) public view returns(uint) {

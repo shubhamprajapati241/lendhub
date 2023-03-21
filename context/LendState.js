@@ -4,13 +4,14 @@ import { ethers } from "ethers";
 const tokensList = require("../token-list-goerli");
 
 // TODO : uncomment for sepolia
-// const TokenABI = require("../abis/DAIToken.json");
-// const LendingPoolABI = require("../abis/LendingPool.json");
+const TokenABI = require("../abis/DAIToken.json");
+const LendingPoolABI = require("../abis/LendingPool.json");
+const LendingHelperABI = require("../abis/LendingHelper.json");
 
 // TODO : uncomment for localhost
-const TokenABI = require("../artifacts/contracts/DAIToken.sol/DAIToken.json");
-const LendingPoolABI = require("../artifacts/contracts/LendingPool.sol/LendingPool.json");
-const LendingHelperABI = require("../artifacts/contracts/LendingHelper.sol/LendingHelper.json");
+// const TokenABI = require("../artifacts/contracts/DAIToken.sol/DAIToken.json");
+// const LendingPoolABI = require("../artifacts/contracts/LendingPool.sol/LendingPool.json");
+// const LendingHelperABI = require("../artifacts/contracts/LendingHelper.sol/LendingHelper.json");
 
 // Importing Bank contract details
 import {
@@ -277,23 +278,25 @@ const LendState = (props) => {
     const assetsList = [];
     for (let i = 0; i < assets.length; i++) {
       const token = assets[i].token;
-      const lendQty = assets[i].lentQty;
+      let lendQty = assets[i].lentQty;
+
       const amountInUSD = await getAmountInUSD(token, lendQty);
-
+      lendQty = Number(assets[i].lentQty) / 1e18;
       const maxSupplyAmount = await getUserTotalAvailableBalance();
-
-      console.log("maxSupplyAmount" + maxSupplyAmount);
 
       const maxQty = await getTokensPerUSDAmount(token, maxSupplyAmount);
 
+      const qty = lendQty <= maxQty ? lendQty : maxQty;
+
+      console.log("lendQty" + lendQty);
       console.log("maxQty" + maxQty);
 
       assetsList.push({
         token: assets[i].token,
-        balance: Number(assets[i].lentQty) / 1e18,
+        balance: lendQty,
         apy: Number(assets[i].lentApy),
         balanceInUSD: amountInUSD,
-        maxSupply: maxQty,
+        maxSupply: qty,
       });
     }
     return assetsList;

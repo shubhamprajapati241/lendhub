@@ -17,21 +17,21 @@ const ModalWithdraw = ({
 }) => {
   const { getAmountInUSD, connectWallet, numberToEthers, WithdrawAsset } =
     useContext(lendContext);
-  const [dollarPrice, setdollarPrice] = useState(0);
+  const [dollarPrice, setUSDPrice] = useState(0);
   const [inputValue, setInputValue] = useState();
   const [isInputValidate, setInputValidate] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   const setMax = () => {
     setInputValue(maxSupply);
-    getbalanceInUSD(maxSupply);
+    getBalanceInUSD(maxSupply);
     setInputValidate(true);
   };
 
-  const getbalanceInUSD = async (amount) => {
+  const getBalanceInUSD = async (amount) => {
     const amount2 = numberToEthers(amount);
     const amountInUSD = await getAmountInUSD(address, amount2);
-    setdollarPrice(amountInUSD);
+    setUSDPrice(amountInUSD);
   };
 
   const validateInput = (input) => {
@@ -43,16 +43,16 @@ const ModalWithdraw = ({
       } else {
         if (Number(input) > Number(maxSupply)) {
           setInputValue(maxSupply);
-          getbalanceInUSD(maxSupply);
+          getBalanceInUSD(maxSupply);
         } else {
           setInputValue(input);
-          getbalanceInUSD(input);
+          getBalanceInUSD(input);
         }
         setInputValidate(true);
       }
     } else {
       setInputValue("");
-      setdollarPrice(0);
+      setUSDPrice(0);
       setInputValidate(false);
     }
   };
@@ -67,7 +67,10 @@ const ModalWithdraw = ({
       onClose();
       await connectWallet();
     } else {
-      toast.error(`Withdraw Failed...`);
+      const pattern = /'([^']*)'/;
+      const error = transaction.message.match(pattern);
+      toast.error(`${error[1]}`);
+      console.log("ERROR: " + transaction.message)
       setIsWithdrawing(false);
     }
   };

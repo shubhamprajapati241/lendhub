@@ -200,7 +200,7 @@ contract LendingPool is ReentrancyGuard {
         uint maxWithdrawQty = lendingHelper.getTokensPerUSDAmount(_token,getUserTotalAvailableBalanceInUSD(lender, TxMode.WITHDRAW)) * 1e18;
         require(maxWithdrawQty >= _amount,"Cannot withdraw more than balance");
         // Reserve must have enough withdrawl qty - this must always be true, so not sure why to code it
-        require (reserves[_token] >= _amount, "Not enough qty in reserve pool to withdraw");
+        require (reserves[_token] >= _amount, "Not enough qty to withdraw");
         reserves[_token] -= _amount;
        
         uint laLen = lenderAssets[lender].length;
