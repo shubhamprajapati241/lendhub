@@ -58,14 +58,15 @@ const ModalBorrow = ({
 
   const handleBorrow = async () => {
     setIsBorrowing(true);
-    const isBorrowed = await borrowAsset(address, inputValue);
-    // console.log(isBorrowed);
-
-    toast.success(`Borrowed ${inputValue} ${name}`);
-    if (isBorrowed) {
+    const transaction = await borrowAsset(address, inputValue);
+    if (transaction.status == 200) {
+      toast.success(`Borrowed ${inputValue} ${name}`);
       setIsBorrowing(false);
       onClose();
       await connectWallet();
+    } else {
+      toast.error(`Borrow Failed...`);
+      setIsBorrowing(false);
     }
   };
 
@@ -178,7 +179,7 @@ const ModalBorrow = ({
         >
           {!isBorrowing && <span>Borrow {name}</span>}
           {isBorrowing && (
-            <ImSpinner8 icon="spinner" className="spinner ml-2" />
+            <ImSpinner8 icon="spinner" className="spinner mr-2" />
           )}
           {isBorrowing && <span>Borrowing {name} ...</span>}
         </button>

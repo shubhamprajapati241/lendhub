@@ -62,7 +62,7 @@ const ModalWithdraw = ({
     let transaction = await WithdrawAsset(address, inputValue);
 
     if (transaction.status == 200) {
-      toast.success(`Withdraw Successful ${inputValue} ${name}`);
+      toast.success(`Withdrawn ${inputValue} ${name}`);
       setIsWithdrawing(false);
       onClose();
       await connectWallet();

@@ -10,9 +10,14 @@ const tokensList = require("../token-list-goerli");
 // TODO : uncomment for localhost
 const TokenABI = require("../artifacts/contracts/DAIToken.sol/DAIToken.json");
 const LendingPoolABI = require("../artifacts/contracts/LendingPool.sol/LendingPool.json");
+const LendingHelperABI = require("../artifacts/contracts/LendingHelper.sol/LendingHelper.json");
 
 // Importing Bank contract details
-import { ETHAddress, LendingPoolAddress } from "../addresses";
+import {
+  ETHAddress,
+  LendingPoolAddress,
+  LendingHelperAddress,
+} from "../addresses";
 
 const numberToEthers = (number) => {
   return ethers.utils.parseEther(number.toString());
@@ -226,6 +231,7 @@ const LendState = (props) => {
 
     try {
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
+      console.log(contract);
       let transaction;
       if (token == ETHAddress) {
         transaction = await contract
@@ -342,8 +348,8 @@ const LendState = (props) => {
 
     try {
       const contract = new ethers.Contract(
-        LendingPoolAddress,
-        LendingPoolABI.abi,
+        LendingHelperAddress,
+        LendingHelperABI.abi,
         metamaskDetails.provider
       );
       const amountInUSD =
@@ -381,8 +387,8 @@ const LendState = (props) => {
   const getTokensPerUSDAmount = async (token, amount) => {
     try {
       const contract = new ethers.Contract(
-        LendingPoolAddress,
-        LendingPoolABI.abi,
+        LendingHelperAddress,
+        LendingHelperABI.abi,
         metamaskDetails.provider
       );
       const maxQty = Number(
@@ -499,10 +505,10 @@ const LendState = (props) => {
       await transaction.wait();
 
       console.log("Token Borrowed...");
-      return true;
+      return { status: 200, message: "Transaction Successful.." };
     } catch (error) {
       reportError(error);
-      return error;
+      return { status: 500, message: error.reason };
     }
   };
 
@@ -566,10 +572,10 @@ const LendState = (props) => {
         .repay(tokenAddress, amount);
       await transaction.wait();
       console.log("Token Repaid....");
-      return true;
+      return { status: 200, message: "Transaction Successful.." };
     } catch (error) {
       reportError(error);
-      return false;
+      return { status: 500, message: error.reason };
     }
   };
 

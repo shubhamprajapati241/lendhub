@@ -16,13 +16,8 @@ const numberToEthers = (number) => {
 
 async function main() {
   let LendingPoolAddress;
-  // const MATIC_ADDRESS = "0x0000000000000000000000000000000000001010";
-
-  /********************** Deploy AddressStorage *************************/
-  // const AddressStorage = await ethers.getContractFactory("AddressStorage");
-  // const addressStorage = await AddressStorage.deploy();
-  // await addressStorage.deployed();
-  // console.log("Address of AddressStorage : ", addressStorage.address);
+  const INTEREST_RATE = 3;
+  const BORROW_RATE = 4;
 
   /********************** Deploy DAIToken *************************/
   const DAIToken = await ethers.getContractFactory("DAIToken");
@@ -57,20 +52,26 @@ async function main() {
 
   /********************** Deploy LendingConfig *************************/
   const LendingConfig = await ethers.getContractFactory("LendingConfig");
-  const lendingConfig = await LendingConfig.deploy();
+  const lendingConfig = await LendingConfig.deploy(INTEREST_RATE, BORROW_RATE);
   await lendingConfig.deployed();
   console.log('const LendingConfigAddress = "' + lendingConfig.address + '"');
+
+  const LendingHelper = await ethers.getContractFactory("LendingHelper");
+  const lendingHelper = await LendingHelper.deploy(
+    addressToTokenMap.address,
+    lendingConfig.address
+  );
+  await lendingHelper.deployed();
+  console.log('const lendingHelperAddress = "' + lendingHelper.address + '"');
 
   /********************** Deploy LendingPoolV2 *************************/
   const LendingPool = await ethers.getContractFactory("LendingPool");
   const lendingPool = await LendingPool.deploy(
     addressToTokenMap.address,
     lendingConfig.address,
-    3,
-    4
+    lendingHelper.address
   );
   await lendingPool.deployed();
-
   LendingPoolAddress = lendingPool.address;
   console.log('const LendingPoolAddress = "' + lendingPool.address + '"');
 

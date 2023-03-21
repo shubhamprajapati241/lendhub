@@ -16,6 +16,7 @@
     "react-icons": "^4.7.1",
     "react-switch": "^7.0.0",
     "react-toastify": "^9.1.1",
+    "truffle-contract-size": "^2.0.1",
     "web3modal": "^1.9.12"
   },
   "devDependencies": {

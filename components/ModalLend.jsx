@@ -2,7 +2,6 @@ import Image from "next/image";
 import React, { useState, useContext } from "react";
 import { MdLocalGasStation } from "react-icons/md";
 import { FiAlertCircle } from "react-icons/fi";
-import { BiError } from "react-icons/bi";
 import { ImSpinner8 } from "react-icons/im";
 import lendContext from "../context/lendContext";
 import { toast } from "react-toastify";

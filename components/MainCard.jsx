@@ -8,16 +8,15 @@ import { BsBarChart } from "react-icons/bs";
 const MainCard = () => {
   return (
     <div className="px-8 md:px-20 py-12">
-      <div className="flex items-center pb-4">
+      <div className="flex items-center pb-4 justify-center">
         <Image
           src={ether}
           alt="Ether icon"
           className="w-8 h-8 md:w-10 md:h-10"
         />
-        <h1 className="pl-2 font-bold text-2xl md:text-3xl">Ethereum Market</h1>
+        <h1 className="pl-2 font-bold text-2xl md:text-5xl">DeFi Lend & Borrow</h1>
       </div>
-      <div className="flex gap-6">
-        {/* Net Worth */}
+      {/* <div className="flex gap-6">
         <div className="flex justify-start items-center">
           <div className="icon-box border border-spacing-3  border-gray-600 p-3 rounded-2xl bg-[#383D51]  hidden md:block">
             <BiWallet className="text-[#cfcece] text-xl" />
@@ -28,9 +27,9 @@ const MainCard = () => {
               $<span className="text-white pl-[2px]">0</span>
             </p>
           </div>
-        </div>
+        </div> */}
 
-        <div className="flex justify-start items-center">
+        {/* <div className="flex justify-start items-center">
           <div className="icon-box border border-spacing-3 border-gray-600 p-3 rounded-2xl bg-[#383D51]  hidden md:block">
             <BsBarChart className="text-[#cfcece] text-xl" />
           </div>
@@ -39,7 +38,7 @@ const MainCard = () => {
             <p className="font-semibold">__</p>
           </div>
         </div>
-      </div>
+       </div> */}
     </div>
   );
 };

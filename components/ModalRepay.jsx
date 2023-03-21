@@ -1,30 +1,24 @@
 import Image from "next/image";
 import React, { useState, useContext } from "react";
 import { MdLocalGasStation } from "react-icons/md";
-import { BiError } from "react-icons/bi";
 import lendContext from "../context/lendContext";
 import { toast } from "react-toastify";
+import { ImSpinner8 } from "react-icons/im";
 
-const ModalRepay = ({ 
-  address, 
-  name, 
-  debt, 
-  image, 
-  onClose 
-}) => {
-  const { 
-    getAmountInUSD, 
-    repayAsset, 
-    numberToEthers, 
+const ModalRepay = ({ address, name, debt, image, onClose }) => {
+  const {
+    getAmountInUSD,
+    repayAsset,
+    numberToEthers,
     connectWallet,
-    ApproveToContinue 
-  } =
-    useContext(lendContext);
+    ApproveToContinue,
+  } = useContext(lendContext);
   const [dollarPrice, setDollarPrice] = useState(0);
   const [isInputValidate, setInputValidate] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isApproved, setIsApproved] = useState(false);
-  const [loadingOnApprove, setLoadingOnApprove] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isRepaying, setIsRepaying] = useState(false);
 
   const setMax = () => {
     setInputValue(debt);
@@ -62,19 +56,28 @@ const ModalRepay = ({
   };
 
   const handleApprove = async () => {
-    const isTokenApproved = await ApproveToContinue(address, inputValue);
-    // console.log(isTokenApproved);
-    toast.success(`Approved ${inputValue} ${name}`);
-    if (isTokenApproved) setIsApproved(true);
+    setIsApproving(true);
+    let transaction = await ApproveToContinue(address, inputValue);
+    if (transaction.status == 200) {
+      setIsApproving(false);
+      setIsApproved(true);
+    } else {
+      toast.error(`Approved Failed...`);
+      setIsApproving(false);
+    }
   };
 
   const handleRepay = async () => {
-    const isRepayed = await repayAsset(address, inputValue);
-    // console.log(isRepayed);
-    toast.success(`Repayed ${inputValue} ${name}`);
-    if (isRepayed) {
+    setIsRepaying(true);
+    const transaction = await repayAsset(address, inputValue);
+    if (transaction.status == 200) {
+      setIsRepaying(false);
+      toast.success(`Repayed ${inputValue} ${name}`);
       onClose();
       await connectWallet();
+    } else {
+      setIsRepaying(false);
+      toast.error("Repay Failed");
     }
   };
 
@@ -164,53 +167,49 @@ const ModalRepay = ({
           Enter an amount
         </button>
       </div>
-{/* insert here */}
+      {/* insert here */}
 
-<div className={!inputValue ? "hidden" : "block"}>
-        {name == "ETH" ? (
-          <button
-            className={
-              "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
-            }
-            onClick={() => {
-              if (isInputValidate) handleRepay();
-            }}
-          >
-            Repay {name}
-          </button>
-        ) : (
-          <div>
-            {" "}
+      <div className={!inputValue ? "hidden" : "block"}>
+        <div>
+          {!isApproved ? (
             <button
-              className={
-                isApproved
-                  ? "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2"
-                  : "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
-              }
+              className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2 flex justify-center items-center"
               onClick={() => {
-                if (isInputValidate) {
-                  setLoadingOnApprove(true);
-                  handleApprove();
-                }
+                if (isInputValidate) handleApprove();
               }}
             >
-              {!isApproved ? "Aprrove to continue" : "Approved Confirmed !"}
+              {!isApproving && <span>Aprrove {name} to continue</span>}
+              {isApproving && (
+                <ImSpinner8 icon="spinner" className="spinner mr-2" />
+              )}
+              {isApproving && <span>Approving {name}... </span>}
             </button>
+          ) : (
+            <div className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2 flex justify-center items-center">
+              Approved Confirmed &#10004;
+            </div>
+          )}
+
+          {isApproved ? (
             <button
-              className={
-                isApproved
-                  ? "w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2"
-                  : "w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2"
-              }
+              className="w-full bg-[#F1F1F3] p-2 rounded text-black tracking-wide text-opacity-80 font-semibold mb-2 flex justify-center items-center"
               onClick={() => {
                 if (!isApproved) return;
                 else handleRepay();
               }}
             >
+              {!isRepaying && <span>Repay {name}</span>}
+              {isRepaying && (
+                <ImSpinner8 icon="spinner" className="spinner mr-2" />
+              )}
+              {isRepaying && <span>Repaying {name}... </span>}
+            </button>
+          ) : (
+            <button className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold mb-2">
               Repay {name}
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
