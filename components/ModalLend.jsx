@@ -87,7 +87,7 @@ const ModalLend = ({
       onClose();
       await connectWallet();
     } else {
-      toast.error(`Supply Failed...`);
+      toast.error(`...`);
       setIsSupplying(false);
     }
   };

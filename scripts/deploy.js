@@ -1,9 +1,6 @@
 const { ethers } = require("hardhat");
 const {
   ETHAddress,
-  DAITokenAddress,
-  USDCTokenAddress,
-  LINKTokenAddress,
   ETH_USD_PF_ADDRESS,
   DAI_USD_PF_ADDRESS,
   USDC_USD_PF_ADDRESS,
@@ -26,14 +23,14 @@ async function main() {
   const DAI_ADDRESS = daiToken.address;
   console.log('const DAITokenAddress = "' + DAI_ADDRESS + '"');
 
-  /********************** Deploy DAIToken *************************/
+  /********************** Deploy LINKToken *************************/
   const LINKToken = await ethers.getContractFactory("LinkToken");
   const linkToken = await LINKToken.deploy();
   await linkToken.deployed();
   const LINK_ADDRESS = linkToken.address;
   console.log('const LINKTokenAddress = "' + LINK_ADDRESS + '"');
 
-  /********************** Deploy DAIToken *************************/
+  /********************** Deploy USDCToken *************************/
   const USDCToken = await ethers.getContractFactory("USDCToken");
   const usdcToken = await USDCToken.deploy();
   await usdcToken.deployed();
@@ -56,13 +53,14 @@ async function main() {
   await lendingConfig.deployed();
   console.log('const LendingConfigAddress = "' + lendingConfig.address + '"');
 
+  /********************** Deploy LendingHelper *************************/
   const LendingHelper = await ethers.getContractFactory("LendingHelper");
   const lendingHelper = await LendingHelper.deploy(
     addressToTokenMap.address,
     lendingConfig.address
   );
   await lendingHelper.deployed();
-  console.log('const lendingHelperAddress = "' + lendingHelper.address + '"');
+  console.log('const LendingHelperAddress = "' + lendingHelper.address + '"');
 
   /********************** Deploy LendingPoolV2 *************************/
   const LendingPool = await ethers.getContractFactory("LendingPool");

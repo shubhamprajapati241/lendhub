@@ -2,23 +2,24 @@ const ETHAddress = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
 
 /****************** LOCAL HOST **********************/
 // npx hardhat run scripts/deploy.js --network localhost
-const DAITokenAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-const LINKTokenAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
-const USDCTokenAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
-const AddressToTokenMapAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-const LendingConfigAddress = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
-const LendingHelperAddress = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
-const LendingPoolAddress = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
+// const DAITokenAddress = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
+// const LINKTokenAddress = "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318";
+// const USDCTokenAddress = "0x610178dA211FEF7D417bC0e6FeD39F05609AD788";
+// const AddressToTokenMapAddress = "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e";
+// const LendingConfigAddress = "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0";
+// const LendingHelperAddress = "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82";
+// const LendingPoolAddress = "0x9A676e781A523b5d0C0e43731313A708CB607508";
 
 /****************** SEPOLIA TESTNET **********************/
 
 // npx hardhat run scripts/deploy.js --network sepolia
-// const DAITokenAddress = "0x07f084AEcf3B7471687CB99f665D24A0DB17e275";
-// const LINKTokenAddress = "0xf8A063287227F986a6c5ffAFD2201Bb9AB0d4703";
-// const USDCTokenAddress = "0x9ecB69907FbF7b3fA48bC36676397F1ee860E08e";
-// const AddressToTokenMapAddress = "0x5d91f3bece6A1Bb2DFC54067f3A47Bb685E0E157";
-// const LendingConfigAddress = "0x84F88ce7Ae8929ccDC9CA340D1Dd70781F29c623";
-// const LendingPoolAddress = "0x3AA3CD923820369d1D0a26C8eb74e03DE6381208";
+const DAITokenAddress = "0x4f26C7137292160ED5E80438A0B39FB45637907a";
+const LINKTokenAddress = "0xCF594ab632f673EeF70800F8e7706c9a8CCCd81c";
+const USDCTokenAddress = "0x768e29eEb5D2fEf6C2d772adc5fF232cA7D329a4";
+const AddressToTokenMapAddress = "0xAf64AC74f0661CAb09cf7aBA77A37e586A142480";
+const LendingConfigAddress = "0x9192A96B83C270788eC6C84Bf6C4A854eC97C519";
+const LendingHelperAddress = "0x0C0EA14627E8CDB23587F5FE980cb24829b7b220";
+const LendingPoolAddress = "0x1b24AAAd247fa171e7A64C809537cc4a02584CAb";
 
 /********* PRICE FEED ADDRESSES ***********/
 // Sepolia PF addresses
@@ -43,9 +44,9 @@ module.exports = {
   DAITokenAddress,
   LINKTokenAddress,
   USDCTokenAddress,
-  LendingHelperAddress,
   AddressToTokenMapAddress,
   LendingConfigAddress,
+  LendingHelperAddress,
   LendingPoolAddress,
   ETH_USD_PF_ADDRESS,
   DAI_USD_PF_ADDRESS,
