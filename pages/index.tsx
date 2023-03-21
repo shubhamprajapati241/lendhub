@@ -41,7 +41,7 @@ const Home: NextPage = () => {
       <main className="w-full p-0 m-0">
         <div>
           <div>{}</div>
-          <div className="App bg-gradient-to-b from-[#212430] to-[#17171a] h-[17rem] text-white">
+          <div className="App bg-gradient-to-b from-[#212430] to-[#17171a] h-[12rem] text-white">
             <Header />
             <MainCard />
           </div>
