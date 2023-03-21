@@ -13,7 +13,7 @@ const DisconnectedTab = () => {
           className="w-24 h-24 md:w-32 md:h-32 mb-3"
         />
         <h1 className=" text-xl font-semibold text-[#303549] mb-2">
-          Please, connect your wallet
+          Please, connect your wallet with Sepolia Network
         </h1>
         <p className="text-sm text-[#62677B] mb-5">
           Please connect your wallet to see your supplies, borrowings, and open

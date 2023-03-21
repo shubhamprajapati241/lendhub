@@ -80,12 +80,10 @@ const LendState = (props) => {
       const networkName = network.name;
       const signer = provider.getSigner();
 
-      // if (networkName != "sepolia") {
-      //   alert("Please switch your network to Sepolia");
-      //   return;
-      // }
-
-      // console.log(networkName);
+      if (networkName != "sepolia") {
+        alert("Please switch your network to Sepolia Testnet");
+        return;
+      }
 
       if (account.length) {
         let currentAddress = account[0];
