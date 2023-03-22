@@ -51,10 +51,10 @@ cache
 artifacts
 
 # test files
-test/foo.js
-test/test2.js
-test-sepolia.js
-testWithdraw.js
+/test/foo.js
+/test/test2.js
+/test-sepolia.js
+/testWithdraw.js
 
 
 
