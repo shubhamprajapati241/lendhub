@@ -18,11 +18,6 @@ module.exports = {
       // allowUnlimitedContractSize: true,
     },
 
-    goerli: {
-      url: process.env.INFURA_GOERLI_API_URL,
-      accounts: [process.env.MAIN_ACCOUNT],
-      chainId: 5,
-    },
     sepolia: {
       url: process.env.INFURA_SEPOLIA_API_URL,
       accounts: [process.env.MAIN_ACCOUNT],

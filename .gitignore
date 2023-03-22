@@ -8,6 +8,7 @@
 # testing
 /coverage
 
+
 # next.js
 /.next/
 /out/
@@ -48,4 +49,12 @@ typechain-types
 # Hardhat files
 cache
 artifacts
+
+# test files
+test/foo.js
+test/test2.js
+test-sepolia.js
+testWithdraw.js
+
+
 
