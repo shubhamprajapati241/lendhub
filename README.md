@@ -1,3 +1,15 @@
+## Table of Contents
+- [Introduction](#introduction)
+- [Technology Stack](#technology-stack)
+- [Project Layout](#project-layout)
+    * [Top Level folders](#top-level-folders)
+    * [Important Files](#important-files)
+- [Using & Testing LendHub on Sepolia](#using--testing-lendhub-on-sepolia)
+- [Cloning and Deploying the Dapp on Sepolia Testnet](#cloning-and-deploying-the-dapp-on-sepolia-testnet)
+- [Bootsrapping & running this project on your localhost using Hardhat](#bootsrapping--running-this-project-on-your-localhost-using-hardhat)
+
+
+
 ## Introduction
 LendHub is a comprehensive DeFi Lending & Borrowing decentralized application (DApp) operating on **Ethereum's Sepolia Testnet**. The platform facilitates lending and borrowing of various crypto assets, while offering opportunities to earn passive income as interest on deposited funds.
 
@@ -7,6 +19,8 @@ This fully on-chain DeFi app allows users to effortlessly deposit their coins (E
 
 - Built on Ethereum Blockchain
 - Solidity
+- Javascript
+- Typescript
 - Chainlink Price Oracles
 - Openzeppelin (ERC20 Tokens, Ownable, Reentrancy Guards)
 - Hardhat
@@ -16,6 +30,21 @@ This fully on-chain DeFi app allows users to effortlessly deposit their coins (E
 - Next JS
 - Tailwind CSS
 - HTML
+- Slither, Mythril, Echidna
+
+## Project Layout
+### Top Level folders
+1. /components - contains the front-end application
+2. /context - contains the front-end application wrapper javascript
+3. /contracts - contains the solidity contract
+4. /scripts - deployment scripts
+5. /pages - Next Js Main rendering pages and components 
+6. /tests - contains tests for the solidity contracts
+### Important Files
+1. package.json - node modules to be installed, etc.
+2. hardhat.config.js - solidity version and run information, deployment network configuration 
+3. addresses.js - addresses exported for use use with hardhat local installed contracts
+4. .env - To store Infura/Alchemy API keys and your private key
 
 ## Using & Testing LendHub on Sepolia
 
@@ -143,7 +172,7 @@ npx hardhat run scripts/deploy.js --network localhost
 
 ![addresses](https://user-images.githubusercontent.com/61042463/226641194-637954ff-8230-4e41-82f0-3e42bb5dbdfe.png)
 
-7. Start the NextJs Node Server
+7. Start the NextJs Node Server. Open http://localhost:3000 to view it in your browser.
 
 ```
 npm run dev
