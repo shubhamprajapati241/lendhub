@@ -1,3 +1,4 @@
+##### Table of Contents  
 ## DeFi-Lending-and-Borrowing DApp
 
 DeFi Lending platform which lets you lend, borrow crypto assets and helps you earn some passive income as interest on your deposits.
@@ -31,6 +32,7 @@ This section should list any major frameworks/libraries used to bootstrap your p
 
    2.1 To add the Sepolia testnet to MetaMask, click the network button at the top of your wallet and click “Add Network”.
 
+   ...snip...   
    <img src="https://user-images.githubusercontent.com/61042463/226925417-a59f11d7-dc25-4167-b4c6-508793327abd.png" width="400" height="400">
 
    2.2 At the bottom of the page, click “Add a network manually”.
