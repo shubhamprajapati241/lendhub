@@ -1,13 +1,12 @@
-##### Table of Contents  
-## DeFi-Lending-and-Borrowing DApp
-
+## Table of Contents  
+[DeFi-Lending-and-Borrowing DApp](##DeFi-Lending-and-Borrowing DApp)
 DeFi Lending platform which lets you lend, borrow crypto assets and helps you earn some passive income as interest on your deposits.
 
 A full stack, fully-onchain DeFi app that enables users to supply coin (ETH) / tokens to the contract and get the rewards based on the amount of token they supply and also allows users to borrow tokens from it.
 
 It is deployed on the **Ethereum Sepolia Testnet.**
 
-## Build with
+[Build with](##Build with)
 
 This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
 
@@ -22,7 +21,7 @@ This section should list any major frameworks/libraries used to bootstrap your p
 - Ethereum
 - Metamask
 
-## To run the project on Sepolia Testnet
+[To run the project on Sepolia Testnet](##To run the project on Sepolia Testnet)
 
 1. Metamask : Install wallet extention on your browser ( Chrome recommended ).
 
@@ -32,7 +31,6 @@ This section should list any major frameworks/libraries used to bootstrap your p
 
    2.1 To add the Sepolia testnet to MetaMask, click the network button at the top of your wallet and click “Add Network”.
 
-   ...snip...   
    <img src="https://user-images.githubusercontent.com/61042463/226925417-a59f11d7-dc25-4167-b4c6-508793327abd.png" width="400" height="400">
 
    2.2 At the bottom of the page, click “Add a network manually”.
