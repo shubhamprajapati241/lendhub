@@ -1,118 +1,133 @@
-## Table of Contents  
-[DeFi-Lending-and-Borrowing DApp](##DeFi-Lending-and-Borrowing DApp)
-DeFi Lending platform which lets you lend, borrow crypto assets and helps you earn some passive income as interest on your deposits.
+## Introduction
+LendHub is a comprehensive DeFi Lending & Borrowing decentralized application (DApp) operating on **Ethereum's Sepolia Testnet**. The platform facilitates lending and borrowing of various crypto assets, while offering opportunities to earn passive income as interest on deposited funds.
 
-A full stack, fully-onchain DeFi app that enables users to supply coin (ETH) / tokens to the contract and get the rewards based on the amount of token they supply and also allows users to borrow tokens from it.
+This fully on-chain DeFi app allows users to effortlessly deposit their coins (ETH) or tokens into the smart contract, and receive rewards based on the amount of tokens they supply. In addition, LendHub enables users to borrow tokens, making it a versatile and user-friendly platform for all crypto enthusiasts.
 
-It is deployed on the **Ethereum Sepolia Testnet.**
+## Technology Stack
 
-[Build with](##Build with)
-
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
-- Next JS
-- Tailwind CSS
+- Built on Ethereum Blockchain
+- Solidity
+- Chainlink Price Oracles
+- Openzeppelin (ERC20 Tokens, Ownable, Reentrancy Guards)
 - Hardhat
 - Etherjs
-- Solidity
-- Openzeppelin
-- ERC20
-- Chainlink
-- Ethereum
 - Metamask
+- Infura Web3API
+- Next JS
+- Tailwind CSS
+- HTML
 
-[To run the project on Sepolia Testnet](##To run the project on Sepolia Testnet)
+## Using & Testing LendHub on Sepolia
 
-1. Metamask : Install wallet extention on your browser ( Chrome recommended ).
+1. Metamask : Install Metamask wallet extension on your browser ( Chrome recommended ) - The App will prompt you to install one if it is not.
 
-   Follow this article to install metamask : https://www.geeksforgeeks.org/how-to-install-and-use-metamask-on-google-chrome/
+   [Click to Download and install Metamask on your browser](https://metamask.io/download/)
 
-2. Add Sepolia to MetaMask
+2. Add Sepolia Testnet to MetaMask
 
-   2.1 To add the Sepolia testnet to MetaMask, click the network button at the top of your wallet and click “Add Network”.
+   ***To add the Sepolia testnet to MetaMask, click the network button at the top of your wallet and click “Add Network”***
 
    <img src="https://user-images.githubusercontent.com/61042463/226925417-a59f11d7-dc25-4167-b4c6-508793327abd.png" width="400" height="400">
 
-   2.2 At the bottom of the page, click “Add a network manually”.
+   ***Under the Networks, at the bottom of the page, click “Add a network manually”***
 
    <img src="https://user-images.githubusercontent.com/61042463/226925715-26272ad1-ce26-46c0-9140-c8f523d25cd8.png" width="700" height="350">
 
-   2.3 Add network configuration details along with the following information:
+   ***Add network configuration details along with the following information***
 
-   - **Network name** : Sepolia test network
-   - **New RPC URL** : https://sepolia.infura.io/v3/
-   - **Chain ID** : 11155111
-   - **Currency symbol** : SepoliaETH
-   - **Block explorer URL** : https://sepolia.etherscan.io
-
+   ```
+   Network name : Sepolia test network
+   New RPC URL : https://sepolia.infura.io/v3/
+   Chain ID : 11155111
+   Currency symbol : SepoliaETH
+   Block explorer URL : https://sepolia.etherscan.io
+   ```
+   ***See image below for reference***
+   
    ![image](https://user-images.githubusercontent.com/61042463/226937721-785bb706-b21d-4291-9dcc-357d1d97ed4d.png)
 
-3. Clone this repo :
 
-```shell
+3. Get Some Sepolia ETH from the Faucets below for testing the App
+- [Alchemy Sepolia Faucet](https://sepoliafaucet.com)
+- [PoW based faucet](https://sepolia-faucet.pk910.de/) 
+
+4. If you need DAI, LINK & USDC tokens for testing email our admin
+
+5. Using/Testing the App
+- Visit https://lendhub.netlify.app and start testing
+
+![image](https://user-images.githubusercontent.com/3410735/227120829-ce4d8ff3-cad2-46cd-817a-d86778920027.png)
+
+
+## Cloning and Deploying the Dapp on Sepolia Testnet
+1. Clone this repo :
+
+```
 git clone https://github.com/shubhamprajapati241/lendhub.git
 ```
 
-4. Go to the root directory and install all node packages
+2. Go to the root directory and install all node packages
 
-```shell
+```
 cd lendhub
 npm install
 ```
 
 5. Infura API key
-   Follow this article to get Infura API key : https://medium.com/jelly-market/how-to-get-infura-api-key-e7d552dd396f
+   [Follow this article to get Infura API key](https://medium.com/jelly-market/how-to-get-infura-api-key-e7d552dd396f)
 
-   Select the Sepolia and copy the url
+   ***Select Sepolia testnet and copy the url***
 
    ![image](https://user-images.githubusercontent.com/61042463/226934039-519747cb-acbb-4403-893f-2c78c2d33bcd.png)
 
-6. Get the Metamask wallet private key : https://support.metamask.io/hc/en-us/articles/360015289632
+6. Get Your Metamask wallet private key : https://support.metamask.io/hc/en-us/articles/360015289632
 
-7. Create a new .env file into root directory
+7. Create a new .env file in the root directory
 
-   Paste the Infura Sepolia API key and your metmask accounts private key into .env file
+   ***Paste the Infura Sepolia API key and your metmask accounts private key into .env file***
 
    ![env](https://user-images.githubusercontent.com/61042463/226642196-965329ef-6c17-43ab-9268-a243f9f04728.png)
 
-8. Deploy on the Sepolia Testnet
+8. Deploy the Dapp on Sepolia Testnet
 
-```shell
+```
 npx hardhat run scripts/deploy-sepolia.js --network sepolia
 ```
 
-9.  Add the sepolia deploy addresses into address.js file
+9. Add the sepolia deploy addresses into ***address.js*** file
 
 ![addresses-sepolia](https://user-images.githubusercontent.com/61042463/226643306-69d6d9cc-67d7-4b2a-9c8a-694a23501260.png)
 
-10. Start the Nextjs Server
+10. Start NextJs Node Server
 
-```shell
+```
 npm run dev
 ```
 
-## To run the project on Hardhat localhost
+## Bootsrapping & running this project on your localhost using Hardhat
+Following steps show to get this project on to your machine and bring it up:
 
-1. Metamask : Install wallet extention on your browser ( Chrome recommended ).
+1. Metamask : Install Metamask wallet extension on your browser ( Chrome recommended ) - The App will prompt you to install one if it is not.
 
-   Follow this article to install metamask : https://www.geeksforgeeks.org/how-to-install-and-use-metamask-on-google-chrome/
+   [Click to Download and install Metamask on your browser](https://metamask.io/download/)
+
 
 2. Clone this repo :
 
-```shell
+```
 git clone https://github.com/shubhamprajapati241/lendhub.git
 ```
 
-3. Go to the root directory and install all node packages
+3. Go to the root directory and install dependent node packages
 
-```shell
+```
 cd lendhub
 npm install
 ```
 
 4. Compile, Test and Run the hardhat node
 
-```shell
+```
  npx hardhat compile
  npx hardhat test
  npx hardhat node
@@ -120,16 +135,21 @@ npm install
 
 5. Deploy on the Hardhat localhost
 
-```shell
+```
 npx hardhat run scripts/deploy.js --network localhost
 ```
 
-6. Add the localhost deploy addresses into address.js file
+6. Add the localhost deploy addresses into ***address.js*** file
 
 ![addresses](https://user-images.githubusercontent.com/61042463/226641194-637954ff-8230-4e41-82f0-3e42bb5dbdfe.png)
 
-7. Start the Nextjs Server
+7. Start the NextJs Node Server
 
-```shell
+```
 npm run dev
+```
+8. To run hardhat tests to verify the working of Dapp, run the script below
+
+```
+npx hardhat test
 ```
