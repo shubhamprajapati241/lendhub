@@ -126,25 +126,19 @@ async function main() {
 
   /****************** Adding Assets ******************/
   await addressToTokenMap._setAddress(ETHAddress, "ETH");
-  await addressToTokenMap._setAddress(DAITokenAddress, "DAI");
-  await addressToTokenMap._setAddress(USDCTokenAddress, "USDC");
-  await addressToTokenMap._setAddress(LINKTokenAddress, "LINK");
+  await addressToTokenMap._setAddress(DAI_ADDRESS, "DAI");
+  await addressToTokenMap._setAddress(USDC_ADDRESS, "USDC");
+  await addressToTokenMap._setAddress(LINK_ADDRESS, "LINK");
 
   console.log("Token Address Set");
 
   /****************** Adding PriceFeed ******************/
-  await addressToTokenMap._setPriceFeedMap(DAITokenAddress, DAI_USD_PF_ADDRESS);
-  await addressToTokenMap._setPriceFeedMap(
-    USDCTokenAddress,
-    USDC_USD_PF_ADDRESS
-  );
-  await addressToTokenMap._setPriceFeedMap(
-    LINKTokenAddress,
-    LINK_USD_PF_ADDRESS
-  );
+  await addressToTokenMap._setPriceFeedMap(DAI_ADDRESS, DAI_USD_PF_ADDRESS);
+  await addressToTokenMap._setPriceFeedMap(USDC_ADDRESS, USDC_USD_PF_ADDRESS);
+  await addressToTokenMap._setPriceFeedMap(LINK_ADDRESS, LINK_USD_PF_ADDRESS);
   await addressToTokenMap._setPriceFeedMap(ETHAddress, ETH_USD_PF_ADDRESS);
 
-  console.log("Pricefeed Address Set");
+  console.log("Price Feed Address Set");
 
   //   /********************** Deploy LendingPoolAddressProvider *************************/
   //   const LendingPoolAddressProvider = await ethers.getContractFactory(

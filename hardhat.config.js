@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
+require("hardhat-contract-sizer");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -37,12 +38,12 @@ module.exports = {
       runs: 20,
     },
   },
-  // gasReporter: {
-  //   enabled: true,
-  //   currency: "USD",
-  //   coinmarketcap: process.env.COINMARKETCAP,
-  //   token: "matic",
-  //   outputFile: "gasReports.txt",
-  //   noColors: true,
-  // },
+  gasReporter: {
+    enabled: true,
+    currency: "USD",
+    coinmarketcap: process.env.COINMARKETCAP,
+    token: "eth",
+    outputFile: "gasReports.txt",
+    noColors: true,
+  },
 };

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import LendContext from "./lendContext";
 import { ethers } from "ethers";
 const tokensList = require("../token-list-goerli");
+import detectEthereumProvider from "@metamask/detect-provider";
 
 // TODO : uncomment for sepolia
 const TokenABI = require("../abis/DAIToken.json");
