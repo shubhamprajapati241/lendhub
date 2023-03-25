@@ -53,7 +53,13 @@ const ModalLend = ({
           setInputValue(balance);
           getBalanceInUSD(balance);
         } else {
-          setInputValue(input);
+          if (name == "ETH") {
+            if (input >= 1) {
+              setInputValue(input);
+            }
+          } else {
+            setInputValue(input);
+          }
           getBalanceInUSD(input);
         }
         setInputValidate(true);
@@ -130,7 +136,7 @@ const ModalLend = ({
               value={inputValue}
               onChange={(e) => validateInput(e.target.value)}
               className="bg-transparent outline-none text-xl font-medium w-3/4"
-              placeholder="0.00"
+              placeholder={name == "ETH" ? "1.00" : "0.00"}
             />
             <div className="font-semibold flex flex-row items-center justify-end w-1/4">
               <Image
@@ -202,11 +208,19 @@ const ModalLend = ({
         </p>
       </div>
 
-      <div className={!inputValue ? "block" : "hidden"}>
-        <button className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold">
-          Enter an amount
-        </button>
-      </div>
+      {name == "ETH" ? (
+        <div className={!inputValue ? "block" : "hidden"}>
+          <button className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold">
+            Enter minimum 1 ETH
+          </button>
+        </div>
+      ) : (
+        <div className={!inputValue ? "block" : "hidden"}>
+          <button className="w-full bg-[#EBEBEF] bg-opacity-10 p-2 rounded text-[#EBEBEF] tracking-wide text-opacity-30 font-semibold">
+            Enter an amount
+          </button>
+        </div>
+      )}
 
       <div className={!inputValue ? "hidden" : "block"}>
         {name == "ETH" ? (
