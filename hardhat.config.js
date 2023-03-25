@@ -16,7 +16,7 @@ module.exports = {
   networks: {
     hardhat: {
       chainId: 1337,
-      // allowUnlimitedContractSize: true,
+      allowUnlimitedContractSize: true,
     },
 
     sepolia: {
@@ -36,7 +36,7 @@ module.exports = {
     enabled: true,
     currency: "USD",
     coinmarketcap: process.env.COINMARKETCAP,
-    token: "matic",
+    token: "eth",
     outputFile: "gasReports.txt",
     noColors: true,
   },

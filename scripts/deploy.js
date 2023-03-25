@@ -138,7 +138,7 @@ async function main() {
   await addressToTokenMap._setPriceFeedMap(LINK_ADDRESS, LINK_USD_PF_ADDRESS);
   await addressToTokenMap._setPriceFeedMap(ETHAddress, ETH_USD_PF_ADDRESS);
 
-  console.log("Pricefeed Address Set");
+  console.log("Price Feed Address Set");
 
   //   /********************** Deploy LendingPoolAddressProvider *************************/
   //   const LendingPoolAddressProvider = await ethers.getContractFactory(

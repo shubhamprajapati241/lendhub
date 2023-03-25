@@ -5,12 +5,13 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./AggregatorV3Interface.sol";
 import "./AddressToTokenMap.sol";
 import "./LendingConfig.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 
 contract LendingHelper {
 
     AddressToTokenMap addressToTokenMap;
     LendingConfig lendingConfig;
-
+    using Address for address;
     constructor(address _addressToTokenMap, address _lendingConfig) {
         addressToTokenMap = AddressToTokenMap(_addressToTokenMap);
         lendingConfig = LendingConfig(_lendingConfig);
@@ -20,6 +21,9 @@ contract LendingHelper {
         return IERC20(_token).balanceOf(_address);
     }
 
+    function checkAddress(address _address) public view returns (bool) {
+        return _address.isContract();
+    }
     /* 
     * @dev : spits out min of tow integers
     * @params : integer 1, integer 2
@@ -29,34 +33,40 @@ contract LendingHelper {
         return x <= y ? x : y;
     }
 
-    function rewardPerToken(uint startTimeStamp, uint totalTokenSupply) public view returns (uint) {
-        if(totalTokenSupply == 0 ) {
-            return 0;
-        }
-        return ((block.timestamp - startTimeStamp) * lendingConfig.INTEREST_RATE() * 1e18 )/ totalTokenSupply;
+    /* 
+    * @dev : spits out max of tow integers
+    * @params : integer 1, integer 2
+    * @returns : uint
+    */
+    function max(uint x, uint y) public pure returns (uint) {
+        return x >= y ? x : y;
     }
 
-    function getCurrentTokenPrice(address _tokenAddress) public view returns(uint)  {
+    function rewardPerToken(uint startTimeStamp, uint totalTokenSupply) public view returns (uint) {
+        if (totalTokenSupply == 0) {
+            return 0;
+        }
+        uint timeElapsed = block.timestamp - startTimeStamp;
+        uint interestRate = lendingConfig.INTEREST_RATE();
+        return timeElapsed * interestRate * 1e18 / totalTokenSupply;
+    }
 
-        // This does not work for Hardhat, chainlink Price Feed is only on Testnets and Mainnets
-        AggregatorV3Interface priceFeed;
-        address priceFeedAddress = addressToTokenMap.getPriceFeedMap(_tokenAddress);
-        priceFeed = AggregatorV3Interface(priceFeedAddress);
-        (,int price,,,) = priceFeed.latestRoundData();
-        uint256 decimal = priceFeed.decimals();
-        uint currentPrice = uint(price) / (10 ** decimal);
-        return currentPrice;
-
+    function getCurrentTokenPrice(address _tokenAddress) public view returns (uint) {
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(addressToTokenMap.getPriceFeedMap(_tokenAddress));
+        (, int price, , , ) = priceFeed.latestRoundData();
+        uint8 decimal = priceFeed.decimals();
+        return uint(price) / (10 ** decimal);
+        //--------------------------------------------------
         // if(addressToTokenMap.isETH(_tokenAddress)) {
         //     return 1725;
         // }
-        // else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('DAI'))) {
+        // else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('DAI'))) {
         //     return 1;
         // }
-        // else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('USDC'))) {
+        // else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('USDC'))) {
         //     return  1;
         // }
-        // else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('LINK'))) {
+        // else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('LINK'))) {
         //     return 6;
         // }
         // return 1;
@@ -66,18 +76,9 @@ contract LendingHelper {
         uint totalAmountInDollars = uint(getCurrentTokenPrice(_token)) * (_amount / 1e18 );
         return totalAmountInDollars;
     }
-    
+
     function getTokensPerUSDAmount(address _token, uint _usdAmount) public view returns(uint) {
         return _usdAmount / getCurrentTokenPrice(_token);
     }
 
-    // function isTokenInReserve(address _token, address[] memory _reserveAssets) public pure returns(bool) {
-    //     uint reservesAssetsLength = _reserveAssets.length;
-    //     for(uint i=0; i < reservesAssetsLength; i++) {
-    //         if(_reserveAssets[i] == _token) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // } 
 }
