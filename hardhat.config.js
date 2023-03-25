@@ -12,6 +12,7 @@ module.exports = {
       },
     },
   },
+
   networks: {
     hardhat: {
       chainId: 1337,
@@ -31,18 +32,12 @@ module.exports = {
     },
   },
 
-  settings: {
-    optimizer: {
-      enabled: true,
-      runs: 20,
-    },
+  gasReporter: {
+    enabled: true,
+    currency: "USD",
+    coinmarketcap: process.env.COINMARKETCAP,
+    token: "matic",
+    outputFile: "gasReports.txt",
+    noColors: true,
   },
-  // gasReporter: {
-  //   enabled: true,
-  //   currency: "USD",
-  //   coinmarketcap: process.env.COINMARKETCAP,
-  //   token: "matic",
-  //   outputFile: "gasReports.txt",
-  //   noColors: true,
-  // },
 };
