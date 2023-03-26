@@ -60,13 +60,13 @@ contract LendingHelper {
         // if(addressToTokenMap.isETH(_tokenAddress)) {
         //     return 1725;
         // }
-        // else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('DAI'))) {
+        // else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('DAI'))) {
         //     return 1;
         // }
-        // else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('USDC'))) {
+        // else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('USDC'))) {
         //     return  1;
         // }
-        // else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('LINK'))) {
+        // else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('LINK'))) {
         //     return 6;
         // }
         // return 1;
