@@ -88,17 +88,9 @@ contract LendingPool is ReentrancyGuard {
    /************* Lender functions ************************/
     receive() external payable {}
 
-    // uncomment
-    // function lend(address _token, uint256 _amount) public 
-    // nonReentrant
-    // updateEarnedInterestOnLend(msg.sender, _token)
-    // payable 
-    // {
-
-        // comment
     function lend(address _token, uint256 _amount) public 
     nonReentrant
-    updateEarnedInterestOnLend(msg.sender, _token)
+    // updateEarnedInterestOnLend(msg.sender, _token)
     payable 
     {
         address lender = msg.sender;
@@ -169,7 +161,7 @@ contract LendingPool is ReentrancyGuard {
     
     function withdraw(address _token, uint256 _amount) external 
     nonReentrant
-    updateEarnedInterestOnLend(msg.sender, _token)
+    // updateEarnedInterestOnLend(msg.sender, _token)
     payable returns(bool) {
         address lender  = msg.sender;
     
