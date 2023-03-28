@@ -1108,8 +1108,8 @@ describe("LendHub Tests", async () => {
   });
 
   it("Should return Lender total available balance to withdtaw", async () => {
-    const valueOption = { value: numberToEthers(0.5) };
-    const lendAmount = numberToEthers(0.5);
+    const valueOption = { value: numberToEthers(50) };
+    const lendAmount = numberToEthers(50);
     const asset = ETH_ADDRESS;
 
     const tx = await lendingPool
@@ -1118,6 +1118,10 @@ describe("LendHub Tests", async () => {
     await tx.wait();
 
     let result = await lendingPool.getLenderAssets(lender5.address);
+
+    console.log(result);
+
+    result = await lendingPool.getAssetsToBorrow(lender5.address);
 
     console.log(result);
 

@@ -127,6 +127,8 @@ async function main() {
   await addressToTokenMap._setPriceFeedMap(LINK_ADDRESS, LINK_USD_PF_ADDRESS);
   await addressToTokenMap._setPriceFeedMap(ETHAddress, ETH_USD_PF_ADDRESS);
   console.log("Price Feed Address Set");
+
+  /****************** lending intial supply ******************/
 }
 
 main().catch((error) => {

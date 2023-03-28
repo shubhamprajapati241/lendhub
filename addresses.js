@@ -12,14 +12,14 @@ const ETHAddress = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
 
 /****************** SEPOLIA TESTNET **********************/
 
-// npx hardhat run scripts/deploy.js --network sepolia
-const DAITokenAddress = "0xB3F9eE656C083AEBE5a55ec1132160c9804BD29B";
-const LINKTokenAddress = "0xE2d16613a3AC1bd4f8919823358f82aeDfa73b0e";
-const USDCTokenAddress = "0x34fF2d449fBeD71d2A7E2D731264deE96AB196FD";
-const AddressToTokenMapAddress = "0x3a219633d952a42320a84c919B3ef24E9a187B1B";
-const LendingConfigAddress = "0xe699dC884F6893c9De88619CA1546764F4d088C3";
-const LendingHelperAddress = "0x4DA1ad4Be0e167F738407Dc2fEE8BbBD8936D365";
-const LendingPoolAddress = "0x3596433d421669373A5CC9655D9517A20BeA0b33";
+// npx hardhat run scripts/deploy-sepolia.js --network sepolia
+const DAITokenAddress = "0xfA36653d85B3A7D06Cd5d83e4d03667b36b44B7a";
+const LINKTokenAddress = "0x9FA894F65353cC2b4feCeA717B998a88a4641255";
+const USDCTokenAddress = "0xacEc0F50978654652d089E4e7016D9682a3b27CD";
+const AddressToTokenMapAddress = "0xf97B39B690C56aA9442126Fc35781efEb0244B69";
+const LendingConfigAddress = "0xcd90133a0d3d962B38650A3983C85a866e21FA8b";
+const LendingHelperAddress = "0x15D9850C486DA40311307A5722C2f9cCDd7fEfb7";
+const LendingPoolAddress = "0xEAEF7504060c6e1CB2982dd3CAA94aD275015971";
 
 /********* PRICE FEED ADDRESSES ***********/
 // Sepolia PF addresses

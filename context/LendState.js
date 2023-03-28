@@ -298,7 +298,7 @@ const LendState = (props) => {
       });
     }
 
-    console.error("**********objectifySuppliedAssets");
+    console.log("**********objectifySuppliedAssets");
     console.log(assetsList);
     return assetsList;
   };
