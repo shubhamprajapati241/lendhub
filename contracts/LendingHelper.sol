@@ -52,24 +52,24 @@ contract LendingHelper {
     }
 
     function getCurrentTokenPrice(address _tokenAddress) public view returns (uint) {
-        // AggregatorV3Interface priceFeed = AggregatorV3Interface(addressToTokenMap.getPriceFeedMap(_tokenAddress));
-        // (, int price, , , ) = priceFeed.latestRoundData();
-        // uint8 decimal = priceFeed.decimals();
-        // return uint(price) / (10 ** decimal);
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(addressToTokenMap.getPriceFeedMap(_tokenAddress));
+        (, int price, , , ) = priceFeed.latestRoundData();
+        uint8 decimal = priceFeed.decimals();
+        return uint(price) / (10 ** decimal);
         // --------------------------------------------------
-        if(addressToTokenMap.isETH(_tokenAddress)) {
-            return 1725;
-        }
-        else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('DAI'))) {
-            return 1;
-        }
-        else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('USDC'))) {
-            return  1;
-        }
-        else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('LINK'))) {
-            return 6;
-        }
-        return 1;
+        // if(addressToTokenMap.isETH(_tokenAddress)) {
+        //     return 1725;
+        // }
+        // else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('DAI'))) {
+        //     return 1;
+        // }
+        // else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('USDC'))) {
+        //     return  1;
+        // }
+        // else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('LINK'))) {
+        //     return 6;
+        // }
+        // return 1;
     }
 
     function getAmountInUSD(address _token, uint256 _amount) public view returns(uint) {

@@ -1,18 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import LendContext from "./lendContext";
 import { ethers } from "ethers";
 const tokensList = require("../token-list-goerli");
-import detectEthereumProvider from "@metamask/detect-provider";
 
 // TODO : uncomment for sepolia
-// const TokenABI = require("../abis/DAIToken.json");
-// const LendingPoolABI = require("../abis/LendingPool.json");
-// const LendingHelperABI = require("../abis/LendingHelper.json");
+const TokenABI = require("../abis/DAIToken.json");
+const LendingPoolABI = require("../abis/LendingPool.json");
+const LendingHelperABI = require("../abis/LendingHelper.json");
 
 // TODO : uncomment for localhost
-const TokenABI = require("../artifacts/contracts/DAIToken.sol/DAIToken.json");
-const LendingPoolABI = require("../artifacts/contracts/LendingPool.sol/LendingPool.json");
-const LendingHelperABI = require("../artifacts/contracts/LendingHelper.sol/LendingHelper.json");
+// const TokenABI = require("../artifacts/contracts/DAIToken.sol/DAIToken.json");
+// const LendingPoolABI = require("../artifacts/contracts/LendingPool.sol/LendingPool.json");
+// const LendingHelperABI = require("../artifacts/contracts/LendingHelper.sol/LendingHelper.json");
 
 // Importing Bank contract details
 import {
@@ -222,14 +221,12 @@ const LendState = (props) => {
 
   /*************************** Lend Functionality ***************************/
   const LendAsset = async (token, supplyAmount) => {
-    const amount = numberToEthers(supplyAmount);
-    const valueOption = { value: amount };
-
-    console.warn(
-      "***Lending token : " + token + "| supplyAmount : " + supplyAmount
-    );
-
     try {
+      const amount = numberToEthers(supplyAmount);
+      const valueOption = { value: amount };
+      console.warn(
+        "***Lending token : " + token + "| supplyAmount : " + supplyAmount
+      );
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
       console.log(contract);
       let transaction;
@@ -252,14 +249,14 @@ const LendState = (props) => {
 
   /*************************** Withdraw Functionality ***************************/
   const WithdrawAsset = async (tokenAddress, withdrawAmount) => {
-    const amount = numberToEthers(withdrawAmount);
-    console.log(
-      "***Withdrawing token : " +
-        tokenAddress +
-        "| withdrawAmount : " +
-        withdrawAmount
-    );
     try {
+      const amount = numberToEthers(withdrawAmount);
+      console.log(
+        "***Withdrawing token : " +
+          tokenAddress +
+          "| withdrawAmount : " +
+          withdrawAmount
+      );
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
       const transaction = await contract
         .connect(metamaskDetails.signer)
@@ -350,10 +347,11 @@ const LendState = (props) => {
   const getAmountInUSD = async (address, amount) => {
     // console.log("Getting amount in USD......");
     // console.log("amount" + amount);
-    const AMOUNT = numberToEthers(amount);
+
     // console.log("AMOUNT" + AMOUNT);
 
     try {
+      const AMOUNT = numberToEthers(amount);
       const contract = new ethers.Contract(
         LendingHelperAddress,
         LendingHelperABI.abi,
@@ -498,11 +496,11 @@ const LendState = (props) => {
 
   /*************************** Borrow Functionality ***************************/
   const borrowAsset = async (token, borrowAmount) => {
-    const amount = numberToEthers(borrowAmount);
-    console.log(
-      "***Borrowing token : " + token + "| borrowAmount : " + borrowAmount
-    );
     try {
+      const amount = numberToEthers(borrowAmount);
+      console.log(
+        "***Borrowing token : " + token + "| borrowAmount : " + borrowAmount
+      );
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
       const transaction = await contract
         .connect(metamaskDetails.signer)
@@ -564,13 +562,15 @@ const LendState = (props) => {
 
   /*************************** Functions for the borrow ***************************/
   const repayAsset = async (tokenAddress, repayAmount) => {
-    const amount = numberToEthers(repayAmount);
-
-    console.log(
-      "****Repaying token : " + tokenAddress + "| repayAmount : " + repayAmount
-    );
-
     try {
+      const amount = numberToEthers(repayAmount);
+      console.log(
+        "****Repaying token : " +
+          tokenAddress +
+          "| repayAmount : " +
+          repayAmount
+      );
+
       const contract = await getContract(LendingPoolAddress, LendingPoolABI);
       const transaction = await contract
         .connect(metamaskDetails.signer)
