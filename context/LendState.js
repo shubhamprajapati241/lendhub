@@ -5,14 +5,14 @@ const tokensList = require("../token-list-goerli");
 import detectEthereumProvider from "@metamask/detect-provider";
 
 // TODO : uncomment for sepolia
-const TokenABI = require("../abis/DAIToken.json");
-const LendingPoolABI = require("../abis/LendingPool.json");
-const LendingHelperABI = require("../abis/LendingHelper.json");
+// const TokenABI = require("../abis/DAIToken.json");
+// const LendingPoolABI = require("../abis/LendingPool.json");
+// const LendingHelperABI = require("../abis/LendingHelper.json");
 
 // TODO : uncomment for localhost
-// const TokenABI = require("../artifacts/contracts/DAIToken.sol/DAIToken.json");
-// const LendingPoolABI = require("../artifacts/contracts/LendingPool.sol/LendingPool.json");
-// const LendingHelperABI = require("../artifacts/contracts/LendingHelper.sol/LendingHelper.json");
+const TokenABI = require("../artifacts/contracts/DAIToken.sol/DAIToken.json");
+const LendingPoolABI = require("../artifacts/contracts/LendingPool.sol/LendingPool.json");
+const LendingHelperABI = require("../artifacts/contracts/LendingHelper.sol/LendingHelper.json");
 
 // Importing Bank contract details
 import {
@@ -81,10 +81,10 @@ const LendState = (props) => {
       const networkName = network.name;
       const signer = provider.getSigner();
 
-      if (networkName != "sepolia") {
-        alert("Please switch your network to Sepolia Testnet");
-        return;
-      }
+      // if (networkName != "sepolia") {
+      //   alert("Please switch your network to Sepolia Testnet");
+      //   return;
+      // }
 
       if (account.length) {
         let currentAddress = account[0];
@@ -281,6 +281,7 @@ const LendState = (props) => {
 
       const amountInUSD = await getAmountInUSD(token, lendQty);
       lendQty = Number(assets[i].lentQty) / 1e18;
+
       const maxSupplyAmount = await getUserTotalAvailableBalance();
 
       const maxQty = await getTokensPerUSDAmount(token, maxSupplyAmount);
@@ -289,6 +290,7 @@ const LendState = (props) => {
 
       console.log("lendQty" + lendQty);
       console.log("maxQty" + maxQty);
+      console.log("maxSupplyAmount" + maxSupplyAmount);
 
       assetsList.push({
         token: assets[i].token,
@@ -298,6 +300,9 @@ const LendState = (props) => {
         maxSupply: qty,
       });
     }
+
+    console.error("**********objectifySuppliedAssets");
+    console.log(assetsList);
     return assetsList;
   };
 
@@ -372,14 +377,12 @@ const LendState = (props) => {
         LendingPoolABI.abi,
         metamaskDetails.provider
       );
-      const maxAmount = Number(
-        await contract.getUserTotalAvailableBalanceInUSD(
-          metamaskDetails.currentAccount,
-          1
-        )
+      const maxAmount = await contract.getUserTotalAvailableBalanceInUSD(
+        metamaskDetails.currentAccount,
+        1
       );
 
-      return maxAmount;
+      return Number(maxAmount);
     } catch (error) {
       reportError(error);
       return error;

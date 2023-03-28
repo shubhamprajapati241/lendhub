@@ -111,6 +111,7 @@ describe("LendHub Tests", async () => {
     lender1 = accounts[1];
     lender2 = accounts[2];
     lender3 = accounts[3];
+    lender5 = accounts[5];
 
     borrower1 = accounts[3];
     borrower2 = accounts[2];
@@ -1104,5 +1105,27 @@ describe("LendHub Tests", async () => {
     // 1679105693 = Mar 18 2023 => 1980
     // 1671100453 = Dec 15 2022 => 2854
     // 1601100453 = Sep 26 2020 => 10496
+  });
+
+  it("Should return Lender total available balance to withdtaw", async () => {
+    const valueOption = { value: numberToEthers(0.5) };
+    const lendAmount = numberToEthers(0.5);
+    const asset = ETH_ADDRESS;
+
+    const tx = await lendingPool
+      .connect(lender5)
+      .lend(asset, lendAmount, valueOption);
+    await tx.wait();
+
+    let result = await lendingPool.getLenderAssets(lender5.address);
+
+    console.log(result);
+
+    result = await lendingPool.getUserTotalAvailableBalanceInUSD(
+      lender5.address,
+      1
+    );
+
+    console.log(result);
   });
 });

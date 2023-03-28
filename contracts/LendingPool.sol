@@ -182,7 +182,7 @@ contract LendingPool is ReentrancyGuard {
                 lenderAssets[lender][i].lendStartTimeStamp = block.timestamp;
             }
 
-             if(lenderAssets[lender][i].lentQty == 0) {
+            if(lenderAssets[lender][i].lentQty == 0) {
                 delete lenderAssets[lender][i];
                 lenderAssets[lender][i] = lenderAssets[lender][laLen - 1];
                 lenderAssets[lender].pop();
