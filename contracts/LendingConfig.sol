@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.6;
 
-// import "./LendingPoolAddressProvider.sol";
-
 contract LendingConfig {
 
-    // LendingPoolAddressProvider addressesProvider;
     address owner;
     enum Freeze { FREEZE, UNFREEZE}
     enum AssetStatus { ACTIVE, INACTIVE }
@@ -16,9 +13,6 @@ contract LendingConfig {
     uint256 public constant DECIMALS = 18;
     uint256 public constant BORROW_THRESHOLD = 80;
     uint256 public constant LIQUIDATION_THRESHOLD = 120;
-    // uint32 public constant BORROW_DURATION_30 = 30 days;
-    // uint32 public constant BORROW_DURATION_60 = 60 days;
-    // uint32 public constant BORROW_DURATION_90 = 90 days;
     uint256 public constant SECONDS_IN_A_DAY=86400;
 
     mapping(string => uint256) private symbolToAssetIndex;
@@ -63,18 +57,31 @@ contract LendingConfig {
         BORROW_RATE = _borrowRate;
     }
 
+    /* 
+    * @dev : updates the lending interest rate
+    * @params : uint new interest rate
+    */
     function updateInterestRate(uint256 _interestRate) public onlyOwner{
         if(INTEREST_RATE != _interestRate) {
             INTEREST_RATE = _interestRate;
         }
     }
 
+    /* 
+    * @dev : updates the borrowing interest rate
+    * @params : uint _newBorrowRate
+    */
     function updateBorrowRate(uint256 _borrowRate) public onlyOwner {
         if(BORROW_RATE != _borrowRate) {
             BORROW_RATE = _borrowRate;
         }
     }
 
+    /* 
+    * @dev : Adds assets on lend
+    * @params : token attributes
+    * @returns : bool - true is asset is added
+    */
     function addAsset(
         address _token, 
         bool _borrowingEnabled,
@@ -107,10 +114,19 @@ contract LendingConfig {
         return true;
     }
 
+    /* 
+    * @dev : Returns stored asset
+    * @returns : All recorded assets - Array of the Asset struct
+    */
     function getAssets() public view returns(Asset[] memory) {
         return assets;
     }
 
+    /*
+    * @dev : returns true if token is present in assets array
+    * @params : token address
+    * @returns : bool - true is asset is present in the array
+    */
     function isTokenInAssets(address _token) public view returns(bool){
         uint256 assetCount = assets.length;
         for (uint i = 0; i < assetCount; i++) {
@@ -120,6 +136,12 @@ contract LendingConfig {
         }
         return false;
     }
+    
+    /*
+    * @dev : Toggles active/inactive for an asset
+    * @params : token address, status enum
+    * @returns : bool
+    */
     function makeAssetActiveInactive(address _token, AssetStatus _choice) external onlyOwner returns(bool){
         uint256 assetsLen = assets.length;
         for (uint256 i = 0; i < assetsLen; i++) {
@@ -134,6 +156,11 @@ contract LendingConfig {
         return false;
     }
 
+    /*
+    * @dev : Toggles freezing/unfreezing assets
+    * @params : token address, status enum
+    * @returns : bool
+    */
     function freezeUnFreezeAsset(address _token, Freeze _choice) external onlyOwner returns (bool) {
         uint256 assetsLen = assets.length;
         for (uint i = 0; i < assetsLen; i++) {
@@ -147,6 +174,12 @@ contract LendingConfig {
         }
         return false;
     }
+
+    /*
+    * @dev : returns asset from the asset array
+    * @params : token address
+    * @returns : Asset struct
+    */
     function getAssetByTokenAddress(address _token) public view returns (Asset memory) {
         require(_token != address(0), "Invalid token address");
         uint256 assetsLen = assets.length;
@@ -158,6 +191,11 @@ contract LendingConfig {
         revert("Asset not found");
     }
 
+    /*
+    * @dev : returns asset using symbol as input
+    * @params : string symbol
+    * @returns : Asset struct
+    */
     function getAssetByTokenSymbol(string memory _symbol) public view returns (Asset memory) {
         uint256 assetIndex = symbolToAssetIndex[_symbol];
         require(
@@ -168,6 +206,11 @@ contract LendingConfig {
         return assets[assetIndex];
     }
 
+    /*
+    * @dev : returns true if the asset can be borrowed
+    * @params : address token
+    * @returns : bool
+    */
     function isBorrowingEnabled(address _token) public view returns(bool) {
         uint256 assetsLen = assets.length;
         for(uint i=0; i < assetsLen; i++) {

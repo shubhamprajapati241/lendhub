@@ -52,11 +52,11 @@ contract LendingPool is ReentrancyGuard {
         uint256 borrowApy;
     }
 
-    // modifier onlyAmountGreaterThanZero(uint256 amount) {
-    //     require(amount > 0, "Amount must be greater than zero");
-    //     _; 
-    // }
 
+    /*
+    * @dev : update interest earned on the lent assets
+    * @params : address lender, address token
+    */
     modifier updateEarnedInterestOnLend(address _lender, address _token){
         uint lenderAssetLength = lenderAssets[_lender].length;
         for (uint i = 0; i < lenderAssetLength; i++) {
@@ -66,6 +66,10 @@ contract LendingPool is ReentrancyGuard {
         _;
     }
 
+    /*
+    * @dev : update interest earned on the borrowed assets
+    * @params : address lender, address token
+    */
     modifier updateAccruedInterestOnBorrow(address _borrower, address _token) {
         uint borrowerAssetLength = borrowerAssets[_borrower].length;
         for (uint i = 0; i < borrowerAssetLength; i++) {
@@ -88,6 +92,10 @@ contract LendingPool is ReentrancyGuard {
    /************* Lender functions ************************/
     receive() external payable {}
 
+    /*
+    * @dev : this function allows a lender to lend assets to the Dapp
+    * @params : address token, uint amount
+    */
     function lend(address _token, uint256 _amount) public 
     nonReentrant
     updateEarnedInterestOnLend(msg.sender, _token)
@@ -159,6 +167,10 @@ contract LendingPool is ReentrancyGuard {
         emit Lend(lender, _token, _amount);
     }
     
+    /*
+    * @dev : this function allows a lender to withdraw assets from the Dapp
+    * @params : address token, uint amount
+    */
     function withdraw(address _token, uint256 _amount) external 
     nonReentrant
     updateEarnedInterestOnLend(msg.sender, _token)
@@ -201,6 +213,12 @@ contract LendingPool is ReentrancyGuard {
     }
 
     /********************* BORROW FUNCTIONS ******************/
+    /*
+    * @dev : Returns the assets lent by all lenders but only the qty allowed 
+    * to be borrowed by the user
+    * @params : address borrower
+    * @returns : Array of structs of borrowable assets
+    */
     function getAssetsToBorrow(address _borrower) public view returns(BorrowAsset[] memory) {
         require(_borrower != address(0), "Invalid address");
         uint maxAmountToBorrowInUSD = getUserTotalAvailableBalanceInUSD(_borrower, TxMode.BORROW); 
@@ -221,6 +239,11 @@ contract LendingPool is ReentrancyGuard {
         return borrowAsset;
     }
 
+    /*
+    * @dev : Allows a user to borrow an asset
+    * @params : address token, uint amount
+    * @returns : bool - borrow success
+    */
     function borrow(address _token, uint256 _amount) public 
     nonReentrant
     updateEarnedInterestOnLend(msg.sender, _token)
@@ -263,6 +286,10 @@ contract LendingPool is ReentrancyGuard {
         return true;
     } 
 
+    /*
+    * @dev : Allows a user to repays a borrowed asset
+    * @params : address token, uint amount
+    */
     function repay(address _token, uint256 _amount) public 
     nonReentrant 
     updateEarnedInterestOnLend(msg.sender, _token)
@@ -299,16 +326,31 @@ contract LendingPool is ReentrancyGuard {
 
     /*************************** HELPER FUNCTIONS ***************************************/
 
+    /*
+    * @dev : calculates interest earnt on lent asset
+    * @params : address lender, address token, uint lendStartTimeStamp
+    * @returns : uint - interest
+    */
     function interestEarned(address _lender, address _token, uint lendStartTimeStamp) public view returns (uint) {
         return getLenderAssetQty(_lender,_token) * lendingHelper.rewardPerToken(lendStartTimeStamp, reserves[_token]) / 1e18;
     }
 
+    /*
+    * @dev : calculates interest accrued on borrowed asset
+    * @params : address borrower, address token, uint borrowStartTimeStamp
+    * @returns : uint - interest
+    */
     function interestAccrued(address _borrower, address _token, uint borrowStartTimeStamp) public view returns (uint) {
         uint qty = getBorrowerAssetQty(_borrower, _token);
         uint rewardPerToken = lendingHelper.rewardPerToken(borrowStartTimeStamp, reserves[_token]);
         return (qty * rewardPerToken) / 1e18;
     }
 
+    /*
+    * @dev : returns true if lender has lent this assets
+    * @params : address token
+    * @returns : bool
+    */
     function isLenderTokenOwner(address _token) internal view returns(bool) {
         uint256 laLen = lenderAssets[msg.sender].length;
         for (uint i = 0; i < laLen; i++) {
@@ -318,6 +360,12 @@ contract LendingPool is ReentrancyGuard {
         }
         return false;
     }
+
+    /*
+    * @dev : returns true if borrowe borrowed the asset
+    * @params : address token
+    * @returns : bool
+    */
     function isBorrowerTokenOwner(address _token) internal view returns(bool) {
         uint256 baLen = borrowerAssets[msg.sender].length;
         for (uint i = 0; i < baLen; i++) {
@@ -328,10 +376,20 @@ contract LendingPool is ReentrancyGuard {
         return false;
     }
 
+    /*
+    * @dev : returns the supply of an asset in Liquidity Reserve Pool
+    * @params : address token
+    * @returns : uint
+    */
     function getTotalTokenSupplyInReserves(address _token) public view returns (uint){
         return reserves[_token];
     }
-
+    
+    /*
+    * @dev : returns truw if the token is in the reserve
+    * @params : address token
+    * @returns : bool
+    */
     function isTokenInReserve(address _token) public view returns(bool) {
         uint reservesAssetsLength = reserveAssets.length;
         for(uint i=0; i < reservesAssetsLength; i++) {
@@ -342,6 +400,11 @@ contract LendingPool is ReentrancyGuard {
         return false;
     } 
 
+    /*
+    * @dev : returns true if the token is in the reserve
+    * @params : address token
+    * @returns : bool
+    */
     function isTokenBorrowed(address _borrower, address _token) public view returns(bool) {
         uint256 assetLen = borrowerAssets[_borrower].length;
         for(uint256 i=0; i < assetLen; i++) {
@@ -352,7 +415,12 @@ contract LendingPool is ReentrancyGuard {
         return false;
     }
     
-    function getLenderAssetQty(address _lender, address _token) public view returns(uint256){
+    /*
+    * @dev : returns the lender's asset qty for his lent token
+    * @params : address lender, address token
+    * @returns : uint qty
+    */
+   function getLenderAssetQty(address _lender, address _token) public view returns(uint256){
         uint laLen = lenderAssets[_lender].length;
         for (uint i = 0; i < laLen; i++) {
             if(lenderAssets[_lender][i].token == _token) {
@@ -362,6 +430,11 @@ contract LendingPool is ReentrancyGuard {
         return 0;
     }
 
+    /*
+    * @dev : returns the borrower's asset qty for his borrowed token
+    * @params : address token
+    * @returns : bool
+    */
     function getBorrowerAssetQty(address _borrower, address _token) public view returns(uint256){
         uint baLen = borrowerAssets[_borrower].length;
         for (uint i = 0; i < baLen; i++) {
@@ -372,14 +445,29 @@ contract LendingPool is ReentrancyGuard {
         return 0;
     }
 
+    /*
+    * @dev : returns all the lent assets of the lender
+    * @params : address lender
+    * @returns : Array of UserAsset[] struct
+    */
     function getLenderAssets(address _lender) public view returns (UserAsset[] memory) {
         return lenderAssets[_lender];
     }
 
+    /*
+    * @dev : returns all the borrowed assets of the borrower
+    * @params : address lender
+    * @returns : Array of UserAsset[] struct
+    */
     function getBorrowerAssets(address _borrower) public view returns (UserAsset[] memory) {
         return borrowerAssets[_borrower];
     }
 
+    /*
+    * @dev : returns the total available USD balance (lent - borrwed) of a user 
+    * @params : address user, enum borrow/withdraw
+    * @returns : uint balance
+    */
     function getUserTotalAvailableBalanceInUSD(address _user, TxMode _txmode) public view returns(uint256) {
         uint256 userTotalLentUSDBalance;
         uint256 userTotalBorrowAmountInUSD;

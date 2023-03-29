@@ -16,10 +16,21 @@ contract AddressToTokenMap{
         require(owner == msg.sender, "Not Owner, cannot add mapping");
         _;
     }
+    
+    /* 
+    * @dev : retrieves the symbol or a token's address - used when adding assets
+    *        and in determining if the symbol is ETH for eth vs token transfers
+    * @params : token address 
+    * @returns : symbol string
+    */
     function getSymbol(address _key) public view returns (string memory) {
         return addresses[_key];
     }
 
+    /* 
+    * @dev : maps token address to symbol
+    * @params : token address , symbol string
+    */
     function _setAddress(address _key, string memory _value) public onlyOwner {
         // Avoids updating addresses[_key] if the new value is the same as the current value
         bytes memory valueBytes = bytes(_value);
@@ -36,16 +47,30 @@ contract AddressToTokenMap{
         }
     }
 
+    /* 
+    * @dev : returns the price feed address for a token's address - chainlink price oracle
+    * @params : token address 
+    * @returns : price feed address
+    */
     function getPriceFeedMap(address _tokenAddress) public view returns(address) {
         return priceFeedMap[_tokenAddress];
     }
 
+    /* 
+    * @dev : maps token address to sepolia/mainnet chainlink price feed address
+    * @params : token address , price feed address
+    */
     function _setPriceFeedMap(address _tokenAddress, address _pairAddress) public onlyOwner{
         if (priceFeedMap[_tokenAddress] != _pairAddress) {
             priceFeedMap[_tokenAddress] = _pairAddress;
         }
     }
 
+    /* 
+    * @dev : returns true fif the address's symbol is ETH
+    * @params : token address
+    * returns : boolean 
+    */
     function isETH(address _token) public view returns(bool) {
         return keccak256(abi.encodePacked(getSymbol(_token))) == keccak256(abi.encodePacked("ETH"));
     }
