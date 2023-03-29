@@ -196,7 +196,7 @@ const LendState = (props) => {
 
   /**************************** APPROVE TOKENS ************************************/
   const ApproveToContinue = async (tokenAddress, approveAmount) => {
-    const amount = ethers.utils.parseEther(approveAmount);
+    const amount = numberToEthers(approveAmount);
 
     console.log(
       "****Approving token : " +

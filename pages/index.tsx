@@ -18,7 +18,7 @@ const Home: NextPage = () => {
   } = useContext(lendContext);
 
   useEffect(() => {
-    connectWallet();
+    // connectWallet();
   }, []);
 
   useEffect(() => {

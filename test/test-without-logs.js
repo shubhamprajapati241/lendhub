@@ -173,40 +173,62 @@ describe("LendHub Tests", async () => {
     expect(feedAddress).to.be.equal(LINK_USD_PF_ADDRESS);
   });
 
-  it("4. Lender Should be able to add assets", async () => {
+  it("3. Lender Should be able to add assets", async () => {
     await lendingConfig
       .connect(lender1)
       .addAsset(DAI_ADDRESS, true, false, false, true, DAI_SYMBOL, 18, 80, 10);
   });
 
-  it("5. DAI Token should be in assets", async () => {
+  it("4. DAI Token should be in assets", async () => {
     const result = await lendingConfig.isTokenInAssets(DAI_ADDRESS);
     expect(result).to.be.equal(true);
   });
 
-  it("6. USDC Token should not be in assets", async () => {
+  it("5. USDC Token should not be in assets", async () => {
     const result = await lendingConfig.isTokenInAssets(USDC_ADDRESS);
     expect(result).to.be.equal(false);
   });
 
-  it("7. Should be able to return symbol by passing address", async () => {
+  it("6. Should be able to return symbol by passing address", async () => {
     const asset = await lendingConfig.getAssetByTokenAddress(DAI_ADDRESS);
     expect(asset.symbol).to.be.equal(DAI_SYMBOL);
   });
 
-  it("8. Should be able to return address by passing symbol", async () => {
+  it("7. Should be able to return address by passing symbol", async () => {
     const asset = await lendingConfig.getAssetByTokenSymbol(DAI_SYMBOL);
     expect(asset.token).to.be.equal(DAI_ADDRESS.toString());
   });
 
-  it("10. Is Borrowing Enabled", async () => {
+  it("8. Is Borrowing Enabled", async () => {
     const result = await lendingConfig.isBorrowingEnabled(DAI_ADDRESS);
     expect(result).to.be.equal(true);
   });
 
-  // it("11. Ledge Should be above to ")
+  it("9. Lender should not be able to make assets inactive", async () => {
+    await expect(
+      lendingConfig.connect(lender1).makeAssetActiveInactive(DAI_ADDRESS, 1)
+    ).to.be.reverted;
+  });
 
-  it("3. Lender1 Should be able to lend 10 ETH", async () => {
+  it("10. Only Deployer should be able to make assets inactive", async () => {
+    await lendingConfig
+      .connect(deployerAddress)
+      .makeAssetActiveInactive(DAI_ADDRESS, 1);
+  });
+
+  it("11. Lender should not be able to freeze assets", async () => {
+    await expect(
+      lendingConfig.connect(lender1).freezeUnFreezeAsset(DAI_ADDRESS, 0)
+    ).to.be.reverted;
+  });
+
+  it("12. Only Deployer should be able to freeze assets", async () => {
+    await lendingConfig
+      .connect(deployerAddress)
+      .freezeUnFreezeAsset(DAI_ADDRESS, 0);
+  });
+
+  it("13. Lender1 Should be able to lend 10 ETH", async () => {
     const valueOption = { value: numberToEthers(10) };
     const amount = numberToEthers(10);
     const asset = ETH_ADDRESS;
@@ -253,7 +275,7 @@ describe("LendHub Tests", async () => {
     expect(result).to.be.equal(amount);
   });
 
-  it("4. Lender1 lendQty Should be able to update with 10 more ETH", async () => {
+  it("14. Lender1 lendQty Should be able to update with 10 more ETH", async () => {
     const valueOption = { value: numberToEthers(10) };
     const amount = numberToEthers(10);
     const asset = ETH_ADDRESS;
@@ -300,7 +322,7 @@ describe("LendHub Tests", async () => {
     expect(result).to.be.greaterThan(amount);
   });
 
-  it("5. Lender1 Should be able to lend 1000 DAI", async () => {
+  it("15. Lender1 Should be able to lend 1000 DAI", async () => {
     const amount = numberToEthers(2500);
     const asset = DAI_ADDRESS;
 
@@ -356,21 +378,21 @@ describe("LendHub Tests", async () => {
     expect(result[1].lentQty).to.be.equal(amount);
   });
 
-  it("6. Not lend user should not be able to withdraw ETH", async () => {
+  it("16. Not lend user should not be able to withdraw ETH", async () => {
     const amount = numberToEthers(5);
     const asset = ETH_ADDRESS;
     await expect(lendingPool.connect(lender2).withdraw(asset, amount)).to.be
       .reverted;
   });
 
-  it("7. Not lend user should not be able to withdraw DAI", async () => {
+  it("17. Not lend user should not be able to withdraw DAI", async () => {
     const amount = numberToEthers(5);
     const asset = DAI_ADDRESS;
     await expect(lendingPool.connect(lender2).withdraw(asset, amount)).to.be
       .reverted;
   });
 
-  it("8. Lender1 Should be able to withdraw ETH assets", async () => {
+  it("18. Lender1 Should be able to withdraw ETH assets", async () => {
     const amount = numberToEthers(10);
     const asset = ETH_ADDRESS;
 
@@ -414,7 +436,7 @@ describe("LendHub Tests", async () => {
     expect(afterReserveBalance).to.be.lessThan(beforeReserveBalance);
   });
 
-  it("9. Lender1 Should be able to withdraw DAI", async () => {
+  it("19. Lender1 Should be able to withdraw DAI", async () => {
     const amount = numberToEthers(100);
     const asset = DAI_ADDRESS;
 
@@ -453,7 +475,7 @@ describe("LendHub Tests", async () => {
     expect(afterDAIBalanceInReserve).to.be.lessThan(beforeDAIBalanceInReserve);
   });
 
-  it("10. Lender2 Should be able to lend 5 ETH", async () => {
+  it("20. Lender2 Should be able to lend 5 ETH", async () => {
     const amount = numberToEthers(5);
     const valueOption = { value: amount };
     const asset = ETH_ADDRESS;
@@ -500,7 +522,7 @@ describe("LendHub Tests", async () => {
     expect(result).to.be.equal(amount);
   });
 
-  it("11. Borrower2 Should be able to borrow 100 DAI", async () => {
+  it("21. Borrower2 Should be able to borrow 100 DAI", async () => {
     const borrowAmount = numberToEthers(100);
     const asset = DAI_ADDRESS;
     const user = borrower2;
@@ -549,7 +571,7 @@ describe("LendHub Tests", async () => {
     expect(afterLenderAmount).to.be.greaterThan(beforeLenderAmount);
   });
 
-  it("12. Borrower2 Should not be able to borrow more than 80% of his supplied", async () => {
+  it("22. Borrower2 Should not be able to borrow more than 80% of his supplied", async () => {
     const asset = DAI_ADDRESS;
     const assets = await lendingPool.getAssetsToBorrow(borrower2.address);
     const assetQty = assets.find((el) => el.token == asset);
@@ -561,7 +583,7 @@ describe("LendHub Tests", async () => {
       .be.reverted;
   });
 
-  it("13. Borrower2 Should not be able to borrow more than reserve qty", async () => {
+  it("23. Borrower2 Should not be able to borrow more than reserve qty", async () => {
     const asset = DAI_ADDRESS;
     const reserveAmount = await lendingPool.reserves(asset);
     borrowAmount = numberToEthers(reserveAmount);
@@ -572,7 +594,7 @@ describe("LendHub Tests", async () => {
       .be.reverted;
   });
 
-  it("14. Borrower2 Should be able to borrow 100 DAI again", async () => {
+  it("24. Borrower2 Should be able to borrow 100 DAI again", async () => {
     const borrowAmount = numberToEthers(100);
     const asset = DAI_ADDRESS;
     const user = borrower2;
@@ -621,7 +643,7 @@ describe("LendHub Tests", async () => {
     expect(afterLenderAmount).to.be.greaterThan(beforeLenderAmount);
   });
 
-  it("15. Borrower2 Should be able to repay", async () => {
+  it("25. Borrower2 Should be able to repay", async () => {
     const repayAmount = numberToEthers(100);
     const asset = DAI_ADDRESS;
 
