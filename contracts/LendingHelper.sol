@@ -56,20 +56,7 @@ contract LendingHelper {
         // (, int price, , , ) = priceFeed.latestRoundData();
         // uint8 decimal = priceFeed.decimals();
         // return uint(price) / (10 ** decimal);
-<<<<<<< Updated upstream
         // --------------------------------------------------
-        if(addressToTokenMap.isETH(_tokenAddress)) {
-            return 1740;
-        }
-        else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('DAI'))) {
-            return 1;
-        }
-        else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('USDC'))) {
-            return  1;
-        }
-        else if(keccak256(bytes(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(bytes('LINK'))) {
-=======
-        //--------------------------------------------------
         if(addressToTokenMap.isETH(_tokenAddress)) {
             return 1725;
         }
@@ -80,7 +67,6 @@ contract LendingHelper {
             return  1;
         }
         else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('LINK'))) {
->>>>>>> Stashed changes
             return 6;
         }
         return 1;
