@@ -145,9 +145,14 @@ const ModalWithdraw = ({
           <div className="flex flex-row items-center justify-between text-[13px] text-[#F1F1F3]">
             <p className="">Remaining Supply</p>
             <p className="justify-end">
-              {Number(remainingSupply).toFixed(2).toString(2).length < 10
-                ? Number(remainingSupply).toFixed(2).toString().slice(0, 10)
-                : `${Number(remainingSupply)
+              {Number(balance - inputValue)
+                .toFixed(2)
+                .toString(2).length < 10
+                ? Number(balance - inputValue)
+                    .toFixed(2)
+                    .toString()
+                    .slice(0, 10)
+                : `${Number(balance - inputValue)
                     .toFixed(2)
                     .toString()
                     .slice(0, 10)}...`}{" "}
