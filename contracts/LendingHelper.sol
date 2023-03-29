@@ -67,19 +67,29 @@ contract LendingHelper {
         // uint8 decimal = priceFeed.decimals();
         // return uint(price) / (10 ** decimal);
         // --------------------------------------------------
-        if(addressToTokenMap.isETH(_tokenAddress)) {
+        bytes32 symbol = getKeccackHash(addressToTokenMap.getSymbol(_tokenAddress));
+        if(symbol == getKeccackHash('ETH')) {
             return 1725;
         }
-        else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('DAI'))) {
+        else if(symbol == getKeccackHash('DAI')) {
             return 1;
         }
-        else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('USDC'))) {
+        else if(symbol == getKeccackHash('USDC')) {
             return  1;
         }
-        else if(keccak256(abi.encodePacked(addressToTokenMap.getSymbol(_tokenAddress))) == keccak256(abi.encodePacked('LINK'))) {
+        else if(symbol == getKeccackHash('LINK')) {
             return 6;
         }
         return 1;
+    }
+
+    /* 
+    * @dev : returns the keccack256 bytes32 equivalent of the symbol
+    * @params : string symbol
+    * @returns: bytes32 hash
+    */
+    function getKeccackHash(string memory symbol) public pure returns(bytes32){
+        return keccak256(bytes(symbol));
     }
 
     /* 
