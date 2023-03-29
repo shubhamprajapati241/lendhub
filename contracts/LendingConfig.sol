@@ -120,7 +120,6 @@ contract LendingConfig {
         }
         return false;
     }
-    
     function makeAssetActiveInactive(address _token, AssetStatus _choice) external onlyOwner returns(bool){
         uint256 assetsLen = assets.length;
         for (uint256 i = 0; i < assetsLen; i++) {
@@ -148,7 +147,6 @@ contract LendingConfig {
         }
         return false;
     }
-
     function getAssetByTokenAddress(address _token) public view returns (Asset memory) {
         require(_token != address(0), "Invalid token address");
         uint256 assetsLen = assets.length;
