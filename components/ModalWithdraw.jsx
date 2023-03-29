@@ -11,7 +11,6 @@ const ModalWithdraw = ({
   balance,
   image,
   maxSupply,
-  remainingSupply,
   onClose,
 }) => {
   const { getAmountInUSD, connectWallet, numberToEthers, WithdrawAsset } =
@@ -20,9 +19,11 @@ const ModalWithdraw = ({
   const [inputValue, setInputValue] = useState();
   const [isInputValidate, setInputValidate] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [remainingSupply, setRemainingSupply] = useState(balance);
 
   const setMax = () => {
     setInputValue(maxSupply);
+    setRemainingSupply(balance - maxSupply);
     getBalanceInUSD(maxSupply);
     setInputValidate(true);
   };
@@ -42,15 +43,18 @@ const ModalWithdraw = ({
       } else {
         if (Number(input) > Number(maxSupply)) {
           setInputValue(maxSupply);
+          setRemainingSupply(balance - maxSupply);
           getBalanceInUSD(maxSupply);
         } else {
           setInputValue(input);
+          setRemainingSupply(balance - input);
           getBalanceInUSD(input);
         }
         setInputValidate(true);
       }
     } else {
       setInputValue("");
+      setRemainingSupply(balance);
       setUSDPrice(0);
       setInputValidate(false);
     }
@@ -145,14 +149,9 @@ const ModalWithdraw = ({
           <div className="flex flex-row items-center justify-between text-[13px] text-[#F1F1F3]">
             <p className="">Remaining Supply</p>
             <p className="justify-end">
-              {Number(balance - inputValue)
-                .toFixed(2)
-                .toString(2).length < 10
-                ? Number(balance - inputValue)
-                    .toFixed(2)
-                    .toString()
-                    .slice(0, 10)
-                : `${Number(balance - inputValue)
+              {Number(remainingSupply).toFixed(2).toString(2).length < 10
+                ? Number(remainingSupply).toFixed(2).toString().slice(0, 10)
+                : `${Number(remainingSupply)
                     .toFixed(2)
                     .toString()
                     .slice(0, 10)}...`}{" "}
