@@ -1,6 +1,5 @@
 import Image from "next/image";
 import React, { useState, useContext } from "react";
-import { MdLocalGasStation } from "react-icons/md";
 import { BiError } from "react-icons/bi";
 import lendContext from "../context/lendContext";
 import { toast } from "react-toastify";
@@ -145,13 +144,6 @@ const ModalBorrow = ({
             </p>
           </div>
         </div>
-      </div>
-
-      <div className="mb-5 flex items-center">
-        <MdLocalGasStation />
-        <p className="text-sm text-[#A5A8B6] pl-1">
-          $<span className="pl-[2px]">0.00</span>
-        </p>
       </div>
 
       <div className="flex justify-center items-center text-xs p-2 bg-[#2E0C0A] text-[#FBB4AF] rounded mb-5">

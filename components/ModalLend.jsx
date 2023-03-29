@@ -1,6 +1,5 @@
 import Image from "next/image";
 import React, { useState, useContext } from "react";
-import { MdLocalGasStation } from "react-icons/md";
 import { FiAlertCircle } from "react-icons/fi";
 import { ImSpinner8 } from "react-icons/im";
 import lendContext from "../context/lendContext";
@@ -199,13 +198,6 @@ const ModalLend = ({
             )}
           </div>
         </div>
-      </div>
-
-      <div className="mb-5 flex items-center">
-        <MdLocalGasStation />
-        <p className="text-sm text-[#A5A8B6] pl-1">
-          $<span className="pl-[2px]">0.00</span>
-        </p>
       </div>
 
       {name == "ETH" ? (

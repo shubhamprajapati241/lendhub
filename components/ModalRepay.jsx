@@ -1,6 +1,5 @@
 import Image from "next/image";
 import React, { useState, useContext } from "react";
-import { MdLocalGasStation } from "react-icons/md";
 import lendContext from "../context/lendContext";
 import { toast } from "react-toastify";
 import { ImSpinner8 } from "react-icons/im";
@@ -153,13 +152,6 @@ const ModalRepay = ({ address, name, debt, image, onClose }) => {
             </p>
           </div>
         </div>
-      </div>
-
-      <div className="mb-5 flex items-center">
-        <MdLocalGasStation />
-        <p className="text-sm text-[#A5A8B6] pl-1">
-          $<span className="pl-[2px]">0.00</span>
-        </p>
       </div>
 
       <div className={!isInputValidate ? "block" : "hidden"}>
