@@ -88,11 +88,6 @@ contract LendingPool is ReentrancyGuard {
    /************* Lender functions ************************/
     receive() external payable {}
 
-    // function lend(address _token, uint256 _amount) public 
-    // nonReentrant
-    // // updateEarnedInterestOnLend(msg.sender, _token)
-    // payable 
-
     function lend(address _token, uint256 _amount) public 
     nonReentrant
     updateEarnedInterestOnLend(msg.sender, _token)
@@ -169,11 +164,9 @@ contract LendingPool is ReentrancyGuard {
     updateEarnedInterestOnLend(msg.sender, _token)
     payable returns(bool) {
         address lender  = msg.sender;
-    
+
         require(isLenderTokenOwner(_token), "Not token owner");
-       
-        // amountAvailableToWithdraw must be set on the front-end (modal) to during withdrawl 
-        // uint amountAvailableToWithdraw = getLenderAssetQty(lender, _token) - getBorrowerAssetQty(lender, _token);
+
         uint maxWithdrawQty = lendingHelper.getTokensPerUSDAmount(_token,getUserTotalAvailableBalanceInUSD(lender, TxMode.WITHDRAW)) * 1e18;
         require(maxWithdrawQty >= _amount,"Cannot withdraw more than balance");
         // Reserve must have enough withdrawl qty - this must always be true, so not sure why to code it
@@ -217,7 +210,6 @@ contract LendingPool is ReentrancyGuard {
         for(uint i = 0; i < length; i++) { 
             address token = reserveAssets[i];
             if(lendingConfig.isBorrowingEnabled(token)) {
-                // uint borrowQty = getTokenQtyForUSDAmount(token, maxAmountToBorrowInUSD);
                 // borrow qty is either tokens per max borrowbale USD amount or the ones in reserves of that token
                 uint borrowQty = lendingHelper.min(lendingHelper.getTokensPerUSDAmount(token,maxAmountToBorrowInUSD), reserves[token]/1e18);
                 if (borrowQty > 0){
@@ -228,7 +220,6 @@ contract LendingPool is ReentrancyGuard {
         }
         return borrowAsset;
     }
-
 
     function borrow(address _token, uint256 _amount) public 
     nonReentrant

@@ -173,6 +173,39 @@ describe("LendHub Tests", async () => {
     expect(feedAddress).to.be.equal(LINK_USD_PF_ADDRESS);
   });
 
+  it("4. Lender Should be able to add assets", async () => {
+    await lendingConfig
+      .connect(lender1)
+      .addAsset(DAI_ADDRESS, true, false, false, true, DAI_SYMBOL, 18, 80, 10);
+  });
+
+  it("5. DAI Token should be in assets", async () => {
+    const result = await lendingConfig.isTokenInAssets(DAI_ADDRESS);
+    expect(result).to.be.equal(true);
+  });
+
+  it("6. USDC Token should not be in assets", async () => {
+    const result = await lendingConfig.isTokenInAssets(USDC_ADDRESS);
+    expect(result).to.be.equal(false);
+  });
+
+  it("7. Should be able to return symbol by passing address", async () => {
+    const asset = await lendingConfig.getAssetByTokenAddress(DAI_ADDRESS);
+    expect(asset.symbol).to.be.equal(DAI_SYMBOL);
+  });
+
+  it("8. Should be able to return address by passing symbol", async () => {
+    const asset = await lendingConfig.getAssetByTokenSymbol(DAI_SYMBOL);
+    expect(asset.token).to.be.equal(DAI_ADDRESS.toString());
+  });
+
+  it("10. Is Borrowing Enabled", async () => {
+    const result = await lendingConfig.isBorrowingEnabled(DAI_ADDRESS);
+    expect(result).to.be.equal(true);
+  });
+
+  // it("11. Ledge Should be above to ")
+
   it("3. Lender1 Should be able to lend 10 ETH", async () => {
     const valueOption = { value: numberToEthers(10) };
     const amount = numberToEthers(10);
