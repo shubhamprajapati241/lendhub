@@ -8,6 +8,15 @@
 - [Cloning and Deploying the Dapp on Sepolia Testnet](#cloning-and-deploying-the-dapp-on-sepolia-testnet)
 - [Bootsrapping & running this project on your localhost using Hardhat](#bootsrapping--running-this-project-on-your-localhost-using-hardhat)
 
+## Get FREE Sepolia ETH for testing the App
+- [Infura Sepolia Faucet](https://www.infura.io/faucet)
+- [Alchemy Sepolia Faucet](https://sepoliafaucet.com)
+- [Sepolia PoW Faucet](https://sepolia-faucet.pk910.de)
+
+## Test Tokens on Sepolia
+- [DAI](https://sepolia.etherscan.io/address/0xF2e2C8A502657c37ad4d37F2BefaBEb308315152)
+- [USDC](https://sepolia.etherscan.io/address/0x9603ed1F72C87d33d48a5e3A4A0915235BA46cFe)
+- [LINK](https://sepolia.etherscan.io/address/0x05332eF900c3B926ED013F66b64A85646Fd82092)
 
 
 ## Introduction
